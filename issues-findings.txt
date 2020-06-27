@@ -1,0 +1,7 @@
+Seems like all webpages will be requiring selenium to scrape since they require a login. 
+
+the air yards webpage. THIS MAY BE A RBROWSER PROBLEM. doesnt seem to allow me to correctly select only 3 weeks of data. It appears that it is an aggregation of all seasons data, I can see how this is a problem if you want to track those averages I see in the last columns in three week increments. This can be resolved by putting those averages in the position dashboards created for that week  and/or created with the data point creator. However all of the positions have the same schema no matter the position. So I think I will store all data coming from Air Yards in one table in the db. perhaps scraping weekly when data is live will be easier to scrape. Adding a week and season column will help query the right data for the week and give more customizeability to the data point creator. 
+
+Im not sure how to track Week # correctly
+i may be able to scrape it!
+this may have to be a yearly addition 
