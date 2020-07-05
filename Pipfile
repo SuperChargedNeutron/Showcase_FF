@@ -12,6 +12,7 @@ numpy = "*"
 sqlalchemy = "*"
 flask-bootstrap = "*"
 ipykernel = "*"
+pymongo = "*"
 
 [requires]
 python_version = "3.7"
