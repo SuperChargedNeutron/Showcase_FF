@@ -5,7 +5,7 @@ from flask import (
     jsonify
 )
 from . import app 
-from .func import get_raw_data
+from .func import get_raw_data, position_names, player_query
 from .database import (db,
     SS_Data,
     _4f4_Proj,
@@ -20,6 +20,8 @@ from .database import (db,
     ETR_Ceil
 )
 
+app.config['JSON_SORT_KEYS'] = False
+
 @app.route('/')
 def root():
     return redirect('/home')
@@ -28,20 +30,25 @@ def root():
 def home():
     return render_template('index.html')
 
-@app.route('/<table>')
-def raw_data(table):
-    name = 'Saber Sim Data'
-    ss_data = get_raw_data(SS_Data)
-    headers = list(ss_data[0].keys())
+@app.route('/<pos>_Dash')
+def qb_dash(pos):
+    return render_template('dashboard_temp.html', position=pos)
 
-    return render_template('raw_data_temp.html', name=name, data=ss_data, headers=headers)
+@app.route('/<pos>_data')
+def qb_data(pos):
+
+    players =  position_names(pos, db)
+    data = [player_query(player, db) for player in players]
+
+    return jsonify(data)
 
 @app.route('/saber_sim_raw')
 def saber_sim_raw():
+
     name = 'Saber Sim Data'
     ss_data = get_raw_data(SS_Data)
     headers = list(ss_data[0].keys())
-
+    
     return render_template('raw_data_temp.html', name=name, data=ss_data, headers=headers)
 
 @app.route('/4f4proj')
