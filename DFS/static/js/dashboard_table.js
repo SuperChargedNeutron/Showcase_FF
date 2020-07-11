@@ -1,22 +1,20 @@
 function getData(url){
     var checklist = d3.select('#toggles')
-    // var tableHeader = d3.select('#myTable').append('thead').append('th').append('tr')
+    var tableHeader = d3.select('#myTable').append('thead').append('tr')
     // var tableFooter = d3.select('#myTable').append('tfoot').append('tf').append('tr')
 
 
     d3.json(url).then((data) => {
         cols = []
-        colObjects = []
-        data.forEach(obj => Object.keys(obj).forEach( function(key) {
+        
+        data.forEach(obj => Object.keys(obj).map( function(key) {
             if (!cols.includes(key)) {
                 cols.push(key)
-                colObjects.push({data : key})
             }
         })
         )
 
 
-    console.log(cols)
     var i = 0;
     cols.forEach(col => {
        var litem =  checklist.append('a')
@@ -25,10 +23,15 @@ function getData(url){
         .text(`${col} - `);
         i++;
 
-        // tableHeader.append('td').text(col)
+        tableHeader.append('th').text(col)
         // tableFooter.append('td').text(col)
     })
-    
+        colObjects = cols.map(function(val){ 
+        return [{'data':val}] ; 
+    }).map(function(val){ 
+        return val[0] ; 
+    })
+    console.log(colObjects)
     var table = $('#myTable').DataTable( {
         select: true,
             data: data,
