@@ -5,6 +5,16 @@ def get_raw_data(table):
     data = [dict(i) for i in table.find({}, {'_id':False})[0:doc_count]]
     return data
 
+def stack_app_query_position(pos,SS_Data):
+    data = []
+    doc_count = SS_Data.count_documents(filter=({'Position' : pos}))
+    cursor = SS_Data.find({'Position' : pos}, {'_id':False, 'Name': True, 'Price':True, 'Projection':True})
+    for i in range(doc_count):
+        data.append(cursor[i])
+                    
+    return data
+
+
 def position_names(pos, db):
     data = []
 

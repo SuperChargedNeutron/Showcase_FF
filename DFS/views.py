@@ -5,7 +5,7 @@ from flask import (
     jsonify
 )
 from . import app 
-from .func import get_raw_data, position_names, player_query
+from .func import get_raw_data, position_names, player_query, stack_app_query_position
 from .database import (db,
     SS_Data,
     _4f4_Proj,
@@ -41,6 +41,15 @@ def qb_data(pos):
     data = [player_query(player, db) for player in players]
 
     return jsonify(data)
+
+@app.route('/stack_app')
+def stack_app():
+    return render_template('stack_app.html')
+
+@app.route('/stack_app_data')
+def stack_app_data():
+    names = {x: stack_app_query_position(x, SS_Data) for x in ['QB', 'WR', 'TE', 'RB', 'DST']}
+    return jsonify(names)
 
 @app.route('/saber_sim_raw')
 def saber_sim_raw():

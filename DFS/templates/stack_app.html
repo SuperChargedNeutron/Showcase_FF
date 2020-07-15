@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+
+
+{% block content %}
+    {% include 'navbar.html' %}
+  <div class="container-fluid">
+    <div class="row">
+
+      
+
+  <!-- start main  -->
+      <main role="main" class="col-md-12 col-lg-12 ">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Team Builder / Stack App</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group mr-2">
+            </div>
+          </div>
+        </div>
+  <div class="spacer --small">
+    
+      <div class="showcase__section">
+        <div class='container-fluid'>
+          <div class='row'>
+          <div id='stackApp'></div>
+          <div class="card  box-shadow col-5 " id='teamBuilder'>
+            <div class="card-header">
+              <h4 class="my-0 font-weight-normal">Team Builder</h4>
+            </div>
+            <div class="card-body">
+              <div class='row'>
+
+              <div class="card">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">QB Selection: 
+                    <div class="control-row">
+                     <select class='posSelect'  id="qbSelection">
+                      </select>
+                      </div>
+                  </li>
+                  <li class="list-group-item">RB Selection: 
+                    <div class="control-row">
+                       <select class='posSelect' id="rbSelection">
+                      </select>
+                      </div>
+                  </li>
+                  <li class="list-group-item">WR Selection: 
+                    <div class="control-row">
+                      <select class='posSelect' id="wrSelection">
+                      </select>
+                      </div>
+                  </li>
+                </ul>
+              </div>
+            <div class="card">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">TE Selection: 
+                <div class="control-row">
+                  <select class='posSelect' id="teSelection">
+                  </select>
+                  </div>
+              </li>
+              <li class="list-group-item">DST Selection: 
+                <div class="control-row">
+                  <select class='posSelect' id="dstSelection">
+                  </select>
+                  </div>
+              </li>
+              <li class="list-group-item">Flex Selection: 
+                <div class="control-row">
+                  <select class='posSelect' id="flexSelection">
+                  </select>
+                  </div>
+              </li>
+            </ul>
+          </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+        <h2>Selected Teams</h2>
+        <div class="table-responsive">
+          <table class="table table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Team Name</th>
+                <th>Total Price</th>
+                <th>Sum of Projections ..?</th>
+                <th>QB</th>
+                <th>RB_1</th>
+                <th>RB_2</th>
+                <th>WR_1</th>
+                <th>WR_2</th>
+                <th>WR_3</th>
+                <th>TE</th>
+                <th>Flex</th>
+                <th>DST</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1,001</td>
+                <td>Lorem</td>
+                <td>ipsum</td>
+                <td>dolor</td>
+                <td>sit</td>
+              </tr>
+              <tr>
+                <td>1,002</td>
+                <td>amet</td>
+                <td>consectetur</td>
+                <td>adipiscing</td>
+                <td>elit</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+    </div>
+  </div>
+ </main>
+      <!-- end main -->
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
+  <script src="{{ url_for('static', filename='js/stackapp.js') }}"></script>
+{% endblock %}
