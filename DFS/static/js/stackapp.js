@@ -50,10 +50,30 @@ Plotly.d3.json('/stack_app_data', function(err, rows){
     assignOptions(te_names, 'te')
     assignOptions(dst_names, 'dst')
 
+    qbCount = 0 
+ 
     d3.selectAll('.qbOpt').on('click', function() {
-        console.log('hi')
-        console.log(this)
-    })
+        if (qbCount < 1) {
+        current = d3.select('#currentSelection')
+        var qbList = current.append('ul')
+                .classed('list-group', true)
+        var item = qbList.append('li')
+                .classed('list-group-item py-0', true)
+                .append('div').classed('input-group', true)
+                .append('input', 'button')
+                    .attr('placeholder', this.value)
+                    .attr('type', 'text')
+                    .property('disabled', true)
+                .append('div')
+                    .classed("input-group-append", true)
+                    .append('span')
+                        .classed('glyphicon glyphicon-remove', true)
+        qbCount++;
+    }
+        // else if (qbCount < 1) {
+        //     flash message 'enough QBs selected'
+        // }
+})
 
 
         

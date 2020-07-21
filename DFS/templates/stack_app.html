@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 
+{% block body %}
+{% include 'navbar.html' %}
+{{ super() }}
+{% endblock %}
 
 {% block content %}
-    {% include 'navbar.html' %}
+
   <div class="container-fluid">
     <div class="row">
-
-      
-
   <!-- start main  -->
       <main role="main" class="col-md-12 col-lg-12 ">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -77,8 +78,11 @@
           </div>
             </div>
           </div>
+          <div class='row' id='currentSelection'>
+          </div>
           </div>
         </div>
+      </div>
       </div>
 
         <h2>Selected Teams</h2>
@@ -121,7 +125,10 @@
         </div>
     </div>
   </div>
+  
  </main>
+</div>
+</div>
       <!-- end main -->
 {% endblock %}
 
