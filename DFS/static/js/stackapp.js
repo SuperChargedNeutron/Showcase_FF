@@ -2,21 +2,24 @@ function unpack(data, key) {
     return data.map(function(row) { return row[key]; });
 }
 
-
-function getCountrydata(chosenCountry) {
-    currentGdp = [];
-    currentYear = [];
-    for (var i = 0 ; i < qb_names.length ; i++){
-        if ( qb_names[i] === chosenCountry ) {
-            currentGdp.push(allGdp[i]);
-            currentYear.push(allYear[i]);
-        }
-    }
-};
-
-function selectPlayer(){
-    console.log(this)
-}
+function addPlayerTag(appendee, name){
+    var listButton = appendee.append('li')
+                .classed('list-group-item py-0', true)
+                .text(`${name}    `)
+                .append('button')
+                .attr('type', 'button')
+                .attr('id', 'removeButton')
+                .classed('btn btn-outline-danger btn-circle btn-sm', true)
+                .append('svg')
+                .attr('viewBox', "0 0 24 24").attr('width', "16")
+                .attr('height', "16")
+                .append('path') 
+                .attr('fill-rule', "evenodd")
+                .attr('d', "M5.72 5.72a.75.75 0 011.06 0L12 10.94l5.22-5.22a.75.75 0 111.06 1.06L13.06 12l5.22 5.22a.75.75 0 11-1.06 1.06L12 13.06l-5.22 5.22a.75.75 0 01-1.06-1.06L10.94 12 5.72 6.78a.75.75 0 010-1.06z")
+                
+        
+        return listButton
+            }
 
 function assignOptions(playerNames, position) {
 
@@ -29,7 +32,10 @@ function assignOptions(playerNames, position) {
     })
 
 }
-
+    // callback function
+    function clickPrint() {
+        console.log( this );
+    }
 Plotly.d3.json('/stack_app_data', function(err, rows){
 
 
@@ -50,48 +56,101 @@ Plotly.d3.json('/stack_app_data', function(err, rows){
     assignOptions(te_names, 'te')
     assignOptions(dst_names, 'dst')
 
-    qbCount = 0 
- 
+    var qbCount = 0,
+    rbCount = 0,
+    wrCount = 0,
+    teCount =0,
+    dstCount = 0,
+    flexCount = 0;
+
     d3.selectAll('.qbOpt').on('click', function() {
+        console.log(qbCount)
         if (qbCount < 1) {
         current = d3.select('#currentSelection')
-        var qbList = current.append('ul')
+        var div = current.append('div')
+                .append('ul')
                 .classed('list-group', true)
-        var item = qbList.append('li')
-                .classed('list-group-item py-0', true)
-                .append('div').classed('input-group', true)
-                .append('input', 'button')
-                    .attr('placeholder', this.value)
-                    .attr('type', 'text')
-                    .property('disabled', true)
-                .append('div')
-                    .classed("input-group-append", true)
-                    .append('span')
-                        .classed('glyphicon glyphicon-remove', true)
+        addPlayerTag(div, this.value)
         qbCount++;
     }
-        // else if (qbCount < 1) {
+        // else if (qbCount >= 1) {
         //     flash message 'enough QBs selected'
         // }
 })
-
+    d3.selectAll('.rbOpt').on('click', function() {
+        if (rbCount < 1) {
+        current = d3.select('#currentSelection');
+        var div = current.append('div')
+                .append('ul')
+                .attr('id', 'rbList')
+                .classed('list-group', true);
+        addPlayerTag(div, this.value);
+        rbCount++;
+    }
+    else if (rbCount < 2) {
+        var list = d3.select('#rbList')
+        addPlayerTag(list, this.value)
+        rbCount++;
+        // else if (qbCount >= 1) {
+        //     flash message 'enough QBs selected'
+        // }
+    }
+    }
+    )
+    d3.selectAll('.wrOpt').on('click', function() {
+        if (wrCount < 1) {
+        current = d3.select('#currentSelection');
+        var div = current.append('div')
+                .append('ul')
+                .attr('id', 'wrList')
+                .classed('list-group', true);
+        addPlayerTag(div, this.value);
+        wrCount++;
+    }
+    else if (wrCount < 3) {
+        var list = d3.select('#wrList')
+        addPlayerTag(list, this.value)
+        wrCount++;
+        // else if (qbCount >= 1) {
+        //     flash message 'enough QBs selected'
+        // }
+    }
+    })
+    d3.selectAll('.teOpt').on('click', function() {
+        if (teCount < 1) {
+        current = d3.select('#currentSelection');
+        var div = current.append('div')
+                .append('ul')
+                .attr('id', 'teList')
+                .classed('list-group', true);
+        addPlayerTag(div, this.value);
+        teCount++;
+    }
+    })
+    d3.selectAll('.dstOpt').on('click', function() {
+        if (dstCount < 1) {
+        current = d3.select('#currentSelection');
+        var div = current.append('div')
+                .append('ul')
+                .attr('id', 'dstList')
+                .classed('list-group', true);
+        addPlayerTag(div, this.value);
+        dstCount++;
+    }
+    })
+    d3.selectAll('#removeButton').each(function() {
+        d3.select(this).on('click', clickPrint)
+        
+        console.log(d3.select(this))
+        console.log(this)
+    })
 
         
 
-    function getCountrydata(chosenCountry) {
-        currentGdp = [];
-        currentYear = [];
-        for (var i = 0 ; i < qb_names.length ; i++){
-            if ( qb_names[i] === chosenCountry ) {
-                currentGdp.push(allGdp[i]);
-                currentYear.push(allYear[i]);
-            }
-        }
-    };
+  
 
     function setBubblePlot(chosenCountry) {
-        getCountrydata(chosenCountry);
-
+        
         var trace1 = {
             x: unpack(qbs, 'Price'),
             y: unpack(qbs, 'Projection'),
@@ -113,18 +172,5 @@ Plotly.d3.json('/stack_app_data', function(err, rows){
         Plotly.newPlot('stackApp', data, layout);
     };
 
-    // var innerContainer = document.querySelector('[data-num="0"'),
-    //     plotEl = innerContainer.querySelector('.plot'),
-    //     countrySelector = innerContainer.querySelector('.countrydata');
-
-
-
-    // assignOptions(qb_names, countrySelector);
-
-    // function updateCountry(){
-    //     setBubblePlot(countrySelector.value);
-    // }
-
-    // countrySelector.addEventListener('change', updateCountry, false);
 
 });
