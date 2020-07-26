@@ -1,4 +1,5 @@
 function addPlayerTag(appendee, obj){
+    // might be beter if i name it update player lists
     appendee.html('')
     appendee.selectAll('li')
                 .data(obj.players).enter()
@@ -15,21 +16,71 @@ function addPlayerTag(appendee, obj){
                 .append('path') 
                 .attr('fill-rule', "evenodd")
                 .attr('d', "M5.72 5.72a.75.75 0 011.06 0L12 10.94l5.22-5.22a.75.75 0 111.06 1.06L13.06 12l5.22 5.22a.75.75 0 11-1.06 1.06L12 13.06l-5.22 5.22a.75.75 0 01-1.06-1.06L10.94 12 5.72 6.78a.75.75 0 010-1.06z")
-    updateRemoveButtonFunction()
     
         }
 
-function updateRemoveButtonFunction() {
+function updateRemoveButtonFunction(counts, currentTeam) {
     killButtonz = d3.selectAll('.rmButton')
-        .on('click', removePlayer)
-    return killButtonz
+        .on('click', function () {
+            if (this.parentNode.parentNode.id == 'qbList') {
+                player = d3.select(this.parentNode)
+                playerText = player.text()
+                playerIndex = currentTeam[0].players.indexOf(playerText)
+                currentTeam[0].players.pop(playerIndex)
+                player.remove()
+                counts['qbCount']--;
+            } else if (this.parentNode.parentNode.id == 'rbList') {
+                player = d3.select(this.parentNode)
+                playerText = player.text()
+                playerIndex = currentTeam[1].players.indexOf(playerText)
+                currentTeam[1].players.pop(playerIndex)
+                player.remove()
+                counts['rbCount']--;
+            } else if (this.parentNode.parentNode.id == 'wrList') {
+                player = d3.select(this.parentNode)
+                playerText = player.text()
+                playerIndex = currentTeam[2].players.indexOf(playerText)
+                currentTeam[2].players.pop(playerIndex)
+                player.remove()
+                counts['wrCount']--;
+            } else if (this.parentNode.parentNode.id == 'teList') {
+                player = d3.select(this.parentNode)
+                playerText = player.text()
+                playerIndex = currentTeam[3].players.indexOf(playerText)
+                currentTeam[3].players.pop(playerIndex)
+                player.remove()
+                counts['teCount']--;
+            } else if (this.parentNode.parentNode.id == 'dstList') {
+                player = d3.select(this.parentNode)
+                playerText = player.text()
+                playerIndex = currentTeam[4].players.indexOf(playerText)
+                currentTeam[4].players.pop(playerIndex)
+                player.remove()
+                counts['dstCount']--;
+            } else if (this.parentNode.parentNode.id == 'flexList') {
+                player = d3.select(this.parentNode)
+                playerText = player.text()
+                playerIndex = currentTeam[5].players.indexOf(playerText)
+                currentTeam[5].players.pop(playerIndex)
+                player.remove()
+                counts['flexCount']--;
+            };
+            
+        })
 }
 
-function removePlayer() {
-    console.log(this.parentNode.value)
-}
 function assignOptions(playerNames, position) {
+    d3.select(`#${position}Selection`)
+        .selectAll('option')
+        .data(playerNames).enter()
+        .append('option')
+        .attr('value', function(d) { return d.Name; })
+        .classed(`${position}Opt`, true)
+        .text(function(d) { return d.Name; })
 
+
+}
+function assignFlexOptions(playerNames, position) {
     d3.select(`#${position}Selection`)
         .selectAll('option')
         .data(playerNames).enter()
@@ -61,12 +112,12 @@ Plotly.d3.json('/stack_app_data', function(err, rows){
     assignOptions(tes, 'te')
     assignOptions(dst, 'dst')
 
-    var qbCount = 0,
-    rbCount = 0,
-    wrCount = 0,
-    teCount =0,
-    dstCount = 0,
-    flexCount = 0,
+    var counts = {'qbCount' : 0,
+    'rbCount' : 0,
+    'wrCount' : 0,
+    'teCount' : 0,
+    'dstCount' : 0,
+    'flexCount' : 0},
     currentTeam = [{'position' : 'QBs', 'players' : []},
                     {'position' : 'RBs', 'players' : []},
                     {'position' :'WRs', 'players' : []},
@@ -84,47 +135,55 @@ Plotly.d3.json('/stack_app_data', function(err, rows){
                         .attr('id', function(d) { return `${d}List`; })
 
     d3.selectAll('.qbOpt').on('click', function() {
-        if (qbCount < 1) {
+        if (counts['qbCount'] < 1) {
             currentTeam[0].players.push(this.value)
             var list = d3.select('#qbList')
             addPlayerTag(list, currentTeam[0])
-            qbCount++;
+            counts['qbCount']++;
+            updateRemoveButtonFunction(counts, currentTeam)
+            setPlot(currentTeam)
+            
     }
         // else if (qbCount >= 1) {
         //     flash message 'enough QBs selected'
         // }
 })
     d3.selectAll('.rbOpt').on('click', function() {
-        if (rbCount < 2) {
+        if (counts['rbCount'] < 2) {
             currentTeam[1].players.push(this.value)
             var list = d3.select('#rbList')
             addPlayerTag(list, currentTeam[1]);
-            rbCount++;
+            counts['rbCount']++;
+            updateRemoveButtonFunction(counts, currentTeam)
+            
     }
     })
     d3.selectAll('.wrOpt').on('click', function() {
-        if (wrCount < 3) {
+        if (counts['wrCount'] < 3) {
             currentTeam[2].players.push(this.value)
             var list = d3.select('#wrList')
             addPlayerTag(list, currentTeam[2]);
-            wrCount++;
+            counts['wrCount']++;
+            updateRemoveButtonFunction(counts, currentTeam)
     }
-
     })
     d3.selectAll('.teOpt').on('click', function() {
-        if (teCount < 1) {
+        if (counts['teCount'] < 1) {
             currentTeam[3].players.push(this.value)
             var list = d3.select('#teList')
             addPlayerTag(list, currentTeam[3]);
-            teCount++;
+            counts['teCount']++;
+            updateRemoveButtonFunction(counts, currentTeam)
+            
     }
     })
     d3.selectAll('.dstOpt').on('click', function() {
-        if (dstCount < 1) {
+        if (counts['dstCount'] < 1) {
             currentTeam[4].players.push(this.value)
             var list = d3.select('#dstList')
             addPlayerTag(list, currentTeam[4]);
-            dstCount++;
+            counts['dstCount']++;
+            updateRemoveButtonFunction(counts, currentTeam)
     }
     })
 
@@ -135,7 +194,7 @@ Plotly.d3.json('/stack_app_data', function(err, rows){
 
   
 
-    function setBubblePlot(chosenCountry) {
+    function setPlot(chosenCountry) {
         
         var trace1 = {
             x: [1,2,3],
