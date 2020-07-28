@@ -7,6 +7,7 @@ from flask import (
 from . import app 
 from .func import get_raw_data, position_names, player_query, stack_app_query_position
 from .database import (db,
+    TeamBuilder,
     SS_Data,
     _4f4_Proj,
     _4f4_Ceil,
@@ -49,7 +50,29 @@ def stack_app():
 @app.route('/stack_app_data')
 def stack_app_data():
     names = {x: stack_app_query_position(x, SS_Data) for x in ['QB', 'WR', 'TE', 'RB', 'DST']}
-    return jsonify(names)
+    teams = [x for x in TeamBuilder.find({}, {'_id':False})]
+    data = {
+        'names' : names,
+        'teams' : teams
+        }
+    return jsonify(data)
+
+@app.route('/<team_name>/<qb>/<rb1>/<rb2>/<wr1>/<wr2>/<wr3>/<te>/<dst>/<flex>')
+def save_new_team(team_name, qb, rb1, rb2, wr1, wr2, wr3, te, dst, flex):
+    team = {
+        'name' : team_name,
+        'QB' : qb,
+        'RBs' : [rb1, rb2],
+        'WRs' : [wr1, wr2, wr3],
+        'TE' : te,
+        'DST' : dst,
+        'flex' : flex
+        }
+
+    TeamBuilder.insert_one(team)
+
+    return redirect('/stack_app')
+    
 
 @app.route('/saber_sim_raw')
 def saber_sim_raw():
