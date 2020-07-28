@@ -60,13 +60,13 @@ def stack_app_data():
 @app.route('/<team_name>/<qb>/<rb1>/<rb2>/<wr1>/<wr2>/<wr3>/<te>/<dst>/<flex>')
 def save_new_team(team_name, qb, rb1, rb2, wr1, wr2, wr3, te, dst, flex):
     team = {
-        'name' : team_name,
-        'QB' : qb,
-        'RBs' : [rb1, rb2],
-        'WRs' : [wr1, wr2, wr3],
-        'TE' : te,
-        'DST' : dst,
-        'flex' : flex
+        'name' : ' '.join(team_name.split('-')),
+        'QB' : ' '.join(qb.split('-')),
+        'RBs' : [' '.join(x.split('-')) for x in [rb1, rb2]],
+        'WRs' : [' '.join(x.split('-')) for x in[wr1, wr2, wr3]],
+        'TE' : ' '.join(te.split('-')),
+        'DST' : ' '.join(dst.split('-')),
+        'flex' : ' '.join(flex.split('-'))
         }
 
     TeamBuilder.insert_one(team)

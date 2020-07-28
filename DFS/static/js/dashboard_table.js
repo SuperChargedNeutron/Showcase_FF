@@ -20,7 +20,7 @@ function getData(url){
        var litem =  checklist.append('a')
         .classed('toggle-vis', true)
         .attr("data-column", i.toString())
-        .text(`${col} - `);
+        .text(`${col}  |  `);
         i++;
 
         tableHeader.append('th').text(col)

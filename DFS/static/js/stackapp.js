@@ -126,10 +126,6 @@ function assignOptions(playerNames, position) {
             }})
 }
 
-function submitTeam(){
-    console.log(this.value)
-    console.log(d3.select("#teamNameSetter").node().value)
-}
 
 function setPlot(currentTeam) {
     var prices = Object.values(currentTeam).map(position => position.prices).flat(1),
@@ -163,6 +159,7 @@ function setPlot(currentTeam) {
 
 Plotly.d3.json('/stack_app_data', function(data){
 
+    
     var playerData = data['names'],
     teams = data['teams'];
 
@@ -195,37 +192,47 @@ Plotly.d3.json('/stack_app_data', function(data){
         'DSTs' : {'players' : [], 'projs' : [], 'prices' : []},
         'flexs' : {'players' : [], 'projs' : [], 'prices' : []}
         };
-    var table = d3.select('#teamTable')
+        //initialize plot
+    setPlot(currentTeam)
+function getTeamData(qbs, rbs, wrs, tes, dst, team, key) {
+    var allPlayers = [qbs, rbs, wrs, tes, dst].flat(1);
+    playerObjects = []
+    
+    team.forEach(name => {
+        playerObjects.push(allPlayers.filter(row => row.Name == name)[0])
+    })
+    playerObjects.shift()
+    if (key =='Price') {
+        var price = playerObjects.map(function(row) {return row[key];})
+                        .reduce((acc, val) => acc + val)
+        return price
+    } else if (key == 'Projection') {
+        var projection = playerObjects.map(function(row) {return row[key];})
+                                .reduce((acc, val) => acc + val)
+        return projection
+    };
+}    
+
+    teamLists = teams.map(elem => {
+        var nameList = Object.values(elem).flat(1);
+        price = getTeamData(qbs, rbs, wrs, tes, dst, nameList, 'Price'),
+        projection =  getTeamData(qbs, rbs, wrs, tes, dst, nameList, 'Projection'),
+        teamName =nameList.shift()
+        nameList.unshift(price)
+        nameList.unshift(projection)
+        nameList.unshift(teamName)
+        return nameList
+    }) 
+    console.log(teamLists)
+    var table = d3.select('#tableBody')
     var trow = table.selectAll('tr')
-        .data(teams).enter()
+        .data(teamLists).enter()
         .append('tr');
-    trow.append('td')
-        .attr('class', 'teamName')
-        .html(function(d) { return d.name; });
-    trow.append('td')
-        .attr('class', 'projSum')
-        .html(function(m) { return 0; });
-    trow.append('td')
-        .attr('class', 'priceSum')
-        .html(function(m) { return 0; });
-    trow.append('td')
-        .attr('class', 'qb')
-        .html(function(d) { return d.QB; });
-    trow.append('td')
-        .attr('class', 'num')
-        .html(function(d) { return d.RBs; });
-    trow.append('td')
-        .attr('class', 'num')
-        .html(function(d) { return d.WRs; });
-    trow.append('td')
-        .attr('class', 'num')
-        .html(function(d) { return d.TE; });
-    trow.append('td')
-        .attr('class', 'num')
-        .html(function(d) { return d.DST; });
-    trow.append('td')
-        .attr('class', 'num')
-        .html(function(d) { return d.flex; });
+    var td = trow.selectAll("td")
+        .data(function(d) {return d; })
+        .enter()
+        .append("td")
+        .text(function(d) {return d;});
         
     var current = d3.select('#currentSelection')
                         .selectAll('ul')
