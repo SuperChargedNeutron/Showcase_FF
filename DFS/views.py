@@ -1,6 +1,7 @@
 from flask import (
     render_template,
     redirect,
+    request,
     url_for,
     jsonify
 )
@@ -20,8 +21,11 @@ from .database import (db,
     airy_TE,
     ETR_Ceil
 )
+from .models import CalculatorForm
+import urllib.parse
 
 app.config['JSON_SORT_KEYS'] = False
+app.config['SECRET_KEY'] = 'you-will-never-guess'
 
 @app.route('/')
 def root():
@@ -73,6 +77,24 @@ def save_new_team(team_name, qb, rb1, rb2, wr1, wr2, wr3, te, dst, flex):
 
     return redirect('/stack_app')
     
+@app.route('/football_calculator_settings', methods=["GET", "POST"])
+def calculator_settings():
+    form = CalculatorForm(request.form)
+    if  form.validate():
+        return redirect(urllib.parse.quote(f'/calculator/{form.point_label.data}/{form.amnt_pts.data}/{form.embedded.data}/{form.position.data}/{form.season.data}/{form.week.data}'))
+    
+    return render_template('calc_settings_jinja.html', form=form)
+
+@app.route('/calculator/<string:label>/<int:amnt>/<embd>/<position>/<season>/<week>')
+def football_calculator(label, amnt, embd, position, season, week):
+    print('hi')
+    return render_template('football_calc.html', label=label, amnt=amnt, embd=embd, position=position, season=season, week=week)
+    
+
+
+@app.route('/team&points_manager')
+def teampointmanager():
+    return jsonify({'teams and data points' : 'created will be able to be deleted from here'})
 
 @app.route('/saber_sim_raw')
 def saber_sim_raw():
@@ -82,6 +104,8 @@ def saber_sim_raw():
     headers = list(ss_data[0].keys())
     
     return render_template('raw_data_temp.html', name=name, data=ss_data, headers=headers)
+
+
 
 @app.route('/4f4proj')
 def _4f4proj():

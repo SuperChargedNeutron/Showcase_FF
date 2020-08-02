@@ -195,35 +195,38 @@ Plotly.d3.json('/stack_app_data', function(data){
         //initialize plot
     setPlot(currentTeam)
 function getTeamData(qbs, rbs, wrs, tes, dst, team, key) {
-    var allPlayers = [qbs, rbs, wrs, tes, dst].flat(1);
-    playerObjects = []
+    var allPlayers = [qbs, rbs, wrs, tes, dst].flat(1),
+    playerObjects = [];
     
     team.forEach(name => {
-        playerObjects.push(allPlayers.filter(row => row.Name == name)[0])
+        playerObjects.push(allPlayers.filter(row => {return row.Name == name })[0])
     })
+
     playerObjects.shift()
+    console.log(playerObjects)
     if (key =='Price') {
-        var price = playerObjects.map(function(row) {return row[key];})
+        var price = playerObjects.map(row => row['Price'])
                         .reduce((acc, val) => acc + val)
         return price
     } else if (key == 'Projection') {
-        var projection = playerObjects.map(function(row) {return row[key];})
+        var projection = playerObjects.map(row => row[key])
                                 .reduce((acc, val) => acc + val)
         return projection
     };
 }    
 
-    teamLists = teams.map(elem => {
+    var teamLists = teams.map(elem => {
         var nameList = Object.values(elem).flat(1);
         price = getTeamData(qbs, rbs, wrs, tes, dst, nameList, 'Price'),
         projection =  getTeamData(qbs, rbs, wrs, tes, dst, nameList, 'Projection'),
-        teamName =nameList.shift()
-        nameList.unshift(price)
-        nameList.unshift(projection)
+        teamName = nameList.shift();
+        nameList.unshift(Math.round(price / projection*100)/100)
+        nameList.unshift(Math.round(price*100)/100)
+        nameList.unshift(Math.round(projection*100)/100)
         nameList.unshift(teamName)
         return nameList
     }) 
-    console.log(teamLists)
+
     var table = d3.select('#tableBody')
     var trow = table.selectAll('tr')
         .data(teamLists).enter()
@@ -345,7 +348,6 @@ function getTeamData(qbs, rbs, wrs, tes, dst, team, key) {
 
         teamPlayers = teamPlayers.map(elem => { return elem.split(' ').join('-')})
 
-        console.log(teamPlayers)
         if (teamList == 10) {
             urlString = `/${teamPlayers.join('/')}`
             console.log(urlString)
