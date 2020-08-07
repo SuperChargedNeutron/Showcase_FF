@@ -108,7 +108,7 @@ function assignOptions(playerNames, position) {
     d3.select(`#${position}Selection`).html('')
         .selectAll('option')
         .data(playerNames).enter()
-        .append('option')
+        .append('option') 
         .attr('value', function(d) { 
             if (position == 'flexPosition') {
                 return d; 
@@ -158,7 +158,6 @@ function setPlot(currentTeam) {
 }
 
 Plotly.d3.json('/stack_app_data', function(data){
-
     
     var playerData = data['names'],
     teams = data['teams'];
@@ -203,7 +202,6 @@ function getTeamData(qbs, rbs, wrs, tes, dst, team, key) {
     })
 
     playerObjects.shift()
-    console.log(playerObjects)
     if (key =='Price') {
         var price = playerObjects.map(row => row['Price'])
                         .reduce((acc, val) => acc + val)
@@ -226,7 +224,7 @@ function getTeamData(qbs, rbs, wrs, tes, dst, team, key) {
         nameList.unshift(teamName)
         return nameList
     }) 
-
+    console.log('hi')
     var table = d3.select('#tableBody')
     var trow = table.selectAll('tr')
         .data(teamLists).enter()
@@ -247,6 +245,7 @@ function getTeamData(qbs, rbs, wrs, tes, dst, team, key) {
                         .attr('id', function(d) { return `${d}List`; })
 
     d3.selectAll('.qbOpt').on('click', function() {
+        console.log(this.value)
         if (counts['qbCount'] < 1) {
             currentTeam.QBs.players.push(this.value)
             var proj = d3.select(this).attr('proj')

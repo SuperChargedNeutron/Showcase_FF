@@ -6,7 +6,7 @@ from flask import (
     jsonify
 )
 from . import app 
-from .func import get_raw_data, position_names, player_query, stack_app_query_position
+from .func import get_raw_data, position_names, player_query, stack_app_query
 from .database import (db,
     TeamBuilder,
     SS_Data,
@@ -36,11 +36,11 @@ def home():
     return render_template('index.html')
 
 @app.route('/<pos>_Dash')
-def qb_dash(pos):
+def position_dash(pos):
     return render_template('dashboard_temp.html', position=pos)
 
 @app.route('/<pos>_data')
-def qb_data(pos):
+def position_data(pos):
 
     players =  position_names(pos, db)
     data = [player_query(player, db) for player in players]
@@ -53,7 +53,7 @@ def stack_app():
 
 @app.route('/stack_app_data')
 def stack_app_data():
-    names = {x: stack_app_query_position(x, SS_Data) for x in ['QB', 'WR', 'TE', 'RB', 'DST']}
+    names = stack_app_query(_4f4_Ceil) 
     teams = [x for x in TeamBuilder.find({}, {'_id':False})]
     data = {
         'names' : names,

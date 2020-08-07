@@ -11,7 +11,7 @@
           <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class = "navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="index.html">Vegas Dash</a>
+                    <a class="nav-link" href="#">Vegas Dash</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">TOP GUNS</a>
@@ -20,30 +20,30 @@
                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
                       aria-haspopup="true" aria-expanded="false">Position Dashboards</a>
                     <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="#">QB</a>
-                        <a class="dropdown-item" href="#">WR</a>
-                        <a class="dropdown-item" href="#">TE</a>
-                        <a class="dropdown-item" href="#">RB</a>
-                        <a class="dropdown-item" href="#">DST</a>
+                        <a class="dropdown-item" href="/QB_Dash">QB</a>
+                        <a class="dropdown-item" href="/WR_Dash">WR</a>
+                        <a class="dropdown-item" href="/TE_Dash">TE</a>
+                        <a class="dropdown-item" href="/RB_Dash">RB</a>
+                        <a class="dropdown-item" href="/DST_Dash">DST</a>
                     </div>
                   </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="players.html">Player Comparison</a>
+                    <a class="nav-link" href="/stack_app">Stack App</a>
                 </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="overal_stat.html">Leauge Stats</a>
-                </li>
-
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
                       aria-haspopup="true" aria-expanded="false">Raw Data</a>
                     <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="4f4-ceiling.html">4f4 Ceiling</a>
-                        <a class="dropdown-item" href="#">4f4 ...</a>
-                        <a class="dropdown-item" href="#">ETR </a>
-                        <a class="dropdown-item" href="#">DraftKingz</a>
+                        <a class="dropdown-item" href="{{ url_for('saber_sim_raw') }}">Saber Sim</a>
+                        <a class="dropdown-item" href="{{ url_for('_4f4proj') }}">4f4 Projection</a>
+                        <a class="dropdown-item" href="{{ url_for('_4f4ceil') }}">4f4 Ceiling </a>
+                        <a class="dropdown-item" href="{{ url_for('_4f4wrcb') }}">4f4 WR CB </a>
+                        <a class="dropdown-item" href="{{ url_for('_4f4RedZ') }}">4f4 WR Fantasy Points </a>
+                        <a class="dropdown-item" href="{{ url_for('_4f4wrfp') }}">4f4 RB Fantasy Points </a>
+                        <a class="dropdown-item" href="{{ url_for('_4f4rbfp') }}">4f4 RB Target Data </a>
+                        <a class="dropdown-item" href="{{ url_for('airywr') }}">AirY WR Data </a>
+                        <a class="dropdown-item" href="{{ url_for('airyte') }}">AirY TE Data</a>
                     </div>
                   </li>
             </ul>

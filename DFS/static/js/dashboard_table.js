@@ -1,5 +1,5 @@
 function getData(url){
-    var checklist = d3.select('#toggles')
+    var colSelect = d3.select('#colSelect')
     var tableHeader = d3.select('#myTable').append('thead').append('tr')
     // var tableFooter = d3.select('#myTable').append('tfoot').append('tf').append('tr')
 
@@ -15,45 +15,114 @@ function getData(url){
         )
 
 
-    var i = 0;
-    cols.forEach(col => {
-       var litem =  checklist.append('a')
-        .classed('toggle-vis', true)
-        .attr("data-column", i.toString())
-        .text(`${col}  |  `);
-        i++;
+        colSelect.selectAll('option')
+            .data(cols).enter()
+            .append('option')
+            .classed('toggle-vis', true)
+            .attr("data-column", (d,i) => i)
+            .attr('id', (d) => d)
+            .text((d) => d);
+ 
+        tableHeader.selectAll('th')
+            .data(cols).enter()
+            .append('th')
+            .text((d) => `${d}`);
+        // tableFooter.selectAll('th')
+        //     .data(cols).enter()
+        //     .append('th')
+        //     .text((d) => `${d}`);
 
-        tableHeader.append('th').text(col)
-        // tableFooter.append('td').text(col)
-    })
         colObjects = cols.map(function(val){ 
-        return [{'data':val}] ; 
-    }).map(function(val){ 
-        return val[0] ; 
+        return {'data':val} ; 
     })
-    console.log(colObjects)
+
     var table = $('#myTable').DataTable( {
-        select: true,
-            data: data,
-            columns : colObjects
+        "scrollX": true,
+        dom: 'BRSlfrtip',
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        buttons: [
+            {
+                extend: 'copyHtml5',
+                exportOptions: {
+                    columns: [ 0, ':visible' ]
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+
+            // 'colvis'
+        ],
+        colReorder: true,
+        select: {
+                style:    'os',
+                selector: 'td:first-child',
+                blurable: true
+            },
+        data: data,
+        columns : colObjects
         } );
-     
-        $('a.toggle-vis').on('click', function (e) {
-            console.log(e);
+
+ 
+        $('.toggle-vis').on('click', function (e) {
             e.preventDefault();
-     
             // Get the column API object
-            var column = table.column( $(this).attr('data-column') );
-     
+            var column = table.column( $(this).attr('data-column') );     
             // Toggle the visibility
             column.visible( ! column.visible() );
         } );
+        // initial toggle
+        $(function() {
+            initColumns = ['name',
+            'Team', 
+            'Opp', 
+            'Price', 
+            'Value', 
+            'aFPA', 
+            'dk_50_percentile',
+            'dk_75_percentile',
+            'dk_85_percentile',
+            'dk_95_percentile',
+            'dk_99_percentile',
+            'Projection',//this is SS projection 
+            'DK_Proj',
+            'DK_Flr',	
+            'DK_Ceil',]
+            // '4f4 RZ L3',
+            // 'Air Tar L3',
+            // Avgs,
+            // JALG]
+            d3.selectAll('.toggle-vis')
+                .each(function(d) {
+                    if (!initColumns.includes(d)) {
+                        var column = table.column($(this).attr('data-column') );
+                        column.visible( ! column.visible() );
+                    }
+            })
+
+            $('#myTable tbody').on( 'click', 'tr', function () {
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+                }
+                else {
+                    table.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }
+            } );
+         
+            $('#deleteButton').click( function () {
+                table.row('.selected').remove().draw( false );
+            } );
+        });
 
     
 }
 );
 }
-var pos = d3.select('#position').html()
+var pos = d3.select('.h1').attr('id')
 url = `${pos}_data`
-
 getData(url)

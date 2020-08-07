@@ -11,3 +11,5 @@ SOLN : I can ask Joe to input the data when I set the parameters to scrape the w
        
        
 when inputing data, clean names to have no special characters. make sure the two/three character string in 
+
+ETR Ceiling sheet is the same as 4f4 RedZ data

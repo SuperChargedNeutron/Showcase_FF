@@ -152,6 +152,7 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
-  <script src="{{ url_for('static', filename='js/stackapp.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
+  <script src="{{ url_for('static', filename='js/stack_app_func.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/d3_stackapp.js') }}"></script>
 {% endblock %}
