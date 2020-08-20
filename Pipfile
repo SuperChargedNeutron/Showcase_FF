@@ -9,7 +9,6 @@ verify_ssl = true
 flask = "*"
 numpy = "*"
 flask-bootstrap = "*"
-ipykernel = "*"
 pymongo = "*"
 flask-cors = "*"
 flask-wtf = "*"
