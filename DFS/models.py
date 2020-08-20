@@ -4,7 +4,6 @@ from flask_wtf import FlaskForm
 from wtforms import (
     Form,
     StringField,
-    BooleanField,
     IntegerField,
     SelectField,
     SubmitField,
@@ -19,7 +18,6 @@ weeks = [str(i) for i in range(1, 17)]
 class CalculatorForm(FlaskForm):
     point_label = StringField("Point Label", [InputRequired()])
     amnt_pts = IntegerField("Amount of Values", [InputRequired()])
-    embedded = BooleanField("Embedded")
     position = SelectField(
         "Position", [InputRequired()], choices=list(zip(positions, positions))
     )

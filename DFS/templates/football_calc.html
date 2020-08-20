@@ -18,21 +18,19 @@
       </div>
       <div id="sample-metadata" class="panel-body">
        
-          <li id='label'>Label : {{ label }}</li>
-          <li id='amnt' value='{{amnt}}'>Variables : {{ amnt }}</li>
-          <li id='embd'>Contains Embd : {{ embd }}</li>
-          <li id='position' value='{{position}}'>Position : {{ position }}</li>
-          <li id='season'>Season : {{ season }}</li>
-          <li id='week'>Week : {{ week }}</li>
+          <li id='metaLabel'>Label : {{ label }}</li>
+          <li id='amnt' value='{{amnt}}'>Amount of Variables : {{ amnt }}</li>
+          <li id='metaPosition' value='{{position}}'>Position : {{ position }}</li>
+          <li id='metaSeason'>Season : {{ season }}</li>
+          <li id='metaWeek'>Week : {{ week }}</li>
     </div>
   </div>
 </div>
-<div id='variables'>
-  <div class='row' id='variableRow'>
+<div class='container' id='variables'>
+  <ul id='variableInput'>
+  </ul>
+  <div id='forButton'>
   </div>
-  <div class='row' id='forButton'>
-  </div>
-
 </div>
 </div>
 {% endblock %}

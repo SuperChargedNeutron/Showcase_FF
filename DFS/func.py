@@ -1,11 +1,48 @@
 import pymongo
+from .database import _4f4_RedZ
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+import numpy as np
 
+def pull_scaled_data(columns, meta):
+    query_cols = {'_id':False, 'Player':True}
+    for col in columns:
+        query_cols.update({col:True})
+   
+    query = [
+        x for x in _4f4_RedZ.find(
+        {'Season' : int(meta['season']), 'Week' : int(meta['week']), 'Pos':meta['pos']},
+        query_cols)
+        ]
+
+    players = [x['Player'] for x in query]
+    to_be_scaled = np.array([[x[key] for key in columns] for x in query])
+
+    minmax_scaler = MinMaxScaler()
+    standard_scaler = StandardScaler()
+
+    minmax_data = dict(zip(players, 
+        [list(x) for x in minmax_scaler.fit_transform(to_be_scaled)]))
+    standard_data = dict(zip(players, 
+        [list(x) for x in standard_scaler.fit_transform(to_be_scaled)]))
+
+    return minmax_data, standard_data
+
+def weigh_data(weights, data):
+    weighed_scaled_data = []
+    for key in data.keys():
+        player_transform = {'name' : key}
+        weighed_point = 0
+        for i in range(len(weights)):
+            num = weights[i] * data[key][i]
+            weighed_point += num
+        player_transform.update({'value' : weighed_point})
+        weighed_scaled_data.append(player_transform)
+    return weighed_scaled_data
 
 def get_raw_data(table):
     doc_count = table.count_documents(filter={})
     data = [dict(i) for i in table.find({}, {"_id": False})[0:doc_count]]
     return data
-
 
 def stack_app_query(_4f4_Ceil):
     data = []
@@ -72,3 +109,4 @@ def player_query(player, db):
                     player_info.update(cursor[i])
 
     return player_info
+

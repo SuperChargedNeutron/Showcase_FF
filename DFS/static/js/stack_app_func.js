@@ -19,7 +19,7 @@ function addPlayerTag(appendee, obj){
     
         }
 
-function updateRemoveButtonFunction(counts, currentTeam) {
+function updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection) {
     killButtonz = d3.selectAll('.rmButton')
         .on('click', function () {
             if (this.parentNode.parentNode.id == 'qbList') {
@@ -31,7 +31,6 @@ function updateRemoveButtonFunction(counts, currentTeam) {
                 currentTeam.QBs.projs.pop(playerIndex)
                 player.remove()
                 counts['qbCount']--;
-                setPlot(currentTeam)
             } else if (this.parentNode.parentNode.id == 'rbList') {
                 player = d3.select(this.parentNode)
                 playerText = player.text()
@@ -41,7 +40,6 @@ function updateRemoveButtonFunction(counts, currentTeam) {
                 currentTeam.RBs.projs.pop(playerIndex)
                 player.remove()
                 counts['rbCount']--;
-                setPlot(currentTeam)
             } else if (this.parentNode.parentNode.id == 'wrList') {
                 player = d3.select(this.parentNode)
                 playerText = player.text()
@@ -51,7 +49,6 @@ function updateRemoveButtonFunction(counts, currentTeam) {
                 currentTeam.WRs.projs.pop(playerIndex)
                 player.remove()
                 counts['wrCount']--;
-                setPlot(currentTeam)
             } else if (this.parentNode.parentNode.id == 'teList') {
                 player = d3.select(this.parentNode)
                 playerText = player.text()
@@ -61,7 +58,6 @@ function updateRemoveButtonFunction(counts, currentTeam) {
                 currentTeam.TEs.projs.pop(playerIndex)
                 player.remove()
                 counts['teCount']--;
-                setPlot(currentTeam)
             } else if (this.parentNode.parentNode.id == 'dstList') {
                 player = d3.select(this.parentNode)
                 playerText = player.text()
@@ -71,7 +67,6 @@ function updateRemoveButtonFunction(counts, currentTeam) {
                 currentTeam.DSTs.projs.pop(playerIndex)
                 player.remove()
                 counts['dstCount']--;
-                setPlot(currentTeam)
             } else if (this.parentNode.parentNode.id == 'flexList') {
                 player = d3.select(this.parentNode)
                 playerText = player.text()
@@ -82,11 +77,33 @@ function updateRemoveButtonFunction(counts, currentTeam) {
                 player.remove()
                 counts['flexCount']--;
             };
-            
+            plotCurrentTeam(currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection)
         })
 }
 
-function updateFlexOptions(counts, currentTeam) {
+function plotCurrentTeam(currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip) {
+    dataExtracted = extractCurrentTeamData(currentTeam)
+                xLinearScale = xScale(
+                    dataExtracted.map(row => row[1]), 
+                    chartWidth
+                    )
+                yLinearScale = yScale(
+                    dataExtracted.map( row => row[2]),
+                     chartHeight
+                    )
+                xAxis = renderXAxis(xLinearScale, xAxis)
+                yAxis = renderYAxis(yLinearScale, yAxis)
+                circlesGroup = renderCircles(
+                    xLinearScale,
+                    yLinearScale, 
+                    yCurrentSelection,
+                    dataExtracted,
+                    dataCurrentSelection, 
+                    tooltip
+                )
+}
+
+function updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip) {
     d3.selectAll('.flexPlayerOpt').on('click', function() {
         if (counts['flexCount'] < 1) {
             currentTeam.flexs.players.push(this.value)
@@ -98,7 +115,9 @@ function updateFlexOptions(counts, currentTeam) {
             addPlayerTag(list, currentTeam.flexs.players);
             counts['flexCount']++;
             updateRemoveButtonFunction(counts, currentTeam)
-            setPlot(currentTeam)
+            if (dataCurrentSelection == 'teamBuild') {
+                plotCurrentTeam(currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip)
+            }
     }
     })
 }
@@ -126,22 +145,23 @@ function assignOptions(playerNames, position) {
 }
 
 
-function xScale (data, xCurrentSelection, chartWidth) {
+function xScale (data, chartWidth) {
     let xMax = d3.max(data.map(d => parseFloat(d))),
         xMin = d3.min(data.map(d => parseFloat(d)))
 
     let xLinearScale = d3.scaleLinear()
-        .domain([xMin - 1, xMax ])
+        .domain([xMin - 1000, xMax  + 1000])
         .range([0, chartWidth])
 
     return xLinearScale 
 }
-function yScale ( data, yCurrentSelection, chartHeight) {
+
+function yScale ( data, chartHeight) {
     let yMin = d3.min(data.map(d => parseFloat(d))),
         yMax = d3.max(data.map(d => parseFloat(d)))
 
     let yLinearScale = d3.scaleLinear()
-        .domain([yMin - 1, yMax])
+        .domain([yMin - 5, yMax + 5])
         .range([chartHeight, 0])
 
     return yLinearScale 
@@ -151,8 +171,6 @@ function renderXAxis (newXScale, xAxis) {
     let bottomAxis = d3.axisBottom(newXScale)
     
     xAxis
-    .transition()
-    .duration(1000)
     .call(bottomAxis)
 
     return xAxis
@@ -161,20 +179,120 @@ function renderXAxis (newXScale, xAxis) {
 function renderYAxis (newYScale, yAxis) {
     let leftAxis = d3.axisLeft(newYScale)
     yAxis
-    .transition()
-    .duration(1000)
     .call(leftAxis)
 
     return yAxis
 }
 
-function renderCircles(circlesGroup, newXScale, xCurrentSelection) {
-    circlesGroup
-        .transition()
-        .duration(1000)
-        .attr('cx', d => newXScale(parseFloat(d[xCurrentSelection])))
-    
-    return circlesGroup
+function extractCurrentTeamData (currentTeam) {
+    dataExtracted = []
+                Object.keys(currentTeam).forEach(key => {
+                    console.log(key)
+                if (key =='teamName') {
+                    return undefined
+                }
+                for (i=0; i < currentTeam[key]['players'].length; i++) {
+                    dataExtracted.push([currentTeam[key]['players'][i], currentTeam[key]['prices'][i], currentTeam[key]['projs'][i]])
+                }
+                }
+            )
+    return dataExtracted
+}
+function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, dataCurrentSelection, tooltip) {
+
+    circleGroup = d3.select('#circleGroup');
+    circleGroup.selectAll('circle').remove().exit();
+    circleGroup.selectAll('line.error').remove().exit();
+    if (dataCurrentSelection == 'teamStacked') {
+
+        circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        var teamCircleColor = d3.scaleOrdinal()
+            .domain(data.map(row => {return row[0]}))
+            .range(circleColors);
+
+        circleGroup.selectAll("circle") //change to circle?
+        .data(data).enter()
+                .append('circle')
+                .attr('cx', d => xLinearScale(parseFloat(d[1])))
+                .attr('cy', d => yLinearScale(parseFloat(d[2])))
+                .attr('r', 5)
+                .style('fill', d => teamCircleColor(d[0]))
+                .style('opacity', .8)
+                .attr('stroke', 'black')
+                .attr('stroke-width', .5)
+                .on("mouseover", function(d) {	
+                    tooltip.transition()		
+                        .duration(200)		
+                        .style("opacity", .9)
+                    tooltip.html(`${d[0]} <br/> ${d[2]}`)	
+                        .style("left", (d3.event.pageX) + "px")		
+                        .style("top", (d3.event.pageY - 28) + "px")
+                        .style("visibility", "visible");	
+                    })					
+                .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+        
+    return circleGroup
+    } else if ( dataCurrentSelection == 'teamPlayers') {
+        circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        var teamCircleColor = d3.scaleOrdinal()
+            .domain(data.map(row => {return row['teamName']}))
+            .range(circleColors);
+
+        circleGroup.selectAll("circle")
+            .data(data).enter()
+            .append('circle')
+            .attr('cx', d => xLinearScale(parseFloat(d['DK_Price'])))
+            .attr('cy', d => yLinearScale(parseFloat(d['DK_Proj'])))
+            .attr('r', 5)
+            .style('fill', (d, i) => teamCircleColor(d['teamName']))
+            .style('opacity', .8)
+            .attr('stroke', 'black')
+            .attr('stroke-width', .5)
+            .on("mouseover", function(d) {	
+                tooltip.transition()		
+                    .duration(200)		
+                    .style("opacity", .9)
+                tooltip.html(`${d['Player']} <br/> ${d['teamName']}`)	
+                    .style("left", (d3.event.pageX) + "px")		
+                    .style("top", (d3.event.pageY - 28) + "px")
+                    .style("visibility", "visible");	
+                })					
+            .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
+        var lines = circleGroup
+            .selectAll('line')
+            .data(data);
+        lines.enter()
+            .append('line')
+            .attr('class', 'error')
+            // .merge(lines)
+            .attr('x1', function(d) { return xLinearScale(parseFloat(d['DK_Price'])); })
+            .attr('x2', function(d) { return xLinearScale(parseFloat(d['DK_Price'])); })
+            .attr('y1', function(d) { return yLinearScale(parseFloat(d['DK_Ceil'])); })
+            .attr('y2', function(d) { return yLinearScale(parseFloat(d['DK_Flr'])); });
+        return circleGroup
+    } else if ( dataCurrentSelection == 'teamBuild') {
+        circleGroup.selectAll("circle")
+            .data(data).enter()
+            .append('circle')
+            .attr('cx', d => xLinearScale(parseFloat(d[1])))
+            .attr('cy', d => yLinearScale(parseFloat(d[2])))
+            .attr('r', 5)
+            .style('fill', 'gray')
+            .style('opacity', .8)
+            .attr('stroke', 'black')
+            .attr('stroke-width', .5)
+            .on("mouseover", function(d) {	
+                tooltip.transition()		
+                    .duration(200)		
+                    .style("opacity", .9)
+                tooltip.html(`${d[0]} <br/> ${d[2]}`)	
+                    .style("left", (d3.event.pageX) + "px")		
+                    .style("top", (d3.event.pageY - 28) + "px")
+                    .style("visibility", "visible");	
+                })					
+            .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+    }
 }
 function renderYCircles(circlesGroup, newYScale, yCurrentSelection) {
     circlesGroup
@@ -186,14 +304,15 @@ function renderYCircles(circlesGroup, newYScale, yCurrentSelection) {
 }
 function getTeamData(playerData, team, key) {
     var playerObjects = [];
-    
+    teamName = team[0]
     team.forEach(name => {
         playerObjects.push(playerData.filter(row => {return row.Player == name })[0])
     })
 
     playerObjects.shift()
-    console.log(playerData)
-    console.log(playerObjects)
+    var playerObjects = playerObjects.filter(function (el) {
+        return el != undefined;
+      });
     if (key =='DK_Price') {
         var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)
@@ -201,6 +320,16 @@ function getTeamData(playerData, team, key) {
     } else if (key == 'DK_Proj') {
         var projection = playerObjects.map(row => row[key])
                                 .reduce((acc, val) => acc + val)
-        return projection
+        var avgProjection = projection / playerObjects.length
+        return avgProjection
+    } else if (key == 'players') {
+        let mappedObjects = playerObjects.map(obj =>{
+            var outDict = {'teamName' : teamName}
+            Object.entries(obj).forEach((key, val) => {
+                outDict[key[0]] = key[1]
+            });
+            return outDict})
+
+        return mappedObjects
     };
 }   

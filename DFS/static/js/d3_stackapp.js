@@ -21,7 +21,7 @@ d3.json('/stack_app_data').then(function(data){
     'teCount' : 0,
     'dstCount' : 0,
     'flexCount' : 0},
-    currentTeam = { 'teamName' : '',
+    currentTeam = { 'teamName' : [],
         'QBs' : {'players' : [], 'projs' : [], 'prices' : []},
         'RBs' : {'players' : [], 'projs' : [], 'prices' : []},
         'WRs' : {'players' : [], 'projs' : [], 'prices' : []},
@@ -29,7 +29,6 @@ d3.json('/stack_app_data').then(function(data){
         'DSTs' : {'players' : [], 'projs' : [], 'prices' : []},
         'flexs' : {'players' : [], 'projs' : [], 'prices' : []}
         };
-    //initialize plot
 
 
 var teamLists = teams.map(elem => {
@@ -43,9 +42,7 @@ var teamLists = teams.map(elem => {
     nameList.unshift(teamName)
     return nameList
 });
-var teamsProjData = teamLists.map(row => row[1]),
-teamsPriceData = teamLists.map(row => row[2]);
-
+var teamsData = teamLists.map(row => [row[0], row[2], row[1]])
 var table = d3.select('#tableBody')
 var trow = table.selectAll('tr')
     .data(teamLists).enter()
@@ -58,8 +55,8 @@ var td = trow.selectAll("td")
     
     // Initial Chart plotting
     const margin = { top: 50, right: 50, bottom: 70, left: 80 },
-    svgWidth = 650,
-    svgHeight = 320,
+    svgWidth = 660,
+    svgHeight = 470,
     chartWidth = svgWidth - margin.left - margin.right,
     chartHeight = svgHeight - margin.top - margin.bottom;
 
@@ -68,19 +65,18 @@ var td = trow.selectAll("td")
         .attr("height", svgHeight)
 
     let chartGroup = svg.append("g")
+        .attr('id', 'chartGroup')
         .attr("transform",  `translate(${margin.left}, ${margin.top})`)
     
-        var xCurrentSelection = 'Price',
-        yCurrentSelection = 'Projection',
-        dataCurrentSelection = 'teamsStacked';
+        var yCurrentSelection = 'Projection',
+        dataCurrentSelection = 'teamStacked',
+        xCurrentSelection = 'Price';
 
-    let xLinearScale = xScale(teamsProjData, xCurrentSelection, chartWidth),
-    yLinearScale = yScale(teamsPriceData, yCurrentSelection, chartHeight);
+    let xLinearScale = xScale(teamsData.map(row => {return row[1]}), chartWidth),
+    yLinearScale = yScale(teamsData.map(row => {return row[2]}), chartHeight);
 
     let bottomAxis = d3.axisBottom(xLinearScale),
         leftAxis = d3.axisLeft(yLinearScale)
-
-    
 
     let xAxis = chartGroup.append('g')
         .classed('x-axis', true)
@@ -90,116 +86,180 @@ var td = trow.selectAll("td")
     let yAxis = chartGroup.append('g')
         .classed('y-axis', true)
         .classed('transform', `translate(${chartWidth}, 0)`)
-        .call (leftAxis)
-        let circlesGroup = chartGroup.append('g')
-        .selectAll("dot") //change to circle?
-        .data(playerData)
-        .enter()
-            .append('circle')
-            .attr('cx', d => xLinearScale(parseFloat(d[xCurrentSelection])))
-            .attr('cy', d => yLinearScale(parseFloat(d[yCurrentSelection])))
-            .attr('r', d => d.income / 5000)
-            .style('fill', 'gray')
-            .style('opacity', .3)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 2)
+        .call(leftAxis)
+
+    circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+
+    var teamCircleColor = d3.scaleOrdinal()
+        .domain(teamsData.map(row => {return row[0]}))
+        .range(circleColors);
+
+    var tooltip = d3.select("#stackApp")
+        .append("div")
+        .classed('tooltip', true)
+        .style("visibility", "hidden");
+
+    let circlesGroup = chartGroup.append('g').attr('id', 'circleGroup')
+    circlesGroup.selectAll("circle") //change to circle?
+        .data(teamsData).enter()
+        .append('circle')
+        .attr('cx', d => xLinearScale(parseFloat(d[1])))
+        .attr('cy', d => yLinearScale(parseFloat(d[2])))
+        .attr('r', 5)
+        .style('fill', d => teamCircleColor(d[0]))
+        .style('opacity', .8)
+        .attr('stroke', 'black')
+        .attr('stroke-width', .5)
+        .on("mouseover", function(d) {	
+            tooltip.transition()		
+                .duration(200)		
+                .style("opacity", .9)
+            tooltip.html(`${d[0]} <br/> ${d[2]}`)	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px")
+                .style("visibility", "visible");	
+            })					
+        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
      
-
-let circleLabelGroup = chartGroup.append('g')
-        .selectAll("text")
-        .data(data.names)
-        .enter()
-        .append("text")
-        .attr('font-size', 12)
-        .attr("font-fmaily", "Saira")
-        .attr('stroke-width', 1)
-        .text((d) => d.abbr)
-        .attr("x", d => xLinearScale(parseFloat(d[xCurrentSelection])) - 6 )
-        .attr("y", d => yLinearScale(parseFloat(d[yCurrentSelection])) + 4 )
-        .attr('fill', 'white')
-
     let xlabelsGroup = chartGroup
         .append("g")
         .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 20})`)
-    
     xlabelsGroup.append('text')
         .attr('x', 0)
         .attr('y', 20)
-        .attr('value', 'poverty')
+        .attr('value', 'Price')
         .classed('active', true)
-        .text('DraftKingz Projection')
-
-
-    xlabelsGroup.selectAll('text').on('click', function() {
-            let xLabel = d3.select(this)
-            let xActiveLabel = xlabelsGroup.select('.active')
-            let xValue = xLabel.attr('value')
-            console.log(xValue)
-            if (xValue != xCurrentSelection) {
-                xLabel.classed('active', true)
-                xActiveLabel.classed('active', false)
-                xCurrentSelection = xValue
-                xLinearScale = xScale(teamsProjData, xCurrentSelection, chartWidth)
-                xAxis = renderXAxis(xLinearScale, xAxis)
-                circlesGroup = renderCircles(
-                    circlesGroup,
-                    xLinearScale,
-                    xCurrentSelection
-                )
-                circleLabelGroup = renderLabels(
-                    circleLabelGroup,
-                    xLinearScale,
-                    xCurrentSelection
-                )
-            }
-        })
+        .text('Price')
 
     let ylabelsGroup = chartGroup
         .append("g")
         .attr("transform", `translate( ${(chartHeight / 2) }, ${0 - margin.left})`)
         .attr('transform', 'rotate(-90)')
-    
+
 ylabelsGroup.append('text')
-        .attr('x', - (chartHeight / 2) - 20)
-        .attr('y', - margin.left + 55 )
+        .attr('x', - (chartHeight / 2) )
+        .attr('y', - margin.left + 20)
         .attr('value', 'aFPA')
-        .classed('active', true)
+        .classed('active', false)
         .text('aFPA')
 
 ylabelsGroup.append('text')
-        .attr('x', - (chartHeight / 2) - 20)
-        .attr('y', - margin.left + 35)
+        .attr('x', - (chartHeight / 2) - 40)
+        .attr('y', - margin.left + 45 )
         .attr('value', 'Projection')
+        .classed('active', true)
+        .text('Projection (Avg)')
+
+
+    let dataLabelsGroup = chartGroup
+        .append("g")
+        .attr("transform", `translate( ${0 + margin.top}, ${.5 * svgWidth})`)
+
+    dataLabelsGroup.append('text')
+        .attr('x',  (-25) )
+        .attr('y', -340)
+        .attr('value', 'teamBuild')
         .classed('active', false)
-        .text('Projection')
+        .text('Team Builder')
+    dataLabelsGroup.append('text')
+        .attr('x',  135) 
+        .attr('y', -340)
+        .attr('value', 'teamPlayers')
+        .classed('active', false)
+        .text('Teams: Players')
+    dataLabelsGroup.append('text')
+        .attr('x', 295) 
+        .attr('y', -340)
+        .attr('value', 'teamStacked')
+        .classed('active', true)
+        .text('Teams: Stacked')
 
+    dataLabelsGroup.selectAll('text').on('click', function() {
+            let tag = d3.select(this),
+            activeLabel = dataLabelsGroup.select('.active'),
+            tagValue = tag.attr('value')
+            if (tagValue != dataCurrentSelection) {
+                newTag = tag.classed('active', true)
+                activeLabel.classed('active', false)
+                dataCurrentSelection = newTag.attr('value')
 
+                if (dataCurrentSelection == 'teamStacked'){
+                    xLinearScale = xScale(
+                        teamsData.map(row => {return row[1]}), 
+                        chartWidth
+                        )
+                    yLinearScale = yScale(
+                        teamsData.map(row => {return row[2]}),
+                         chartHeight
+                        )
+                    xAxis = renderXAxis(xLinearScale, xAxis)
+                    yAxis = renderYAxis(yLinearScale, yAxis)
+                    circlesGroup = renderCircles(
+                        xLinearScale,
+                        yLinearScale, 
+                        yCurrentSelection,
+                        teamsData,
+                        dataCurrentSelection,
+                        tooltip
+                    )
 
-
-    // ylabelsGroup.selectAll('text').on('click', function() {
-    //         let label = d3.select(this)
-    //         let activeLabel = ylabelsGroup.select('.active')
-    //         let value = label.attr('value')
-    //         if (value != yCurrentSelection) {
-    //             activeLabel.classed('active', false)
-    //             label.classed('active', true)
-    //             yCurrentSelection = value
-    //             yLinearScale = yScale(data, yCurrentSelection)
-    //             yAxis = renderYAxis(yLinearScale, yAxis)
-    //             circlesGroup = renderYCircles(
-    //                 circlesGroup,
-    //                 yLinearScale,
-    //                 yCurrentSelection
-    //             )
-    //             circleLabelGroup = renderYLabels(
-    //                 circleLabelGroup,
-    //                 yLinearScale,
-    //                 yCurrentSelection
-    //             )
-    //         }
-    // })
+                } else if (dataCurrentSelection == 'teamPlayers') {
+                    
+                    allTeamPlayers = teams.map(elem => {
+                        var nameList = Object.values(elem).flat(1);
+                        teamPlayers = getTeamData(playerData, nameList, 'players')
+                        return teamPlayers                        
+                }).flat(1)
+                xLinearScale = xScale(
+                    allTeamPlayers.map(obj => obj['DK_Price']), 
+                    chartWidth
+                    )
+                yLinearScale = yScale(
+                    allTeamPlayers.map(obj => obj['DK_Proj']),
+                     chartHeight
+                    )
+                xAxis = renderXAxis(xLinearScale, xAxis)
+                yAxis = renderYAxis(yLinearScale, yAxis)
+                circlesGroup = renderCircles(
+                    xLinearScale,
+                    yLinearScale, 
+                    yCurrentSelection,
+                    allTeamPlayers,
+                    dataCurrentSelection, 
+                    tooltip
+                )
+            } else if (dataCurrentSelection == 'teamBuild') {
+                plotCurrentTeam(currentTeam, 
+                    chartWidth, chartHeight, 
+                    xAxis, yAxis, 
+                    dataCurrentSelection, yCurrentSelection,
+                    tooltip)
+            }}
+        })
+    
+    ylabelsGroup.selectAll('text').on('click', function() {
+            let clickedLabel = d3.select(this).attr('value')
+            let activeLabel = ylabelsGroup.select('.active').attr('value')
+            // if (value != yCurrentSelection) {
+            //     activeLabel.classed('active', false)
+            //     label.classed('active', true)
+            //     yCurrentSelection = value
+            //     yLinearScale = yScale(data, yCurrentSelection)
+            //     yAxis = renderYAxis(yLinearScale, yAxis)
+            //     circlesGroup = renderYCircles(
+            //         circlesGroup,
+            //         yLinearScale,
+            //         yCurrentSelection
+            //     )
+            //     circleLabelGroup = renderYLabels(
+            //         circleLabelGroup,
+            //         yLinearScale,
+            //         yCurrentSelection
+            //     )
+            // }
+    })
    
-    var current = d3.select('#currentSelection')
+    var current = d3.select('#currentTeam')
                         .selectAll('ul')
                         .data(positions).enter()
                         .append('div')
@@ -209,7 +269,7 @@ ylabelsGroup.append('text')
                         .attr('id', function(d) { return `${d}List`; })
 
     d3.selectAll('.qbOpt').on('click', function() {
-        console.log(this.value)
+
         if (counts['qbCount'] < 1) {
             currentTeam.QBs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
@@ -219,7 +279,14 @@ ylabelsGroup.append('text')
             var list = d3.select('#qbList')
             addPlayerTag(list, currentTeam.QBs.players)
             counts['qbCount']++;
-            updateRemoveButtonFunction(counts, currentTeam)
+            updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection)
+            if (dataCurrentSelection == 'teamBuild') {
+                plotCurrentTeam(currentTeam, 
+                    chartWidth, chartHeight, 
+                    xAxis, yAxis, 
+                    dataCurrentSelection, yCurrentSelection,
+                    tooltip)
+            }
     }
 })
     d3.selectAll('.rbOpt').on('click', function() {
@@ -232,7 +299,14 @@ ylabelsGroup.append('text')
             var list = d3.select('#rbList')
             addPlayerTag(list, currentTeam.RBs.players);
             counts['rbCount']++;
-            updateRemoveButtonFunction(counts, currentTeam)
+            updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection)
+            if (dataCurrentSelection == 'teamBuild') {
+                plotCurrentTeam(currentTeam, 
+                    chartWidth, chartHeight, 
+                    xAxis, yAxis, 
+                    dataCurrentSelection, yCurrentSelection,
+                    tooltip)
+            }
 
             
     }
@@ -247,7 +321,14 @@ ylabelsGroup.append('text')
             var list = d3.select('#wrList')
             addPlayerTag(list, currentTeam.WRs.players);
             counts['wrCount']++;
-            updateRemoveButtonFunction(counts, currentTeam)
+            updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection)
+            if (dataCurrentSelection == 'teamBuild') {
+                plotCurrentTeam(currentTeam, 
+                    chartWidth, chartHeight, 
+                    xAxis, yAxis, 
+                    dataCurrentSelection, yCurrentSelection,
+                    tooltip)
+            }
     }
     })
     d3.selectAll('.teOpt').on('click', function() {
@@ -260,8 +341,14 @@ ylabelsGroup.append('text')
             var list = d3.select('#teList')
             addPlayerTag(list, currentTeam.TEs.players);
             counts['teCount']++;
-            updateRemoveButtonFunction(counts, currentTeam)
-            
+            updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection)
+            if (dataCurrentSelection == 'teamBuild') {
+                plotCurrentTeam(currentTeam, 
+                    chartWidth, chartHeight, 
+                    xAxis, yAxis, 
+                    dataCurrentSelection, yCurrentSelection,
+                    tooltip)
+            }
     }
     })
     d3.selectAll('.dstOpt').on('click', function() {
@@ -274,33 +361,43 @@ ylabelsGroup.append('text')
             var list = d3.select('#dstList')
             addPlayerTag(list, currentTeam.DSTs.players);
             counts['dstCount']++;
-            updateRemoveButtonFunction(counts, currentTeam)
+            updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection)
+            if (dataCurrentSelection == 'teamBuild') {
+                plotCurrentTeam(currentTeam, 
+                    chartWidth, chartHeight, 
+                    xAxis, yAxis, 
+                    dataCurrentSelection, yCurrentSelection,
+                    tooltip)
+            }
     }
     })
     d3.selectAll('.flexPositionOpt').on('click', function() {
         if (this.value == 'RB') {
             assignOptions(rbs, 'flexPlayer')
-            updateFlexOptions(counts, currentTeam)
+             updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip)
         } else if (this.value == 'WR') {
             assignOptions(wrs, 'flexPlayer')
-            updateFlexOptions(counts, currentTeam)
+             updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip)
         } else if (this.value == 'TE') {
             assignOptions(tes, 'flexPlayer')
-            updateFlexOptions(counts, currentTeam)
+             updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip)
         };
     })
-    // d3.select("#teamNameSetter").html(this.value);
-    d3.select('#nameSetter').on('change', function() {
+
         d3.select('#nameSetterButton').on('click', function() {
             var input = d3.select(this.parentNode.parentNode).select('#nameSetter')
-            currentTeam.teamName = input.node().value
+            while (currentTeam.teamName.length) {
+                currentTeam.teamName.pop();
+              }
+            currentTeam.teamName.push(input.node().value)
     });
-    })
     
    d3.select('#submitButton').on('click', function () {
-       // // // add team name secure meaning make sure 
-       // // // team name is in place before this request is sent
-       var teamName = currentTeam.teamName;
+        if ( currentTeam.teamName[0] == undefined || currentTeam.teamName[0] == "") {
+           teamName = 'default'
+       } else if (currentTeam.teamName[0] != undefined && currentTeam.teamName[0] != "") {
+            teamName = currentTeam.teamName[0];
+       };
        if (currentTeam.QBs.players[0] != undefined) { 
            qb = currentTeam.QBs.players[0]
         } else if  (currentTeam.QBs.players[0] == undefined) {
@@ -350,14 +447,8 @@ ylabelsGroup.append('text')
 
         var teamPlayers = [teamName, qb, rb1, rb2, wr1, wr2, wr3, te, dst, flex]
         teamPlayers = teamPlayers.map(elem => { return elem.split(' ').join('-')})
-
-        
-            urlString = `/${teamPlayers.join('/')}`
-            console.log(urlString)
-            window.location.replace(urlString)
-
-        
-        
+        urlString = `/${teamPlayers.join('/')}`
+        window.location.replace(urlString)
     })
     
 });

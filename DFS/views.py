@@ -3,10 +3,16 @@ from flask import (
     redirect,
     request,
     url_for,
-    jsonify
+    jsonify,
+    session
 )
 from . import app 
-from .func import get_raw_data, position_names, player_query, stack_app_query
+from .func import (get_raw_data, 
+    position_names, 
+    player_query, 
+    stack_app_query,
+    pull_scaled_data,
+    weigh_data)
 from .database import (db,
     TeamBuilder,
     SS_Data,
@@ -19,10 +25,11 @@ from .database import (db,
     _4f4_RB_tar,
     airy_WR,
     airy_TE,
-    ETR_Ceil
+    CalcCollection
 )
 from .models import CalculatorForm
-import urllib.parse
+import json
+from urllib.parse import quote, unquote
 
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = 'you-will-never-guess'
@@ -81,20 +88,69 @@ def save_new_team(team_name, qb, rb1, rb2, wr1, wr2, wr3, te, dst, flex):
 def calculator_settings():
     form = CalculatorForm(request.form)
     if  form.validate():
-        return redirect(urllib.parse.quote(f'/calculator/{form.point_label.data}/{form.amnt_pts.data}/{form.embedded.data}/{form.position.data}/{form.season.data}/{form.week.data}'))
+        return redirect(quote(f'/calculator/{form.point_label.data}/{form.amnt_pts.data}/{form.position.data}/{form.season.data}/{form.week.data}'))
     
     return render_template('calc_settings_jinja.html', form=form)
 
-@app.route('/calculator/<string:label>/<int:amnt>/<embd>/<position>/<season>/<week>')
-def football_calculator(label, amnt, embd, position, season, week):
-    print('hi')
-    return render_template('football_calc.html', label=label, amnt=amnt, embd=embd, position=position, season=season, week=week)
+@app.route('/calculator/<string:label>/<int:amnt>/<position>/<season>/<week>')
+def football_calculator(label, amnt, position, season, week):
+    return render_template('football_calc.html', label=label, amnt=amnt, position=position, season=season, week=week)
     
+@app.route('/<string:label>/<meta>/<weights>/<columns>')
+def calculator_submit(label, meta, weights, columns):
+    point_label = unquote(label)
+    point_meta = json.loads(unquote(meta))
+    point_weights = json.loads(unquote(weights))
+    point_columns = json.loads(unquote(columns))
+    point_data = {'label' : point_label}
+    columns = []
+    weights = []
+    if len(point_weights) == len(point_columns):
+        for i in range(len(point_weights)):
+            point_dict = {
+                'weight' : point_weights[i][f'weight{i+1}'],
+                'col' : point_columns[i][f'column{i+1}']
+                }
+            columns.append(point_columns[i][f'column{i+1}'])
+            weights.append(float(point_weights[i][f'weight{i+1}']))
+            point_data[f'point{i+1}'] = point_dict
 
+    CalcCollection.insert_one(point_data)
+
+    minmax_data, standard_data = pull_scaled_data(columns, point_meta)
+
+    minmax_point = weigh_data(weights, minmax_data)
+    standard_point = weigh_data(weights, standard_data)
+
+    for p_minmax, p_standard in zip(minmax_point, standard_point):
+        _4f4_Proj.update({'Player' : p_minmax['name'],
+                        'Season' : int(point_meta['season']),
+                        'Week' : int(point_meta['week']),
+                        'Pos' : point_meta['pos']}, 
+                    {'$set' : {f"{label}_minmax" : p_minmax['value'],
+                            f"{label}_standard" : p_standard['value']}})
+                            
+    return redirect(f"/{point_meta['pos']}_Dash")
 
 @app.route('/team&points_manager')
 def teampointmanager():
-    return jsonify({'teams and data points' : 'created will be able to be deleted from here'})
+
+    team_query = TeamBuilder.find({}, {'_id': False, 'name': True})
+    calc_query = CalcCollection.find({}, {'_id': False, 'label': True})
+    team_names = [doc for doc in team_query]
+    calc_labels = [doc for doc in calc_query]
+    # return jsonify({ '1':team_names, '2':calc_labels})
+    return render_template('data_manager.html', teams=team_names, labels=calc_labels) 
+
+@app.route('/delete/<collection>/<name>')
+def delete_team_points(collection, name):
+    if collection == 'teams':
+        query = {'name' : name}
+        TeamBuilder.delete_one(query)
+    elif collection == 'points':
+        query = {'label' : name}
+        CalcCollection.delete_one(query)
+    return redirect('/team&points_manager')
 
 @app.route('/saber_sim_raw')
 def saber_sim_raw():

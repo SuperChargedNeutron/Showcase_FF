@@ -19,6 +19,14 @@
   position: relative;
   top: -1px;
 }
+
+  line {
+    stroke: black;
+    stroke-width: .5px;
+    fill: none;
+    opacity: .5;
+  }
+
 </style>
 {% endblock %}
 
@@ -108,7 +116,7 @@
       </div>
             </div>
           </div>
-          <div class='row' id='currentSelection'>
+          <div class='row' id='currentTeam'>
           </div>
           </div>
         </div>
@@ -152,7 +160,9 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
+  <script src="{{ url_for('static', filename='js/d3-scale-chromatic/d3-scale-chromatic.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/d3/d3.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/d3-color/d3-color.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/stack_app_func.js') }}"></script>
   <script src="{{ url_for('static', filename='js/d3_stackapp.js') }}"></script>
 {% endblock %}
