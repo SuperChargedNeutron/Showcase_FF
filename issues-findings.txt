@@ -1,0 +1,15 @@
+Seems like all webpages will be requiring selenium to scrape since they require a login. 
+
+the air yards webpage. THIS MAY BE A BROWSER PROBLEM. doesnt seem to allow me to correctly select only 3 weeks of data. It appears that it is an aggregation of all seasons data, I can see how this is a problem if you want to track those averages I see in the last columns in three week increments. This can be resolved by putting those averages in the position dashboards created for that week  and/or created with the data point creator. However all of the positions have the same schema no matter the position.
+
+
+Im not sure how to track Week # correctly
+i may be able to scrape it!
+
+SOLN : I can ask Joe to input the data when I set the parameters to scrape the websites. 
+        then i can clearly have a season id and week # associated with the data. 
+       
+       
+when inputing data, clean names to have no special characters. make sure the two/three character string in 
+
+ETR Ceiling sheet is the same as 4f4 RedZ data

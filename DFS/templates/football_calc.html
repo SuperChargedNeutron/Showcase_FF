@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">Football Calculator</h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+        </div>
+      </div>
+    </div>
+  <div class="container">
+      <div class="well">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Point MetaData</h3>
+      </div>
+      <div id="sample-metadata" class="panel-body">
+       
+          <li id='metaLabel'>Label : {{ label }}</li>
+          <li id='amnt' value='{{amnt}}'>Amount of Variables : {{ amnt }}</li>
+          <li id='metaPosition' value='{{position}}'>Position : {{ position }}</li>
+          <li id='metaSeason'>Season : {{ season }}</li>
+          <li id='metaWeek'>Week : {{ week }}</li>
+    </div>
+  </div>
+</div>
+<div class='container' id='variables'>
+  <ul id='variableInput'>
+  </ul>
+  <div id='forButton'>
+  </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/football_calculator.js') }}"></script>
+{% endblock %}

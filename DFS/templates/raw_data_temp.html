@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+{% endblock %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+  <div class="container-fluid">
+    <div class="row">
+
+  <!-- start main-->
+      <main role="main" class="col-md-12 col-lg-12">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Raw Data | {{ name }}</h1>
+        </div>
+
+       
+        <div class="table-responsive">
+          <table class="table table-striped table-sm" id='myTable'>
+            <thead>
+        {% for h in headers %}
+        
+            <th>{{h}}</th>
+        
+        {% endfor %}
+            </thead>
+        <tbody>
+            {% for d in data %}
+            <tr>
+            
+                {% for key in d.keys() %}
+           
+                <td> {{ d[key] }}</td>
+            
+                 {% endfor %}
+            </tr>
+           
+            {% endfor %}
+        </tbody>
+          </table>
+        </div>
+      </main>
+      <!-- end main -->
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='js/DataTables/datatables.min.css') }}"/>
+ 
+  <script type="text/javascript" src="{{ url_for('static', filename='js/DataTables/datatables.min.js') }}"></script>
+  
+  <script src="{{ url_for('static', filename='js/make_table.js') }}"></script>
+  <!-- <script src="{{ url_for('static', filename='js/dash_chart.js') }}"></script> -->
+{% endblock %}

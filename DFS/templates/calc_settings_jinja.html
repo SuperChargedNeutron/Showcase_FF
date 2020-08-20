@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">Football Calculator</h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+        </div>
+      </div>
+    </div>
+  <div class="container">
+        
+  <form class='' method='POST', action='/football_calculator_settings'>
+    {{ form.hidden_tag() }}
+
+    <div class="form-row">
+      {{ wtf.form_field(form.point_label)}}
+      {{ wtf.form_field(form.amnt_pts)}}
+    </div>
+    <div class="form-row">
+      {{ wtf.form_field(form.position)}}
+      {{ wtf.form_field(form.season)}}
+      {{ wtf.form_field(form.week)}}
+    </div>
+<button class='btn btn-lg btn-primary' type='submit'>{{ wtf.form_field(form.submit)}}</button>
+     </div>
+
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+{% endblock %}
