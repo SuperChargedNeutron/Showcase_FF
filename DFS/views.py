@@ -36,11 +36,7 @@ app.config['SECRET_KEY'] = 'you-will-never-guess'
 
 @app.route('/')
 def root():
-    return redirect('/home')
-
-@app.route('/home')
-def home():
-    return render_template('index.html')
+    return redirect('/stack_app')
 
 @app.route('/<pos>_Dash')
 def position_dash(pos):
