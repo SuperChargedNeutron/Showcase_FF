@@ -1,1 +1,1 @@
-web: gunicorn --bind 0.0.0.0:5000 app:DFS
+web: waitress-serve --port=5000 DFS.wsgi:application
