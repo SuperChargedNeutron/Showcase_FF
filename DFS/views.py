@@ -30,6 +30,9 @@ from .database import (db,
 from .models import CalculatorForm
 import json
 from urllib.parse import quote, unquote
+from . import create_app
+
+app = create_app()
 
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = 'you-will-never-guess'

@@ -1,1 +1,1 @@
-web: gunicorn DFS:app --bind 0.0.0.0
+web: gunicorn DFS.views:app
