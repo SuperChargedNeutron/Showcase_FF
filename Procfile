@@ -1,1 +1,1 @@
-web: waitress-serve --port=5000 DFS.wsgi:application
+web: waitress-serve --port=5000 DFS.wsgi:app
