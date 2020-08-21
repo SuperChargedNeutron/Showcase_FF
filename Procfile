@@ -1,1 +1,1 @@
-web: gunicorn DFS:app
+web: gunicorn --bind 0.0.0.0:$PORT DFS:app
