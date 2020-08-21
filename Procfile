@@ -1,1 +1,1 @@
-web: gunicorn DFS.init:app 
+web: waitress-serve --port=$PORT DFS.init:app 
