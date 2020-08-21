@@ -1,12 +1,12 @@
 import os
 from pymongo import MongoClient
 import pymongo
-import dotenv
-import urllib
+# import dotenv
+# import urllib
 
-dotenv.load_dotenv()
+# dotenv.load_dotenv()
 
-MONGO_URI = os.environ.get('MONGO_URI') 
+MONGO_URI = os.environ.get('MONGODB_URI') 
 client = MongoClient(MONGO_URI)
 
 db = client.DFS
