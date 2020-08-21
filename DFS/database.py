@@ -6,12 +6,8 @@ import urllib
 
 dotenv.load_dotenv()
 
-MONGO_USER = os.environ.get('MONGO_USER') 
-MONGO_PASSWORD = urllib.parse.quote(os.environ.get('MONGO_PASSWORD'))
-DB_HOST = os.environ.get('DB_HOST')
-
-uri_string = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@{DB_HOST}/DFS?retryWrites=true&w=majority"
-client = MongoClient(uri_string)
+MONGO_URI = os.environ.get('MONGO_URI') 
+client = MongoClient(MONGO_URI)
 
 db = client.DFS
 
