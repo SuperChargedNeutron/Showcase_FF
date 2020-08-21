@@ -1,1 +1,1 @@
-web: gunicorn DFS.views:app
+web: gunicorn DFS:app

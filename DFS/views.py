@@ -6,7 +6,6 @@ from flask import (
     jsonify,
     session
 )
-from . import app 
 from .func import (get_raw_data, 
     position_names, 
     player_query, 
@@ -30,9 +29,7 @@ from .database import (db,
 from .models import CalculatorForm
 import json
 from urllib.parse import quote, unquote
-from . import create_app
-
-app = create_app()
+from . import app
 
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = 'you-will-never-guess'
