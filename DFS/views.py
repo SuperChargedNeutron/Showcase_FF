@@ -6,7 +6,6 @@ from flask import (
     jsonify,
     session
 )
-from . import app 
 from .func import (get_raw_data, 
     position_names, 
     player_query, 
@@ -30,17 +29,14 @@ from .database import (db,
 from .models import CalculatorForm
 import json
 from urllib.parse import quote, unquote
+from . import app
 
 app.config['JSON_SORT_KEYS'] = False
 app.config['SECRET_KEY'] = 'you-will-never-guess'
 
 @app.route('/')
 def root():
-    return redirect('/home')
-
-@app.route('/home')
-def home():
-    return render_template('index.html')
+    return redirect('/stack_app')
 
 @app.route('/<pos>_Dash')
 def position_dash(pos):

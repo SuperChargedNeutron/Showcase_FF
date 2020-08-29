@@ -14,7 +14,6 @@ seasons = [str(x) for x in _4f4_Proj.find({}).distinct("Season")]
 positions = ["QB", "RB", "WR", "TE", "DST"]
 weeks = [str(i) for i in range(1, 17)]
 
-
 class CalculatorForm(FlaskForm):
     point_label = StringField("Point Label", [InputRequired()])
     amnt_pts = IntegerField("Amount of Values", [InputRequired()])

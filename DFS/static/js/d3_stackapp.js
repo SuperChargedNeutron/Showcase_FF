@@ -215,7 +215,9 @@ ylabelsGroup.append('text')
                     chartWidth
                     )
                 yLinearScale = yScale(
-                    allTeamPlayers.map(obj => obj['DK_Proj']),
+                    [allTeamPlayers.map(obj => obj['DK_Flr']), 
+                        allTeamPlayers.map(obj => obj['DK_Proj']),
+                        allTeamPlayers.map(obj => obj['DK_Ceil'])].flat(1),
                      chartHeight
                     )
                 xAxis = renderXAxis(xLinearScale, xAxis)
