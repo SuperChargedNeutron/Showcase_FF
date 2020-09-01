@@ -1,6 +1,7 @@
 import os
 from pymongo import MongoClient
 import pymongo
+import dotenv 
 
 dotenv.load_dotenv()
 
