@@ -7,44 +7,33 @@
 
 {% block content %}
     {% include 'navbar.html' %}
-  <div class="container-fluid">
-    <div class="row">
 
-  <!-- start main-->
-      <main role="main" class="col-md-12 col-lg-12">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h1 class="h2">Raw Data | {{ name }}</h1>
-        </div>
-
-       
-        <div class="table-responsive">
-          <table class="table table-striped table-sm" id='myTable'>
-            <thead>
+    <div class="container">
+        <div class="row">
+          <div class="col-sm">
+    <thead>
         {% for h in headers %}
-        
             <th>{{h}}</th>
-        
         {% endfor %}
             </thead>
         <tbody>
             {% for d in data %}
             <tr>
-            
                 {% for key in d.keys() %}
-                   
-                <td> {{ d[key] }}</td>
-            
+                    <td> {{ d[key] }}</td>
                  {% endfor %}
             </tr>
-           
             {% endfor %}
-        </tbody>
-          </table>
         </div>
-      </main>
-      <!-- end main -->
+        <div class="col-sm">
+          One of three columns
+        </div>
+        <div class="col-sm">
+          One of three columns
+        </div>
+      </div>
     </div>
-  </div>
+
 
 {% endblock %}
 

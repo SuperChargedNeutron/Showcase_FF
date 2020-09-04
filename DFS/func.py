@@ -3,46 +3,69 @@ from .database import _4f4_RedZ
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import numpy as np
 
-def pull_scaled_data(columns, meta):
-    query_cols = {'_id':False, 'Player':True}
-    for col in columns:
-        query_cols.update({col:True})
-   
-    query = [
-        x for x in _4f4_RedZ.find(
-        {'Season' : int(meta['season']), 'Week' : int(meta['week']), 'Pos':meta['pos']},
-        query_cols)
-        ]
 
-    players = [x['Player'] for x in query]
+def pull_scaled_data(columns, meta):
+    
+    ### queries the database for the data selected and
+    ### scales the columns with both scalers
+    ### function returns tuple of list of lists
+    ### ready to be weighted and averaged
+    
+    query_cols = {"_id": False, "Player": True}
+    for col in columns:
+        query_cols.update({col: True})
+
+    query = [
+        x
+        for x in _4f4_RedZ.find(
+            {
+                "Season": int(meta["season"]),
+                "Week": int(meta["week"]),
+                "Pos": meta["pos"],
+            },
+            query_cols,
+        )
+    ]
+
+    players = [x["Player"] for x in query]
     to_be_scaled = np.array([[x[key] for key in columns] for x in query])
 
     minmax_scaler = MinMaxScaler()
     standard_scaler = StandardScaler()
 
-    minmax_data = dict(zip(players, 
-        [list(x) for x in minmax_scaler.fit_transform(to_be_scaled)]))
-    standard_data = dict(zip(players, 
-        [list(x) for x in standard_scaler.fit_transform(to_be_scaled)]))
+    minmax_data = dict(
+        zip(players, [list(x) for x in minmax_scaler.fit_transform(to_be_scaled)])
+    )
+    standard_data = dict(
+        zip(players, [list(x) for x in standard_scaler.fit_transform(to_be_scaled)])
+    )
 
     return minmax_data, standard_data
 
+
 def weigh_data(weights, data):
+
+    ### this functions takes in the weights
+    ### and one of the list of lists from
+    ### `pull_scaled_data
+
     weighed_scaled_data = []
     for key in data.keys():
-        player_transform = {'name' : key}
+        player_transform = {"name": key}
         weighed_point = 0
         for i in range(len(weights)):
             num = weights[i] * data[key][i]
             weighed_point += num
-        player_transform.update({'value' : weighed_point})
+        player_transform.update({"value": weighed_point})
         weighed_scaled_data.append(player_transform)
     return weighed_scaled_data
+
 
 def get_raw_data(table):
     doc_count = table.count_documents(filter={})
     data = [dict(i) for i in table.find({}, {"_id": False})[0:doc_count]]
     return data
+
 
 def stack_app_query(_4f4_Ceil):
     data = []
@@ -110,3 +133,23 @@ def player_query(player, db):
 
     return player_info
 
+def average_row(row, avgee):
+    
+    ### takes in a player/document and scans
+    ### for 'proj' in columns, then avg all 
+    ##E the collected columns based on the averagee
+    ### avgee SHOULD be 'proj' or 'ceil' or 'flr'
+    
+    acc = 0
+    count = 0
+    for key in row.keys():
+        
+        if avgee in key.lower() and key.lower() != 'proj_own' and '1k' not in key.lower() and 'val' not in key.lower() and 'dollar' not in key.lower():
+            count += 1 if row[key] != 'nan' else 0
+            acc += row[key] if row[key] != 'nan' else 0
+    if count != 0:
+        avg = acc / count
+        player_coll.update_one(
+            {'_id':row['_id']}, 
+            {'$set':{f'C_{avgee.capitalize()}': round(avg,2)}}
+        ) 
