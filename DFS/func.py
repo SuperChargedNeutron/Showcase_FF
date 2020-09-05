@@ -5,7 +5,7 @@ import numpy as np
 
 
 def pull_scaled_data(columns, meta):
-    
+
     ### queries the database for the data selected and
     ### scales the columns with both scalers
     ### function returns tuple of list of lists
@@ -66,25 +66,29 @@ def get_raw_data(table):
     data = [dict(i) for i in table.find({}, {"_id": False})[0:doc_count]]
     return data
 
-
-def stack_app_query(_4f4_Ceil):
-    data = []
-    doc_count = _4f4_Ceil.count_documents(filter=({}))
-    cursor = _4f4_Ceil.find(
-        {},
+def stack_app_query(player_coll):
+    ## leave week 16 until `current_week` data is avail
+    query_params = {'week':16,
+        'C_Proj':{'$exists':True},
+        'C_Flr':{'$exists':True},
+        'C_Ceil':{'$exists':True},
+        "dk_price": {'$exists':True},
+        'afpa': {'$exists':True}
+    }
+    data = list(player_coll.find(
+        query_params,
         {
             "_id": False,
-            "Player": True,
-            "Pos": True,
-            "DK_Price": True,
-            "DK_Proj": True,
-            "aFPA": True,
-            "DK_Flr": True,
-            "DK_Ceil": True,
-        },
+            "player": True,
+            "position": True,
+            "dk_price": True,
+            "C_Proj": True,
+            "afpa": True,
+            "C_Flr": True,
+            "C_Ceil": True,
+        }
     )
-    for i in range(doc_count):
-        data.append(cursor[i])
+    )
 
     return data
 

@@ -2,11 +2,11 @@ d3.json('/stack_app_data').then(function(data){
     var playerData = data['names'],
     teams = data['teams'];
     var positions = ['qb', 'rb', 'wr', 'te', 'dst', 'flex'],
-    qbs = playerData.filter(row => row.Pos === 'QB'),
-    rbs = playerData.filter(row => row.Pos === 'RB'),
-    wrs = playerData.filter(row => row.Pos === 'WR'),
-    tes = playerData.filter(row => row.Pos === 'TE'),
-    dst = playerData.filter(row => row.Pos === 'DST');
+    qbs = playerData.filter(row => row.position === 'QB'),
+    rbs = playerData.filter(row => row.position === 'RB'),
+    wrs = playerData.filter(row => row.position === 'WR'),
+    tes = playerData.filter(row => row.position === 'TE'),
+    dst = playerData.filter(row => row.position === 'DEF');
 
     assignOptions(qbs, 'qb')
     assignOptions(rbs, 'rb')
@@ -33,8 +33,8 @@ d3.json('/stack_app_data').then(function(data){
 
 var teamLists = teams.map(elem => {
     var nameList = Object.values(elem).flat(1);
-    price = getTeamData(playerData, nameList, 'DK_Price'),
-    projection =  getTeamData(playerData, nameList, 'DK_Proj'),
+    price = getTeamData(playerData, nameList, 'dk_price'),
+    projection =  getTeamData(playerData, nameList, 'C_Proj'),
     teamName = nameList.shift();
     nameList.unshift(Math.round(price / projection*100)/100)
     nameList.unshift(Math.round(price*100)/100)
@@ -42,6 +42,16 @@ var teamLists = teams.map(elem => {
     nameList.unshift(teamName)
     return nameList
 });
+
+
+//////////////  /////////////////////
+//  TRY DOING TEAM DATA MATH IN PYTHON TO SIMPLY QUERY THE TEAMS
+// AND BUILD A QUICK CHART BEFORE THE DOM IS DONE
+// THEN POSSIBLY TURN IT INTO A DATATABLES OBJECT
+// AND I COULD ADD DELETE BUTTONS LIKE IN MY PANTREE APP
+////////////////////////////// 
+
+// teamLists2 = teamLists.forEach(row =>  {newRow = row.push('button'); return v})
 var teamsData = teamLists.map(row => [row[0], row[2], row[1]])
 var table = d3.select('#tableBody')
 var trow = table.selectAll('tr')
@@ -52,7 +62,26 @@ var td = trow.selectAll("td")
     .enter()
     .append("td")
     .text(function(d) {return d;});
-    
+console.log(teamLists2)
+teamTableRows = table.selectAll('tr')
+buttonSVG = teamTableRows.selectAll('td')
+    .data(teamNames4buttons).enter()
+    .append('td')
+    .append('button')
+    .classed('btn btn-danger', true)
+    .attr('href', d => {return `/delete/teams/${d}`})
+    .append('svg')
+    .attr('viewBox', "0 0 24 24")
+    .attr('width', "16")
+    .attr('height', "16")
+buttonSVG.append('path') 
+    .attr('fill-rule', "evenodd")
+    .attr('d', "M16 1.75V3h5.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H8V1.75C8 .784 8.784 0 9.75 0h4.5C15.216 0 16 .784 16 1.75zm-6.5 0a.25.25 0 01.25-.25h4.5a.25.25 0 01.25.25V3h-5V1.75z")
+    buttonSVG.append('path')
+    .attr('d', 'M4.997 6.178a.75.75 0 10-1.493.144L4.916 20.92a1.75 1.75 0 001.742 1.58h10.684a1.75 1.75 0 001.742-1.581l1.413-14.597a.75.75 0 00-1.494-.144l-1.412 14.596a.25.25 0 01-.249.226H6.658a.25.25 0 01-.249-.226L4.997 6.178z')
+    buttonSVG.append('path')
+    .attr('d', 'M9.206 7.501a.75.75 0 01.793.705l.5 8.5A.75.75 0 119 16.794l-.5-8.5a.75.75 0 01.705-.793zm6.293.793A.75.75 0 1014 8.206l-.5 8.5a.75.75 0 001.498.088l.5-8.5z')
+
     // Initial Chart plotting
     const margin = { top: 50, right: 50, bottom: 70, left: 80 },
     svgWidth = 660,
@@ -144,11 +173,11 @@ ylabelsGroup.append('text')
         .text('aFPA')
 
 ylabelsGroup.append('text')
-        .attr('x', - (chartHeight / 2) - 40)
+        .attr('x', - (chartHeight / 2) - 80)
         .attr('y', - margin.left + 45 )
         .attr('value', 'Projection')
         .classed('active', true)
-        .text('Projection (Avg)')
+        .text('Consensus Projection (sum)')
 
 
     let dataLabelsGroup = chartGroup
@@ -211,13 +240,13 @@ ylabelsGroup.append('text')
                         return teamPlayers                        
                 }).flat(1)
                 xLinearScale = xScale(
-                    allTeamPlayers.map(obj => obj['DK_Price']), 
+                    allTeamPlayers.map(obj => obj['dk_price']), 
                     chartWidth
                     )
                 yLinearScale = yScale(
-                    [allTeamPlayers.map(obj => obj['DK_Flr']), 
-                        allTeamPlayers.map(obj => obj['DK_Proj']),
-                        allTeamPlayers.map(obj => obj['DK_Ceil'])].flat(1),
+                    [allTeamPlayers.map(obj => obj['C_Flr']), 
+                        allTeamPlayers.map(obj => obj['C_Proj']),
+                        allTeamPlayers.map(obj => obj['C_Ceil'])].flat(1),
                      chartHeight
                     )
                 xAxis = renderXAxis(xLinearScale, xAxis)

@@ -10,7 +10,7 @@ client = MongoClient(MONGO_URI)
 
 db = client.DFS
 
-players_coll = db["Player_Data"]
+player_coll = db["Player_Data"]
 vegas_coll = db["Vegas_Data"]
 TeamBuilder = db["Team_Builder"]
 CalcCollection = db["CalculatorCollection"]

@@ -64,16 +64,54 @@ def position_data(pos):
     return jsonify(data)
 
 
-@app.route("/TOP_GUNS")
-def top_guns():
+@app.route("/TOP_GUNS/<qb_thresh>/<rb_thresh>/<wr_thresh>/<te_thresh>/<def_thresh>")
+def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
     current_week = list(
-        vegas_coll.find({}, {"_id": False, "week": True}).sort("week", -1).limit(1)
-    )[0]["week"] 
-    qbs = player_coll.find.find(
-        {'position':'QB', "week": current_week}, 
-        {'_id':False, 'C_Proj':True,'C_Ceil':True})
-    players = player_coll.find({"week": current_week})
-    return jsonify(players)
+        vegas_coll.find({}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
+    )[0]["Week"] 
+
+    ## leave week as 16 for now
+    qbs = list(player_coll.find(
+        {'position':'QB', "week": 16, 'C_Proj':{'$gte':int(qb_thresh)}}, 
+        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
+        ))
+    rbs = list(player_coll.find(
+        {'position':'RB', "week": 16, 'C_Proj':{'$gte':int(rb_thresh)}}, 
+        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
+        ))
+    wrs = list(player_coll.find(
+        {'position':'WR', "week": 16, 'C_Proj':{'$gte':int(wr_thresh)}}, 
+        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
+        ))
+    tes = list(player_coll.find(
+        {'position':'TE', "week": 16, 'C_Proj':{'$gte':int(te_thresh)}}, 
+        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
+        ))
+    defs = list(player_coll.find(
+        {'position':'DEF', "week": 16, 'C_Proj':{'$gte':int(def_thresh)}}, 
+        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
+        ))
+
+
+    qb_headers = list(qbs[0].keys())
+    rb_headers = list(rbs[0].keys())
+    wr_headers = list(wrs[0].keys())
+    te_headers = list(tes[0].keys())
+    def_headers = list(defs[0].keys())
+
+    # return jsonify(qbs)
+    return render_template('topguns.html', 
+        qbs=qbs, 
+        qb_headers=qb_headers,
+        rbs=rbs,
+        rb_headers=rb_headers,
+        wrs=wrs,
+        wr_headers=wr_headers,
+        tes=tes,
+        te_headers=te_headers,
+        defs=defs,
+        def_headers=def_headers
+        )
 
 
 @app.route("/stack_app")
@@ -83,7 +121,7 @@ def stack_app():
 
 @app.route("/stack_app_data")
 def stack_app_data():
-    names = stack_app_query(_4f4_Ceil)
+    names = stack_app_query(player_coll)
     teams = [x for x in TeamBuilder.find({}, {"_id": False})]
     data = {"names": names, "teams": teams}
     return jsonify(data)

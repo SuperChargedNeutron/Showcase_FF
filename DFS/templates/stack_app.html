@@ -5,6 +5,19 @@
 {% include 'navbar.html' %}
 {{ super() }}
 <style>
+   .btn-danger {
+        background-color: #FFF;
+        color: #ac2925;
+        border-color: #d2322d;
+        border-radius: 25px;
+    }
+    .btn-danger:hover,
+    .btn-danger:focus,
+    .btn-danger:active {
+        background-color: #d2322d;
+        color: #FFF;
+        border-color: #ac2925;
+    }
 .btn-circle {
   width: 25px;
   height: 25px;
@@ -129,7 +142,7 @@
             <thead>
               <tr>
                 <th>Team Name</th>
-                <th>Average Projection</th>
+                <th>Sum of <br> Projections</th>
                 <th>Total Price</th>
                 <th>$ per Pt</th>
                 <th>QB</th>
@@ -141,6 +154,7 @@
                 <th>TE</th>
                 <th>DST</th>
                 <th>Flex</th>
+                <th>Delete Team</th>
               </tr>
             </thead>
             <tbody id='tableBody'>

@@ -131,16 +131,16 @@ function assignOptions(playerNames, position) {
             if (position == 'flexPosition') {
                 return d; 
             } else if (position != 'flexPosition') {
-                return d.Player;
+                return d.player;
             }})
         .classed(`${position}Opt`, true)
-        .attr('proj', function (d) {return d.DK_Proj})
-        .attr('price', function (d) {return d.DK_Price})
+        .attr('proj', function (d) {return d.C_Proj})
+        .attr('price', function (d) {return d.dk_price})
         .text(function(d) { 
             if (position == 'flexPosition') {
                 return d; 
             } else if (position != 'flexPosition') {
-                return d.Player;
+                return d.player;
             }})
 }
 
@@ -241,8 +241,8 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         circleGroup.selectAll("circle")
             .data(data).enter()
             .append('circle')
-            .attr('cx', d => xLinearScale(parseFloat(d['DK_Price'])))
-            .attr('cy', d => yLinearScale(parseFloat(d['DK_Proj'])))
+            .attr('cx', d => xLinearScale(parseFloat(d['dk_price'])))
+            .attr('cy', d => yLinearScale(parseFloat(d['C_Proj'])))
             .attr('r', 5)
             .style('fill', (d, i) => teamCircleColor(d['teamName']))
             .style('opacity', .8)
@@ -252,7 +252,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
                 tooltip.transition()		
                     .duration(200)		
                     .style("opacity", .9)
-                tooltip.html(`${d['Player']} <br/> ${d['teamName']}`)	
+                tooltip.html(`${d['player']} <br/> ${d['teamName']}`)	
                     .style("left", (d3.event.pageX) + "px")		
                     .style("top", (d3.event.pageY - 28) + "px")
                     .style("visibility", "visible");	
@@ -266,10 +266,10 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
             .append('line')
             .attr('class', 'error')
             // .merge(lines)
-            .attr('x1', function(d) { return xLinearScale(parseFloat(d['DK_Price'])); })
-            .attr('x2', function(d) { return xLinearScale(parseFloat(d['DK_Price'])); })
-            .attr('y1', function(d) { return yLinearScale(parseFloat(d['DK_Ceil'])); })
-            .attr('y2', function(d) { return yLinearScale(parseFloat(d['DK_Flr'])); });
+            .attr('x1', function(d) { return xLinearScale(parseFloat(d['dk_price'])); })
+            .attr('x2', function(d) { return xLinearScale(parseFloat(d['dk_price'])); })
+            .attr('y1', function(d) { return yLinearScale(parseFloat(d['C_Ceil'])); })
+            .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Flr'])); });
         return circleGroup
     } else if ( dataCurrentSelection == 'teamBuild') {
         circleGroup.selectAll("circle")
@@ -306,22 +306,22 @@ function getTeamData(playerData, team, key) {
     var playerObjects = [];
     teamName = team[0]
     team.forEach(name => {
-        playerObjects.push(playerData.filter(row => {return row.Player == name })[0])
+        playerObjects.push(playerData.filter(row => {return row.player == name })[0])
     })
 
     playerObjects.shift()
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
-    if (key =='DK_Price') {
+    if (key =='dk_price') {
+        console.log(playerObjects)
         var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)
         return price
-    } else if (key == 'DK_Proj') {
+    } else if (key == 'C_Proj') {
         var projection = playerObjects.map(row => row[key])
                                 .reduce((acc, val) => acc + val)
-        var avgProjection = projection / playerObjects.length
-        return avgProjection
+        return projection
     } else if (key == 'players') {
         let mappedObjects = playerObjects.map(obj =>{
             var outDict = {'teamName' : teamName}
