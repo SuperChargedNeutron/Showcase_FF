@@ -1,7 +1,7 @@
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top flex-md-nowrap p-0 shadow">
     <div class="container-fluid">
-            <a class="navbar-brand" href="#"><strong>FantasyData</strong></a>
+            <a class="navbar-brand" href="#"><strong>Joe's DFS</strong></a>
 
             <button class="navbar-toggler" type="button" data-toggle="collapse"
         data-target="#navbarNavDropdown">
@@ -17,7 +17,7 @@
                     <a class="nav-link" href="/TOP_GUNS/20/15/15/12/7">TOP GUNS</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('calculator_settings') }}">Calculator Settings</a>
+                  <a class="nav-link" href="{{ url_for('calculator_settings') }}">Calculator</a>
               </li>
               <li class="nav-item">
                     <a class="nav-link" href="/stack_app">Stack App</a>
@@ -39,20 +39,17 @@
                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
                       aria-haspopup="true" aria-expanded="false">Raw Data</a>
                     <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="{{ url_for('saber_sim_raw') }}">Saber Sim</a>
-                        <a class="dropdown-item" href="{{ url_for('_4f4proj') }}">4f4 Projection</a>
-                        <a class="dropdown-item" href="{{ url_for('_4f4ceil') }}">4f4 Ceiling </a>
-                        <a class="dropdown-item" href="{{ url_for('_4f4wrcb') }}">4f4 WR CB </a>
-                        <a class="dropdown-item" href="{{ url_for('_4f4RedZ') }}">4f4 WR Fantasy Points </a>
-                        <a class="dropdown-item" href="{{ url_for('_4f4wrfp') }}">4f4 RB Fantasy Points </a>
-                        <a class="dropdown-item" href="{{ url_for('_4f4rbfp') }}">4f4 RB Target Data </a>
-                        <a class="dropdown-item" href="{{ url_for('airywr') }}">AirY WR Data </a>
-                        <a class="dropdown-item" href="{{ url_for('airyte') }}">AirY TE Data</a>
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='SS_Data') }}">Saber Sim</a>
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='4f4proj') }}">4f4 Projection</a>
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='4f4ceil') }}">4f4 Ceiling </a>
+                        <!-- <a class="dropdown-item" href="{{ url_for('raw_data', source='4f4_WR_cb') }}">4f4 WR CB </a> -->
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='4f4_WR_fp') }}">4f4 WR Fantasy Points </a>
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='4f4_RB_fp') }}">4f4 RB Fantasy Points </a>
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='4f4_RB_tar') }}">4f4 RB Target Data </a>
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='airy_wr') }}">AirY WR Data </a>
+                        <a class="dropdown-item" href="{{ url_for('raw_data', source='airy_te') }}">AirY TE Data</a>
                     </div>
                   </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="/team&points_manager">Team manager</a>
-                </li>
             </ul>
         </div>
         </div>

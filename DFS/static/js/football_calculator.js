@@ -24,6 +24,16 @@ function usePosition(url) {
     d3.json(url).then(function(data) {
         var weightInputs = [];
         var colInputs = [];
+        ////MUST SORT BY C_PROJ TO GET THE KEYS/OPTIONS I WANT!
+        //not done
+        /// EXPLAIN THAT THE OPTIONS COME FROM THE FIRST PLAYER THAT 
+        /// THAT COMES OUT OF THE QUERY
+        /// every player will have a C_Proj so might be better than a specific
+        /// point from a sheet
+        //////////// bugs to be determined ////////////
+        /// maybe only add the JALG by using an '$exists' on the query_params
+        /// for the update_many command
+        // done :p
         var columns = Object.keys(data[0])
         var amnt = d3.select('#amnt')
         makeVariables(amnt, columns)

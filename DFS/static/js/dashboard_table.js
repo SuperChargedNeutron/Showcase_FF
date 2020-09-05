@@ -77,21 +77,25 @@ function getData(url){
         } );
         // initial toggle
         $(function() {
-            initColumns = ['name',
-            'Team', 
-            'Opp', 
-            'Price', 
-            'Value', 
-            'aFPA', 
+            initColumns = ['player',
+            'team', 
+            'opponent', 
+            'price',
+            'dk_price', 
+            'value', 
+            'afpa',
+            'projection',
+            'C_Proj',
+            'C_Ceil',	
+            'C_Flr', 
             'dk_50_percentile',
             'dk_75_percentile',
             'dk_85_percentile',
             'dk_95_percentile',
             'dk_99_percentile',
-            'Projection',//this is SS projection 
-            'DK_Proj',
-            'DK_Flr',	
-            'DK_Ceil',]
+            'FAV'
+            //this is SS projection 
+           ]
             // '4f4 RZ L3',
             // 'Air Tar L3',
             // Avgs,

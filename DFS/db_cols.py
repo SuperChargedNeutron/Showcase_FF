@@ -1,4 +1,6 @@
-ss_data_cols = """Name
+ss_data_cols = [
+    x.lower()
+    for x in """Player
 Team
 Opponent
 Position
@@ -49,16 +51,19 @@ receiving_td
 rushes
 rushing_yards
 rushing_td""".split(
-    "\n"
-)
+        "\n"
+    )
+]
 
-_4f4_proj_cols = """Season
+_4f4_proj_cols = [
+    x.lower()
+    for x in """Season
 Week
 PID
 Player
-Pos
+Position
 Team
-Opp
+Opponent
 aFPA
 aFPA_Rk
 FFPts
@@ -80,16 +85,19 @@ Fum
 XP
 FG
 Grade""".split(
-    "\n"
-)
+        "\n"
+    )
+]
 
-_4f4_ceil_cols = """Season
+_4f4_ceil_cols = [
+    x.lower()
+    for x in """Season
 Week
 PID
 Player
-Pos
+Position
 Team
-Opp
+Opponent
 aFPA
 aFPA_Rk
 FFPts
@@ -160,239 +168,177 @@ FyD_Wk_Change
 O_U
 Line
 Team_O_U""".split(
-    "\n"
-)
+        "\n"
+    )
+]
 
-_4f4_wrcb_cols = ["Player", "Team", "Opponent", "Matchup", "Shadow"]
 _4f4_wr_fp_cols = [
-    "Player",
-    "Pos",
-    "Team",
-    "G",
-    "W5",
-    "W6",
-    "W7",
-    "W8",
-    "DK_Pts",
-    "DK_Pts_pr_G",
+    x.lower()
+    for x in [
+        "Player",
+        "Position",
+        "Team",
+        "G",
+        "W5_fp",
+        "W6_fp",
+        "W7_fp",
+        "W8_fp",
+        "DK_Pts",
+        "DK_Pts_pr_G",
+    ]
 ]
 _4f4_rb_fp_cols = [
-    "Player",
-    "Pos",
-    "Team",
-    "G",
-    "W13",
-    "W14",
-    "W15",
-    "DK_Pts",
-    "DK_Pts_pr_G",
+    x.lower()
+    for x in [
+        "Player",
+        "Position",
+        "Team",
+        "G",
+        "W13_fp",
+        "W14_fp",
+        "W15_fp",
+        "DK_Pts",
+        "DK_Pts_pr_G",
+    ]
 ]
 _4f4_rb_tar_cols = [
-    "Player",
-    "Pos",
-    "Team",
-    "G",
-    "W13",
-    "W14",
-    "W15",
-    "TGTs",
-    "TGTs_pr_G",
-    "Array",
+    x.lower()
+    for x in [
+        "Player",
+        "Position",
+        "Team",
+        "G",
+        "W13_tar",
+        "W14_tar",
+        "W15_tar",
+        "TGTs",
+        "TGTs_pr_G",
+        "Array",
+    ]
 ]
 airy_wr_cols = [
-    "full_name",
-    "position",
-    "team",
-    "targets",
-    "rec",
-    "rec_yards",
-    "air_yards",
-    "yac",
-    "td",
-    "adot",
-    "racr",
-    "ms_air",
-    "tgt_share",
-    "wopr",
-    "ppr",
-    "Tar_pr_Gam",
-    "AY_pr_Gam",
+    x.lower()
+    for x in [
+        "Player",
+        "Position",
+        "Team",
+        "targets",
+        "rec",
+        "rec_yards",
+        "air_yards",
+        "yac",
+        "td",
+        "adot",
+        "racr",
+        "ms_air",
+        "tgt_share",
+        "wopr",
+        "ppr",
+        "Tar_pr_Gam",
+        "AY_pr_Gam",
+    ]
 ]
 airy_te_cols = [
-    "full_name",
-    "position",
-    "team",
-    "targets",
-    "rec",
-    "rec_yards",
-    "air_yards",
-    "yac",
-    "td",
-    "adot",
-    "racr",
-    "ms_air",
-    "tgt_share",
-    "wopr",
-    "ppr",
-    "Tar_pr_3",
+    x.lower()
+    for x in [
+        "Player",
+        "Position",
+        "Team",
+        "targets",
+        "rec",
+        "rec_yards",
+        "air_yards",
+        "yac",
+        "td",
+        "adot",
+        "racr",
+        "ms_air",
+        "tgt_share",
+        "wopr",
+        "ppr",
+        "Tar_pr_3",
+    ]
 ]
 
 _4f4_redZ_cols = [
-    "Season",
-    "Week",
-    "PID",
-    "Player",
-    "Pos",
-    "Team",
-    "Opp",
-    "aFPA",
-    "aFPA_Rk",
-    "FFPts",
-    "Comp",
-    "Pass_Att",
-    "Pass_Yds",
-    "Pass_TD",
-    "INT",
-    "Rush_Att",
-    "Rush_Yds",
-    "Rush_TD",
-    "Rec",
-    "Rec_Yds",
-    "Rec_TD",
-    "Pa1D",
-    "Ru1D",
-    "Rec1D",
-    "Fum",
-    "XP",
-    "FG",
-    "Grade",
-    "DK_proj",
-    "DK_price",
-    "DK_val",
-    "DK_Pt_pr_1k",
-    "DK_Flr",
-    "DK_Flr_Val",
-    "DK_Flr_pr_1k",
-    "DK_Ceil",
-    "DK_Ceil_Val",
-    "DK_Ceil_pr_1k",
-    "DK_Wk_Change",
-    "DK_Own_Percent",
-    "FD_proj",
-    "FD_price",
-    "FD_val",
-    "FD_Pt_pr_1k",
-    "FD_Flr",
-    "FD_Flr_Val",
-    "FD_Flr_pr_1k",
-    "FD_Ceil",
-    "FD_Ceil_Val",
-    "FD_Ceil_pr_1k",
-    "FD_Wk_Change",
-    "FD_Own_Percent",
-    "Y_proj",
-    "Y_price",
-    "Y_val",
-    "Y_Pt_pr_DOllar",
-    "Y_Flr",
-    "Y_Flr_Val",
-    "Y_Flr_pr_Dollar",
-    "Y_Ceil",
-    "Y_Ceil_Val",
-    "Y_Ceil_pr_Dollar",
-    "Y_Wk_Change",
-    "FyD_proj",
-    "FyD_price",
-    "FyD_val",
-    "FyD_Pt_pr_1k",
-    "FyD_Flr",
-    "FyD_Flr_Val",
-    "FyD_Flr_pr_1k",
-    "FyD_Ceil",
-    "FyD_Ceil_Val",
-    "FyD_Ceil_pr_1k",
-    "FyD_Wk_Change",
-    "O_U",
-    "Line",
-    "Team_O_U",
-]
-
-etr_ceiling_cols = [
-    "Season",
-    "Week",
-    "PID",
-    "Player",
-    "Pos",
-    "Team",
-    "Opp",
-    "aFPA",
-    "aFPA_Rk",
-    "FFPts",
-    "Comp",
-    "Pass_Att",
-    "Pass_Yds",
-    "Pass_TD",
-    "INT",
-    "Rush_Att",
-    "Rush_Yds",
-    "Rush_TD",
-    "Rec",
-    "Rec_Yds",
-    "Rec_TD",
-    "Pa1D",
-    "Ru1D",
-    "Rec1D",
-    "Fum",
-    "XP",
-    "FG",
-    "Grade",
-    "DK_proj",
-    "DK_price",
-    "DK_val",
-    "DK_Pt_pr_1k",
-    "DK_Flr",
-    "DK_Flr_Val",
-    "DK_Flr_pr_1k",
-    "DK_Ceil",
-    "DK_Ceil_Val",
-    "DK_Ceil_pr_1k",
-    "DK_Wk_Change",
-    "DK_Own_Percent",
-    "FD_proj",
-    "FD_price",
-    "FD_val",
-    "FD_Pt_pr_1k",
-    "FD_Flr",
-    "FD_Flr_Val",
-    "FD_Flr_pr_1k",
-    "FD_Ceil",
-    "FD_Ceil_Val",
-    "FD_Ceil_pr_1k",
-    "FD_Wk_Change",
-    "FD_Own_Percent",
-    "Y_proj",
-    "Y_price",
-    "Y_val",
-    "Y_Pt_pr_Dollar",
-    "Y_Flr",
-    "Y_Flr_Val",
-    "Y_Flr_pr_Dollar",
-    "Y_Ceil",
-    "Y_Ceil_Val",
-    "Y_Ceil_pr_Dollar",
-    "Y_Wk_Change",
-    "FyD_proj",
-    "FyD_price",
-    "FyD_val",
-    "FyD_Pt_pr_1k",
-    "FyD_Flr",
-    "FyD_Flr_Val",
-    "FyD_Flr_pr_1k",
-    "FyD_Ceil",
-    "FyD_Ceil_Val",
-    "FyD_Ceil_pr_1k",
-    "FyD_Wk_Change",
-    "O_U",
-    "Line",
-    "Team_O_U",
+    x.lower()
+    for x in [
+        "Season",
+        "Week",
+        "PID",
+        "Player",
+        "Position",
+        "Team",
+        "Opponent",
+        "aFPA",
+        "aFPA_Rk",
+        "FFPts",
+        "Comp",
+        "Pass_Att",
+        "Pass_Yds",
+        "Pass_TD",
+        "INT",
+        "Rush_Att",
+        "Rush_Yds",
+        "Rush_TD",
+        "Rec",
+        "Rec_Yds",
+        "Rec_TD",
+        "Pa1D",
+        "Ru1D",
+        "Rec1D",
+        "Fum",
+        "XP",
+        "FG",
+        "Grade",
+        "DK_proj",
+        "DK_price",
+        "DK_val",
+        "DK_Pt_pr_1k",
+        "DK_Flr",
+        "DK_Flr_Val",
+        "DK_Flr_pr_1k",
+        "DK_Ceil",
+        "DK_Ceil_Val",
+        "DK_Ceil_pr_1k",
+        "DK_Wk_Change",
+        "DK_Own_Percent",
+        "FD_proj",
+        "FD_price",
+        "FD_val",
+        "FD_Pt_pr_1k",
+        "FD_Flr",
+        "FD_Flr_Val",
+        "FD_Flr_pr_1k",
+        "FD_Ceil",
+        "FD_Ceil_Val",
+        "FD_Ceil_pr_1k",
+        "FD_Wk_Change",
+        "FD_Own_Percent",
+        "Y_proj",
+        "Y_price",
+        "Y_val",
+        "Y_Pt_pr_DOllar",
+        "Y_Flr",
+        "Y_Flr_Val",
+        "Y_Flr_pr_Dollar",
+        "Y_Ceil",
+        "Y_Ceil_Val",
+        "Y_Ceil_pr_Dollar",
+        "Y_Wk_Change",
+        "FyD_proj",
+        "FyD_price",
+        "FyD_val",
+        "FyD_Pt_pr_1k",
+        "FyD_Flr",
+        "FyD_Flr_Val",
+        "FyD_Flr_pr_1k",
+        "FyD_Ceil",
+        "FyD_Ceil_Val",
+        "FyD_Ceil_pr_1k",
+        "FyD_Wk_Change",
+        "O_U",
+        "Line",
+        "Team_O_U",
+    ]
 ]

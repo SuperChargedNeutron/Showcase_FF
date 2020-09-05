@@ -1,8 +1,6 @@
 from flask import render_template, redirect, request, url_for, jsonify, session
 from .func import (
     get_raw_data,
-    position_names,
-    player_query,
     stack_app_query,
     pull_scaled_data,
     weigh_data,
@@ -23,6 +21,17 @@ from .database import (
     airy_WR,
     airy_TE,
     CalcCollection,
+)
+from .db_cols import (
+    ss_data_cols,
+    _4f4_ceil_cols,
+    _4f4_proj_cols,
+    _4f4_rb_fp_cols,
+    _4f4_rb_tar_cols,
+    _4f4_redZ_cols,
+    _4f4_wr_fp_cols,
+    airy_te_cols,
+    airy_wr_cols,
 )
 from .models import CalculatorForm
 import json
@@ -57,9 +66,7 @@ def position_dash(pos):
 
 @app.route("/<pos>_data")
 def position_data(pos):
-
-    players = position_names(pos, db)
-    data = [player_query(player, db) for player in players]
+    data = list(player_coll.find({"week": 16, "position": pos}, {"_id": False}))
 
     return jsonify(data)
 
@@ -68,30 +75,39 @@ def position_data(pos):
 def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
     current_week = list(
         vegas_coll.find({}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
-    )[0]["Week"] 
+    )[0]["Week"]
 
     ## leave week as 16 for now
-    qbs = list(player_coll.find(
-        {'position':'QB', "week": 16, 'C_Proj':{'$gte':int(qb_thresh)}}, 
-        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
-        ))
-    rbs = list(player_coll.find(
-        {'position':'RB', "week": 16, 'C_Proj':{'$gte':int(rb_thresh)}}, 
-        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
-        ))
-    wrs = list(player_coll.find(
-        {'position':'WR', "week": 16, 'C_Proj':{'$gte':int(wr_thresh)}}, 
-        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
-        ))
-    tes = list(player_coll.find(
-        {'position':'TE', "week": 16, 'C_Proj':{'$gte':int(te_thresh)}}, 
-        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
-        ))
-    defs = list(player_coll.find(
-        {'position':'DEF', "week": 16, 'C_Proj':{'$gte':int(def_thresh)}}, 
-        {'_id':False, 'player':True, 'C_Proj':True,'C_Ceil':True, 'FAV':True}
-        ))
-
+    qbs = list(
+        player_coll.find(
+            {"position": "QB", "week": 16, "C_Proj": {"$gte": int(qb_thresh)}},
+            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
+        )
+    )
+    rbs = list(
+        player_coll.find(
+            {"position": "RB", "week": 16, "C_Proj": {"$gte": int(rb_thresh)}},
+            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
+        )
+    )
+    wrs = list(
+        player_coll.find(
+            {"position": "WR", "week": 16, "C_Proj": {"$gte": int(wr_thresh)}},
+            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
+        )
+    )
+    tes = list(
+        player_coll.find(
+            {"position": "TE", "week": 16, "C_Proj": {"$gte": int(te_thresh)}},
+            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
+        )
+    )
+    defs = list(
+        player_coll.find(
+            {"position": "DEF", "week": 16, "C_Proj": {"$gte": int(def_thresh)}},
+            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
+        )
+    )
 
     qb_headers = list(qbs[0].keys())
     rb_headers = list(rbs[0].keys())
@@ -100,8 +116,9 @@ def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
     def_headers = list(defs[0].keys())
 
     # return jsonify(qbs)
-    return render_template('topguns.html', 
-        qbs=qbs, 
+    return render_template(
+        "topguns.html",
+        qbs=qbs,
         qb_headers=qb_headers,
         rbs=rbs,
         rb_headers=rb_headers,
@@ -110,8 +127,8 @@ def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
         tes=tes,
         te_headers=te_headers,
         defs=defs,
-        def_headers=def_headers
-        )
+        def_headers=def_headers,
+    )
 
 
 @app.route("/stack_app")
@@ -196,12 +213,12 @@ def calculator_submit(label, meta, weights, columns):
     standard_point = weigh_data(weights, standard_data)
 
     for p_minmax, p_standard in zip(minmax_point, standard_point):
-        _4f4_Proj.update(
+        player_coll.update_many(
             {
-                "Player": p_minmax["name"],
-                "Season": int(point_meta["season"]),
-                "Week": int(point_meta["week"]),
-                "Pos": point_meta["pos"],
+                "player": p_minmax["name"],
+                "season": int(point_meta["season"]),
+                "week": int(point_meta["week"]),
+                "position": point_meta["pos"],
             },
             {
                 "$set": {
@@ -214,17 +231,6 @@ def calculator_submit(label, meta, weights, columns):
     return redirect(f"/{point_meta['pos']}_Dash")
 
 
-@app.route("/team&points_manager")
-def teampointmanager():
-
-    team_query = TeamBuilder.find({}, {"_id": False, "name": True})
-    calc_query = CalcCollection.find({}, {"_id": False, "label": True})
-    team_names = [doc for doc in team_query]
-    calc_labels = [doc for doc in calc_query]
-    # return jsonify({ '1':team_names, '2':calc_labels})
-    return render_template("data_manager.html", teams=team_names, labels=calc_labels)
-
-
 @app.route("/delete/<collection>/<name>")
 def delete_team_points(collection, name):
     if collection == "teams":
@@ -233,126 +239,43 @@ def delete_team_points(collection, name):
     elif collection == "points":
         query = {"label": name}
         CalcCollection.delete_one(query)
-    return redirect("/team&points_manager")
+    return redirect("/stack_app")
 
 
-@app.route("/saber_sim_raw")
-def saber_sim_raw():
+@app.route("/raw_data/<source>")
+def raw_data(source):
+    if source == "SS_Data":
+        name = "Saber Sim Raw"
+        cols = ss_data_cols
+    elif source == "4f4proj":
+        name = "4for4 Projection Data"
+        cols = _4f4_proj_cols
+    elif source == "4f4ceil":
+        name = "4for4 Ceiling Data"
+        cols = _4f4_ceil_cols
+    # elif source == '4f4_WR_cb':
+    #     name = "4for4 WR cb?"
+    #     cols = _4f4_wrcb_co
+    elif source == "4f4_redzone":
+        name = "4for4 Redzone Data"
+        cols = _4f4_redZ_cols
+    elif source == "4f4_WR_fp":
+        name = "4for4 WR Fantasy Points"
+        cols = _4f4_wr_fp_cols
+    elif source == "4f4_RB_fp":
+        name = "4for4 RB Fantasy Points"
+        cols = _4f4_rb_fp_cols
+    elif source == "4f4_RB_tar":
+        name = "4for4 RB Target Data"
+        cols = _4f4_rb_tar_cols
+    elif source == "airy_wr":
+        name = "AirY WR Data"
+        cols = airy_wr_cols
+    elif source == "airy_te":
+        name = "AirY TE Data"
+        cols = airy_te_cols
 
-    name = "Saber Sim Data"
-    ss_data = get_raw_data(SS_Data)
-    headers = list(ss_data[0].keys())
+    data = get_raw_data(player_coll, cols)
+    headers = data[0].keys()
 
-    return render_template(
-        "raw_data_temp.html", name=name, data=ss_data, headers=headers
-    )
-
-
-@app.route("/4f4proj")
-def _4f4proj():
-    name = "4for4 Projection Data"
-    _4f4_proj_data = get_raw_data(_4f4_Proj)
-    headers = list(_4f4_proj_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=_4f4_proj_data, headers=headers
-    )
-
-
-@app.route("/4f4ceil")
-def _4f4ceil():
-    name = "4for4 Ceiling Data"
-    _4f4_ceil_data = get_raw_data(_4f4_Ceil)
-    headers = list(_4f4_ceil_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=_4f4_ceil_data, headers=headers
-    )
-
-
-@app.route("/4f4_WR_cb")
-def _4f4wrcb():
-    name = "4for4 WR cb?"
-    _4f4_wrcb_data = get_raw_data(_4f4_WR_cb)
-    headers = list(_4f4_wrcb_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=_4f4_wrcb_data, headers=headers
-    )
-
-
-@app.route("/4f4_redzone")
-def _4f4RedZ():
-    name = "4for4 Redzone Data"
-    _4f4_redz_data = get_raw_data(_4f4_RedZ)
-    headers = list(_4f4_redz_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=_4f4_redz_data, headers=headers
-    )
-
-
-@app.route("/4f4_WRfp")
-def _4f4wrfp():
-    name = "4for4 WR Fantasy Points"
-    _4f4_WRfp_data = get_raw_data(_4f4_WR_fp)
-    headers = list(_4f4_WRfp_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=_4f4_WRfp_data, headers=headers
-    )
-
-
-@app.route("/4f4_RBfp")
-def _4f4rbfp():
-    name = "4for4 RB Fantasy Points"
-    _4f4_rbfp_data = get_raw_data(_4f4_RB_fp)
-    headers = list(_4f4_rbfp_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=_4f4_rbfp_data, headers=headers
-    )
-
-
-@app.route("/4f4_rbtar")
-def _4f4rbtar():
-    name = "4for4 RB Target Data"
-    _4f4_rbtar_data = get_raw_data(_4f4_RB_tar)
-    headers = list(_4f4_rbtar_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=_4f4_rbtar_data, headers=headers
-    )
-
-
-@app.route("/airy_wr")
-def airywr():
-    name = "AirY WR Data"
-    airywr_data = get_raw_data(airy_WR)
-    headers = list(airywr_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=airywr_data, headers=headers
-    )
-
-
-@app.route("/airy_te")
-def airyte():
-    name = "AirY TE Data"
-    airyte_data = get_raw_data(airy_TE)
-    headers = list(airyte_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=airyte_data, headers=headers
-    )
-
-
-@app.route("/etr_ceil")
-def etrceil():
-    name = "ETR Ceiling Data"
-    etrceil_data = get_raw_data(ETR_Ceil)
-    headers = list(etrceil_data[0].keys())
-
-    return render_template(
-        "raw_data_temp.html", name=name, data=etrceil_data, headers=headers
-    )
+    return render_template("raw_data_temp.html", name=name, data=data, headers=headers)

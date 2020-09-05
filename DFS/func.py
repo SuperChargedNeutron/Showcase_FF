@@ -1,5 +1,5 @@
 import pymongo
-from .database import _4f4_RedZ
+from .database import player_coll
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import numpy as np
 
@@ -10,24 +10,19 @@ def pull_scaled_data(columns, meta):
     ### scales the columns with both scalers
     ### function returns tuple of list of lists
     ### ready to be weighted and averaged
-    
-    query_cols = {"_id": False, "Player": True}
+
+    query_cols = {"_id": False, "player": True}
+    query_params = {
+        "season": int(meta["season"]),
+        "week": int(meta["week"]),
+        "position": meta["pos"],
+    }
     for col in columns:
         query_cols.update({col: True})
+        query_params.update({col: {"$exists": True}})
 
-    query = [
-        x
-        for x in _4f4_RedZ.find(
-            {
-                "Season": int(meta["season"]),
-                "Week": int(meta["week"]),
-                "Pos": meta["pos"],
-            },
-            query_cols,
-        )
-    ]
-
-    players = [x["Player"] for x in query]
+    query = list(player_coll.find(query_params, query_cols))
+    players = [x["player"] for x in query]
     to_be_scaled = np.array([[x[key] for key in columns] for x in query])
 
     minmax_scaler = MinMaxScaler()
@@ -61,99 +56,83 @@ def weigh_data(weights, data):
     return weighed_scaled_data
 
 
-def get_raw_data(table):
-    doc_count = table.count_documents(filter={})
-    data = [dict(i) for i in table.find({}, {"_id": False})[0:doc_count]]
+def get_raw_data(player_coll, cols):
+    query_params = {col: {"$exists": True} for col in cols}
+    data_return = {col: True for col in cols}
+    data_return.update({"_id": False})
+    data = player_coll.find(query_params, data_return)
     return data
+
 
 def stack_app_query(player_coll):
     ## leave week 16 until `current_week` data is avail
-    query_params = {'week':16,
-        'C_Proj':{'$exists':True},
-        'C_Flr':{'$exists':True},
-        'C_Ceil':{'$exists':True},
-        "dk_price": {'$exists':True},
-        'afpa': {'$exists':True}
+    query_params = {
+        "week": 16,
+        "C_Proj": {"$exists": True},
+        "C_Flr": {"$exists": True},
+        "C_Ceil": {"$exists": True},
+        "dk_price": {"$exists": True},
+        "afpa": {"$exists": True},
     }
-    data = list(player_coll.find(
-        query_params,
-        {
-            "_id": False,
-            "player": True,
-            "position": True,
-            "dk_price": True,
-            "C_Proj": True,
-            "afpa": True,
-            "C_Flr": True,
-            "C_Ceil": True,
-        }
-    )
+    data = list(
+        player_coll.find(
+            query_params,
+            {
+                "_id": False,
+                "player": True,
+                "position": True,
+                "dk_price": True,
+                "C_Proj": True,
+                "afpa": True,
+                "C_Flr": True,
+                "C_Ceil": True,
+            },
+        )
     )
 
     return data
 
 
-def position_names(pos, db):
-    data = []
-
-    for collection in db.list_collection_names():
-        col = db[collection]
-        positions = ["Pos", "Position", "position"]
-        for fil in positions:
-            doc_count = col.count_documents(filter={fil: pos})
-            if doc_count > 0:
-                cursor = col.find({fil: pos}, {"_id": False})
-                for i in range(doc_count):
-                    data.append(cursor[i])
-    names = []
-    for row in data:
-        if "full_name" in row:
-            name = row["full_name"]
-            if not any(word in name for word in names):
-                names.append(name)
-        elif "Name" in row:
-            name = row["Name"]
-            if not any(word in name for word in names):
-                names.append(name)
-        elif "Player" in row:
-            name = row["Player"]
-            if not any(word in name for word in names):
-                names.append(name)
-    return names
-
-
-def player_query(player, db):
-    player_info = {"name": player}
-
-    for collection in db.list_collection_names():
-        col = db[collection]
-        name_forms = ["Name", "Player", "full_name"]
-        for nm in name_forms:
-            doc_count = col.count_documents(filter={nm: player})
-            if doc_count > 0:
-                cursor = col.find({nm: player}, {"_id": False, nm: False})
-                for i in range(doc_count):
-                    player_info.update(cursor[i])
-
-    return player_info
-
 def average_row(row, avgee):
-    
+
     ### takes in a player/document and scans
-    ### for 'proj' in columns, then avg all 
+    ### for 'proj' in columns, then avg all
     ##E the collected columns based on the averagee
     ### avgee SHOULD be 'proj' or 'ceil' or 'flr'
-    
+
     acc = 0
     count = 0
     for key in row.keys():
-        
-        if avgee in key.lower() and key.lower() != 'proj_own' and '1k' not in key.lower() and 'val' not in key.lower() and 'dollar' not in key.lower():
-            count += 1 if row[key] != 'nan' else 0
-            acc += row[key] if row[key] != 'nan' else 0
+
+        if (
+            avgee in key.lower()
+            and key.lower() != "proj_own"
+            and "1k" not in key.lower()
+            and "val" not in key.lower()
+            and "dollar" not in key.lower()
+        ):
+            count += 1 if row[key] != "nan" else 0
+            acc += row[key] if row[key] != "nan" else 0
     if count != 0:
         avg = acc / count
         player_coll.update_one(
-            {'_id':row['_id']}, 
-            {'$set':{f'C_{avgee.capitalize()}': round(avg,2)}}
-        ) 
+            {"_id": row["_id"]}, {"$set": {f"C_{avgee.capitalize()}": round(avg, 2)}}
+        )
+
+
+def is_favorite(doc):
+    ## this function takes in a player
+    ## team, and week and determines
+    ## whether that team is a favorite or
+    ## not according to vegas dash
+    if doc["team"] == "OAK":
+        doc["team"] = "LV"
+    if doc["team"] == "LA":
+        doc["team"] = "LAC"
+    if doc["team"] == "JAC":
+        doc["team"] = "JAX"
+    player_team = list(team_coll.find({"Acronym": doc["team"]}, {"_id": False}))[0]
+    if len(list(vegas_coll.find({"FAV": player_team["Team"]}))) > 0:
+        player_coll.update_one({"_id": doc["_id"]}, {"$set": {"FAV": True}})
+    elif len(list(vegas_coll.find({"FAV": player_team["Team"]}))) == 0:
+        player_coll.update_one({"_id": doc["_id"]}, {"$set": {"FAV": False}})
