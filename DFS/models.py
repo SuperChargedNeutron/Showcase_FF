@@ -1,4 +1,4 @@
-from .database import _4f4_Proj
+from .database import player_coll
 import datetime
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -10,8 +10,9 @@ from wtforms import (
 )
 from wtforms.validators import InputRequired, DataRequired
 
-seasons = [str(x) for x in _4f4_Proj.find({}).distinct("Season")]
-positions = ["QB", "RB", "WR", "TE", "DST"]
+seasons = list(player_coll.find({}).distinct("season"))
+seasons.pop(seasons.index(None))
+positions = ["QB", "RB", "WR", "TE", "DEF"]
 weeks = [str(i) for i in range(1, 17)]
 
 
