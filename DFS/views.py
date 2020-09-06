@@ -27,9 +27,10 @@ from .models import CalculatorForm
 import json
 from urllib.parse import quote, unquote
 from . import app
+import os
 
 app.config["JSON_SORT_KEYS"] = False
-app.config["SECRET_KEY"] = "you-will-never-guess"
+app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
 
 
 @app.route("/")
