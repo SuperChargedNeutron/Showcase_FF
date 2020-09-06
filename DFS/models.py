@@ -10,8 +10,9 @@ from wtforms import (
 )
 from wtforms.validators import InputRequired, DataRequired
 
-seasons = [str(x) for x in player_coll.find({}).distinct("season")]
-positions = ["QB", "RB", "WR", "TE", "DST"]
+seasons = list(player_coll.find({}).distinct("season"))
+seasons.pop(seasons.index(None))
+positions = ["QB", "RB", "WR", "TE", "DEF"]
 weeks = [str(i) for i in range(1, 17)]
 
 
