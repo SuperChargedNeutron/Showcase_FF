@@ -10,16 +10,6 @@ from .database import (
     player_coll,
     vegas_coll,
     TeamBuilder,
-    SS_Data,
-    _4f4_Proj,
-    _4f4_Ceil,
-    _4f4_WR_cb,
-    _4f4_RedZ,
-    _4f4_WR_fp,
-    _4f4_RB_fp,
-    _4f4_RB_tar,
-    airy_WR,
-    airy_TE,
     CalcCollection,
 )
 from .db_cols import (
