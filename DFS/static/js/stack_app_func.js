@@ -135,7 +135,7 @@ function assignOptions(playerNames, position) {
             }})
         .classed(`${position}Opt`, true)
         .attr('proj', function (d) {return d.C_Proj})
-        .attr('price', function (d) {return d.dk_price})
+        .attr('price', function (d) {return d.price})
         .text(function(d) { 
             if (position == 'flexPosition') {
                 return d; 
@@ -241,7 +241,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         circleGroup.selectAll("circle")
             .data(data).enter()
             .append('circle')
-            .attr('cx', d => xLinearScale(parseFloat(d['dk_price'])))
+            .attr('cx', d => xLinearScale(parseFloat(d['price'])))
             .attr('cy', d => yLinearScale(parseFloat(d['C_Proj'])))
             .attr('r', 5)
             .style('fill', (d, i) => teamCircleColor(d['teamName']))
@@ -266,8 +266,8 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
             .append('line')
             .attr('class', 'error')
             // .merge(lines)
-            .attr('x1', function(d) { return xLinearScale(parseFloat(d['dk_price'])); })
-            .attr('x2', function(d) { return xLinearScale(parseFloat(d['dk_price'])); })
+            .attr('x1', function(d) { return xLinearScale(parseFloat(d['price'])); })
+            .attr('x2', function(d) { return xLinearScale(parseFloat(d['price'])); })
             .attr('y1', function(d) { return yLinearScale(parseFloat(d['C_Ceil'])); })
             .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Flr'])); });
         return circleGroup
@@ -313,7 +313,7 @@ function getTeamData(playerData, team, key) {
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
-    if (key =='dk_price') {
+    if (key =='price') {
         console.log(playerObjects)
         var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)

@@ -76,7 +76,8 @@ def position_dash_thresh(pos, threshold):
 @app.route("/<pos>_data/<threshold>")
 def position_data_thresh(pos, threshold):
     data = list(player_coll.find(
-        {"season":current_season, "week": current_week, "position": pos, "C_Proj": {"$gte": int(threshold)}}, {"_id": False})
+        {"season":current_season, "week": current_week, "position": pos, "C_Proj": {"$gte": int(threshold)}}, 
+        {"_id": False})
         )
 
     return jsonify(data)
@@ -119,7 +120,7 @@ def stack_app():
 
 @app.route("/stack_app_data")
 def stack_app_data():
-    names = stack_app_query(player_coll)
+    names = stack_app_query(player_coll, current_week)
     teams = [x for x in TeamBuilder.find({}, {"_id": False})]
     data = {"names": names, "teams": teams}
     return jsonify(data)

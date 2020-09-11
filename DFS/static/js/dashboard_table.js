@@ -128,5 +128,14 @@ function getData(url){
 );
 }
 var pos = d3.select('.h1').attr('id')
-url = `${pos}_data`
+var thresh = d3.select('#thresh').text()
+
+if (thresh != '') {
+    url = `/${pos}_data/${thresh}`
+}
+
+else if (thresh == '') {
+    url = `/${pos}_data`
+}
+
 getData(url)

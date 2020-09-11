@@ -33,7 +33,7 @@ d3.json('/stack_app_data').then(function(data){
 
 var teamLists = teams.map(elem => {
     var nameList = Object.values(elem).flat(1);
-    price = getTeamData(playerData, nameList, 'dk_price'),
+    price = getTeamData(playerData, nameList, 'price'),
     projection =  getTeamData(playerData, nameList, 'C_Proj'),
     teamName = nameList.shift();
     nameList.unshift(Math.round(price / projection*100)/100)
@@ -230,7 +230,7 @@ ylabelsGroup.append('text')
                         return teamPlayers                        
                 }).flat(1)
                 xLinearScale = xScale(
-                    allTeamPlayers.map(obj => obj['dk_price']), 
+                    allTeamPlayers.map(obj => obj['price']), 
                     chartWidth
                     )
                 yLinearScale = yScale(

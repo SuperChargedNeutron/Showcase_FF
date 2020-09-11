@@ -8,7 +8,7 @@ def top_guns_query(pos, thresh, current_week, current_season):
         player_coll.find(
             {"position": pos, 'season':current_season, "week": current_week, "C_Proj": {"$gte": int(thresh)}},
             {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        ).sort('C_Proj', -1)
+        )
     )
 
 def pull_scaled_data(columns, meta):
@@ -71,14 +71,14 @@ def get_raw_data(player_coll, cols):
     return data
 
 
-def stack_app_query(player_coll):
+def stack_app_query(player_coll, current_week):
     ## leave week 16 until `current_week` data is avail
     query_params = {
-        "week": 16,
+        "week": current_week,
         "C_Proj": {"$exists": True},
-        "C_Flr": {"$exists": True},
+        "C_Fl": {"$exists": True},
         "C_Ceil": {"$exists": True},
-        "dk_price": {"$exists": True},
+        "price": {"$exists": True},
         "afpa": {"$exists": True},
     }
     data = list(
@@ -88,10 +88,10 @@ def stack_app_query(player_coll):
                 "_id": False,
                 "player": True,
                 "position": True,
-                "dk_price": True,
+                "price": True,
                 "C_Proj": True,
                 "afpa": True,
-                "C_Flr": True,
+                "C_Fl": True,
                 "C_Ceil": True,
             },
         )
