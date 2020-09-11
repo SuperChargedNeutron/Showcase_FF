@@ -46,10 +46,10 @@ def root():
     return redirect("/VEGAS_Dash")
 
 
-@app.route("/VEGAS_Dash")
-def vegas_dash():
+@app.route("/VEGAS_Dash/<week>/<season>")
+def vegas_dash(week, season):
 
-    week_games = list(vegas_coll.find({"Week": current_week, "Season":current_season}, {"_id": False}))
+    week_games = list(vegas_coll.find({"Week": int(week), "Season":int(season)}, {"_id": False}))
     headers = week_games[0].keys()
 
     return render_template("vegas_dash.html", data=week_games, headers=headers)
