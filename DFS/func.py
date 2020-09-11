@@ -3,6 +3,13 @@ from .database import player_coll
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import numpy as np
 
+def top_guns_query(pos, thresh, current_week, current_season):
+    return list(
+        player_coll.find(
+            {"position": pos, 'season':current_season, "week": current_week, "C_Proj": {"$gte": int(thresh)}},
+            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
+        ).sort('C_Proj', -1)
+    )
 
 def pull_scaled_data(columns, meta):
 

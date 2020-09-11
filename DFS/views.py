@@ -4,6 +4,7 @@ from .func import (
     stack_app_query,
     pull_scaled_data,
     weigh_data,
+    top_guns_query
 )
 from .database import (
     db,
@@ -32,6 +33,13 @@ import os
 app.config["JSON_SORT_KEYS"] = False
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
 
+current_season = int(list(
+        vegas_coll.find({}, {"_id":False, "Season":True}).sort('Season', -1).limit(1)
+    )[0]['Season'])
+    
+current_week = int(list(
+        vegas_coll.find({'Season':current_season}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
+    )[0]["Week"])
 
 @app.route("/")
 def root():
@@ -40,11 +48,8 @@ def root():
 
 @app.route("/VEGAS_Dash")
 def vegas_dash():
-    current_week = list(
-        vegas_coll.find({}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
-    )[0]["Week"]
 
-    week_games = list(vegas_coll.find({"Week": current_week}, {"_id": False}))
+    week_games = list(vegas_coll.find({"Week": current_week, "Season":current_season}, {"_id": False}))
     headers = week_games[0].keys()
 
     return render_template("vegas_dash.html", data=week_games, headers=headers)
@@ -57,48 +62,33 @@ def position_dash(pos):
 
 @app.route("/<pos>_data")
 def position_data(pos):
-    data = list(player_coll.find({"week": 16, "position": pos}, {"_id": False}))
-
+    data = list(player_coll.find(
+        {"season":current_season, "week": current_week, "position": pos}, {"_id": False}
+        )
+    )
     return jsonify(data)
 
 
+@app.route("/<pos>_Dash/<threshold>")
+def position_dash_thresh(pos, threshold):
+    return render_template("dashboard_temp.html", position=pos, thresh=threshold)
+
+@app.route("/<pos>_data/<threshold>")
+def position_data_thresh(pos, threshold):
+    data = list(player_coll.find(
+        {"season":current_season, "week": current_week, "position": pos, "C_Proj": {"$gte": int(threshold)}}, {"_id": False})
+        )
+
+    return jsonify(data)
+
 @app.route("/TOP_GUNS/<qb_thresh>/<rb_thresh>/<wr_thresh>/<te_thresh>/<def_thresh>")
 def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
-    current_week = list(
-        vegas_coll.find({}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
-    )[0]["Week"]
 
-    ## leave week as 16 for now
-    qbs = list(
-        player_coll.find(
-            {"position": "QB", "week": 16, "C_Proj": {"$gte": int(qb_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
-    )
-    rbs = list(
-        player_coll.find(
-            {"position": "RB", "week": 16, "C_Proj": {"$gte": int(rb_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
-    )
-    wrs = list(
-        player_coll.find(
-            {"position": "WR", "week": 16, "C_Proj": {"$gte": int(wr_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
-    )
-    tes = list(
-        player_coll.find(
-            {"position": "TE", "week": 16, "C_Proj": {"$gte": int(te_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
-    )
-    defs = list(
-        player_coll.find(
-            {"position": "DEF", "week": 16, "C_Proj": {"$gte": int(def_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
-    )
+    qbs = top_guns_query('QB', qb_thresh, current_week, current_season)
+    rbs = top_guns_query('RB', rb_thresh, current_week, current_season)
+    wrs = top_guns_query('WR', wr_thresh, current_week, current_season)
+    tes = top_guns_query('TE', te_thresh, current_week, current_season)
+    defs = top_guns_query('DEF', def_thresh, current_week, current_season)
 
     qb_headers = list(qbs[0].keys())
     rb_headers = list(rbs[0].keys())

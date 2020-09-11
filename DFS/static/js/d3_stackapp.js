@@ -44,14 +44,6 @@ var teamLists = teams.map(elem => {
 });
 
 
-//////////////  /////////////////////
-//  TRY DOING TEAM DATA MATH IN PYTHON TO SIMPLY QUERY THE TEAMS
-// AND BUILD A QUICK CHART BEFORE THE DOM IS DONE
-// THEN POSSIBLY TURN IT INTO A DATATABLES OBJECT
-// AND I COULD ADD DELETE BUTTONS LIKE IN MY PANTREE APP
-////////////////////////////// 
-
-// teamLists2 = teamLists.forEach(row =>  {newRow = row.push('button'); return v})
 var teamsData = teamLists.map(row => [row[0], row[2], row[1]])
 teamNames4buttons = teamsData.map(row=> {return row[0]})
 var table = d3.select('#tableBody')
