@@ -269,7 +269,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
             .attr('x1', function(d) { return xLinearScale(parseFloat(d['price'])); })
             .attr('x2', function(d) { return xLinearScale(parseFloat(d['price'])); })
             .attr('y1', function(d) { return yLinearScale(parseFloat(d['C_Ceil'])); })
-            .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Flr'])); });
+            .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Fl'])); });
         return circleGroup
     } else if ( dataCurrentSelection == 'teamBuild') {
         circleGroup.selectAll("circle")

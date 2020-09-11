@@ -73,8 +73,9 @@ def get_raw_data(player_coll, cols):
 
 def stack_app_query(player_coll, current_week):
     ## leave week 16 until `current_week` data is avail
+    print(current_week)
     query_params = {
-        "week": current_week,
+        "week": 1,
         "C_Proj": {"$exists": True},
         "C_Fl": {"$exists": True},
         "C_Ceil": {"$exists": True},

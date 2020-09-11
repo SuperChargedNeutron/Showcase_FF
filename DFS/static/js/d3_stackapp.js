@@ -234,7 +234,7 @@ ylabelsGroup.append('text')
                     chartWidth
                     )
                 yLinearScale = yScale(
-                    [allTeamPlayers.map(obj => obj['C_Flr']), 
+                    [allTeamPlayers.map(obj => obj['C_Fl']), 
                         allTeamPlayers.map(obj => obj['C_Proj']),
                         allTeamPlayers.map(obj => obj['C_Ceil'])].flat(1),
                      chartHeight
