@@ -4,7 +4,8 @@ from .func import (
     stack_app_query,
     pull_scaled_data,
     weigh_data,
-    top_guns_query
+    top_guns_query,
+    get_current_time
 )
 from .database import (
     db,
@@ -31,25 +32,36 @@ from . import app
 import os
 
 app.config["JSON_SORT_KEYS"] = False
-app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
-current_season = int(list(
-        vegas_coll.find({}, {"_id":False, "Season":True}).sort('Season', -1).limit(1)
-    )[0]['Season'])
-    
-current_week = int(list(
-        vegas_coll.find({'Season':current_season}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
-    )[0]["Week"])
+session["current_week"], session["current_season"] = get_current_time(vegas_coll)
+
 
 @app.route("/")
 def root():
     return redirect("/VEGAS_Dash")
 
 
-@app.route("/VEGAS_Dash/<week>/<season>")
+@app.route("/VEGAS_Dash")
 def vegas_dash(week, season):
 
-    week_games = list(vegas_coll.find({"Week": int(week), "Season":int(season)}, {"_id": False}))
+    week_games = list(
+        vegas_coll.find(
+            {"Week": session["current_week"], "Season": session["current_week"]},
+            {"_id": False},
+        )
+    )
+    headers = week_games[0].keys()
+
+    return render_template("vegas_dash.html", data=week_games, headers=headers)
+
+
+@app.route("/VEGAS_Dash/<week>/<season>")
+def vegas_dash_specific(week, season):
+
+    week_games = list(
+        vegas_coll.find({"Week": int(week), "Season": int(season)}, {"_id": False})
+    )
     headers = week_games[0].keys()
 
     return render_template("vegas_dash.html", data=week_games, headers=headers)
@@ -62,8 +74,10 @@ def position_dash(pos):
 
 @app.route("/<pos>_data")
 def position_data(pos):
-    data = list(player_coll.find(
-        {"season":current_season, "week": current_week, "position": pos}, {"_id": False}
+    data = list(
+        player_coll.find(
+            {"season": 2020, "week": 1, "position": pos},
+            {"_id": False},
         )
     )
     return jsonify(data)
@@ -73,23 +87,32 @@ def position_data(pos):
 def position_dash_thresh(pos, threshold):
     return render_template("dashboard_temp.html", position=pos, thresh=threshold)
 
+
 @app.route("/<pos>_data/<threshold>")
 def position_data_thresh(pos, threshold):
-    data = list(player_coll.find(
-        {"season":current_season, "week": current_week, "position": pos, "C_Proj": {"$gte": int(threshold)}}, 
-        {"_id": False})
+    data = list(
+        player_coll.find(
+            {
+                "season": 2020,
+                "week": 1,
+                "position": pos,
+                "C_Proj": {"$gte": int(threshold)},
+            },
+            {"_id": False},
         )
+    )
 
     return jsonify(data)
+
 
 @app.route("/TOP_GUNS/<qb_thresh>/<rb_thresh>/<wr_thresh>/<te_thresh>/<def_thresh>")
 def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
 
-    qbs = top_guns_query('QB', qb_thresh, current_week, current_season)
-    rbs = top_guns_query('RB', rb_thresh, current_week, current_season)
-    wrs = top_guns_query('WR', wr_thresh, current_week, current_season)
-    tes = top_guns_query('TE', te_thresh, current_week, current_season)
-    defs = top_guns_query('DEF', def_thresh, current_week, current_season)
+    qbs = top_guns_query("QB", qb_thresh, 1, 2020)
+    rbs = top_guns_query("RB", rb_thresh, 1, 2020)
+    wrs = top_guns_query("WR", wr_thresh, 1, 2020)
+    tes = top_guns_query("TE", te_thresh, 1, 2020)
+    defs = top_guns_query("DEF", def_thresh, 1, 2020)
 
     qb_headers = list(qbs[0].keys())
     rb_headers = list(rbs[0].keys())
@@ -120,6 +143,7 @@ def stack_app():
 
 @app.route("/stack_app_data")
 def stack_app_data():
+    print(current_week)
     names = stack_app_query(player_coll, current_week)
     teams = [x for x in TeamBuilder.find({}, {"_id": False})]
     data = {"names": names, "teams": teams}

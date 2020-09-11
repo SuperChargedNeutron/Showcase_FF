@@ -138,4 +138,5 @@ else if (thresh == '') {
     url = `/${pos}_data`
 }
 
+console.log(url)
 getData(url)
