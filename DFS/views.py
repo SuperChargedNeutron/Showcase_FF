@@ -34,8 +34,6 @@ import os
 app.config["JSON_SORT_KEYS"] = False
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
-session["current_week"], session["current_season"] = get_current_time(vegas_coll)
-
 
 @app.route("/")
 def root():
