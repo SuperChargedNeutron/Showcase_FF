@@ -101,7 +101,7 @@ def stack_app_query(player_coll, current_week):
     ## leave week 16 until `current_week` data is avail
     print(current_week)
     query_params = {
-        "week": 1,
+        "week": current_week,
         "C_Proj": {"$exists": True},
         "C_Fl": {"$exists": True},
         "C_Ceil": {"$exists": True},

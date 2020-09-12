@@ -141,8 +141,7 @@ def stack_app():
 
 @app.route("/stack_app_data")
 def stack_app_data():
-    print(current_week)
-    names = stack_app_query(player_coll, current_week)
+    names = stack_app_query(player_coll, 1)
     teams = [x for x in TeamBuilder.find({}, {"_id": False})]
     data = {"names": names, "teams": teams}
     return jsonify(data)
