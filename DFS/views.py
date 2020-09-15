@@ -5,7 +5,10 @@ from .func import (
     pull_scaled_data,
     weigh_data,
     top_guns_query,
-    get_current_time
+    get_current_time,
+    get_bookie_divs,
+    scrape_bookie_divs,
+    conditional_insert
 )
 from .database import (
     db,
@@ -25,7 +28,7 @@ from .db_cols import (
     airy_te_cols,
     airy_wr_cols,
 )
-from .models import CalculatorForm
+from .models import CalculatorForm, GetTimeForm
 import json
 from urllib.parse import quote, unquote
 from . import app
@@ -37,33 +40,40 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
 @app.route("/")
 def root():
-    return redirect("/VEGAS_Dash")
+    return redirect("/get_time")
 
+@app.route("/get_time", methods=['GET', 'POST'])
+def get_time():
+    form = GetTimeForm(request.form)
+    if form.validate():
+        session['current_week'] = int(form.week.data)
+        session['current_season'] = int(form.season.data)
+
+        return redirect('/VEGAS_Dash')
+    return render_template('gettime.html', form=form)
 
 @app.route("/VEGAS_Dash")
-def vegas_dash(week, season):
+def vegas_dash():
 
     week_games = list(
         vegas_coll.find(
-            {"Week": session["current_week"], "Season": session["current_week"]},
-            {"_id": False},
+            {"week": session["current_week"], "season": session["current_season"]},
+            {"_id": False}
         )
     )
     headers = week_games[0].keys()
 
     return render_template("vegas_dash.html", data=week_games, headers=headers)
 
+@app.route("/scrape_bookie")
+def scrape_bookie():
+    divs = get_bookie_divs()
+    games = scrape_bookie_divs(divs)
+    
+    for g in games:
+        conditional_insert(vegas_coll, g)
 
-@app.route("/VEGAS_Dash/<week>/<season>")
-def vegas_dash_specific(week, season):
-
-    week_games = list(
-        vegas_coll.find({"Week": int(week), "Season": int(season)}, {"_id": False})
-    )
-    headers = week_games[0].keys()
-
-    return render_template("vegas_dash.html", data=week_games, headers=headers)
-
+    return redirect('/VEGAS_Dash')
 
 @app.route("/<pos>_Dash")
 def position_dash(pos):
@@ -74,7 +84,7 @@ def position_dash(pos):
 def position_data(pos):
     data = list(
         player_coll.find(
-            {"season": 2020, "week": 1, "position": pos},
+            {"season": session["current_season"], "week": session["current_week"], "position": pos},
             {"_id": False},
         )
     )
@@ -91,8 +101,8 @@ def position_data_thresh(pos, threshold):
     data = list(
         player_coll.find(
             {
-                "season": 2020,
-                "week": 1,
+                "season": session["current_season"],
+                "week": session["current_week"],
                 "position": pos,
                 "C_Proj": {"$gte": int(threshold)},
             },
@@ -106,11 +116,11 @@ def position_data_thresh(pos, threshold):
 @app.route("/TOP_GUNS/<qb_thresh>/<rb_thresh>/<wr_thresh>/<te_thresh>/<def_thresh>")
 def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
 
-    qbs = top_guns_query("QB", qb_thresh, 1, 2020)
-    rbs = top_guns_query("RB", rb_thresh, 1, 2020)
-    wrs = top_guns_query("WR", wr_thresh, 1, 2020)
-    tes = top_guns_query("TE", te_thresh, 1, 2020)
-    defs = top_guns_query("DEF", def_thresh, 1, 2020)
+    qbs = top_guns_query("QB", qb_thresh, session["current_week"], session["current_season"])
+    rbs = top_guns_query("RB", rb_thresh, session["current_week"], session["current_season"])
+    wrs = top_guns_query("WR", wr_thresh, session["current_week"], session["current_season"])
+    tes = top_guns_query("TE", te_thresh, session["current_week"], session["current_season"])
+    defs = top_guns_query("DEF", def_thresh, session["current_week"], session["current_season"])
 
     qb_headers = list(qbs[0].keys())
     rb_headers = list(rbs[0].keys())
@@ -141,7 +151,7 @@ def stack_app():
 
 @app.route("/stack_app_data")
 def stack_app_data():
-    names = stack_app_query(player_coll, 1)
+    names = stack_app_query(player_coll, session["current_week"])
     teams = [x for x in TeamBuilder.find({}, {"_id": False})]
     data = {"names": names, "teams": teams}
     return jsonify(data)
