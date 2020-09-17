@@ -243,6 +243,9 @@ def calculator_submit(label, meta, weights, columns):
 
     return redirect(f"/{point_meta['pos']}_Dash")
 
+@app.route('/scrape_center')
+def scrape_center():
+    return render_template('scrape_center.html')
 
 @app.route("/delete/<collection>/<name>")
 def delete_team_points(collection, name):

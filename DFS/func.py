@@ -243,16 +243,16 @@ def scrape_bookie_divs(divs):
             market_ou = int(market_ou[0:2]) + .5 if market_ou[-1] == '½' else market_ou
             spread = buttons[0].split()[0]
             if len(spread) > 3:
-                spread = int(spread[1:3]) + .5 if spread[-1] == '½' else spread[1:3]
+                spread = abs(int(spread[1:3]) + .5) if spread[-1] == '½' else abs(int(spread[1:3]))
             elif len(spread) == 3:
-                spread = int(spread[1:2]) + .5 if spread[-1] == '½' else spread[1:2]
+                spread = abs(int(spread[1:2]) + .5) if spread[-1] == '½' else abs(int(spread[1:2]))
             vegas_row.update({'Home' : teams[0], 
                               'Road':teams[1],
                               'week': int(week),
                               'season': py_date.year,
                               'Game Date':f"{py_date.month}-{py_date.day}",
                               'Market_O/U':float(market_ou),
-                              'Market Spread': 0 if spread == 'PK' else float(spread)
+                              'Market Spread': 0 if spread == 'PK' else abs(float(spread))
                              })
             if buttons[0][0] == '-':
                 fave_team = vegas_row['Home'] 
@@ -263,8 +263,8 @@ def scrape_bookie_divs(divs):
             vegas_row.update({
                 'FAV':fave_team,
                 'DOG':dog_team,
-                'Market_Imp_fav': (int(market_ou) / 2) if spread == 'PK' else (int(market_ou) / 2) - (int(spread) / 2),
-                'Market_Imp_dog': (int(market_ou) / 2) if spread == 'PK' else (int(market_ou) / 2) + (int(spread) / 2)
+                'Market_Imp_fav': (int(market_ou) / 2) if spread == 'PK' else (int(market_ou) / 2) + (abs(int(spread)) / 2),
+                'Market_Imp_dog': (int(market_ou) / 2) if spread == 'PK' else (int(market_ou) / 2) - (abs(int(spread)) / 2)
                  })
             
             game_data.append(vegas_row)

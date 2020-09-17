@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<div class="container-fluid">
+  <div class="row">
+<!-- start main-->
+    <main role="main" class="col-md-12 col-lg-12">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Scrape Center</h1>
+      </div>
+
+      <div class='row'>
+        <p> 4for4 Projection Data</p>
+        <button type="button" class="btn btn-info">
+            <a> scrape </a>
+        </button>
+      </div>
+      <div></div>
+      <div class='row'>
+        <p> 4for4 Flr/Ceil Data</p>
+        <button type="button" class="btn btn-info">
+            <a> scrape </a>
+        </button>
+      </div>
+
+    </main>
+<!-- end main -->
+</div>
+</div>
+
+{% endblock %}
