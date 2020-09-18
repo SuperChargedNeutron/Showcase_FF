@@ -4,6 +4,7 @@ import pymongo
 
 
 MONGO_URI = os.environ.get("MONGODB_URI")
+
 client = MongoClient(MONGO_URI)
 
 db = client.DFS
