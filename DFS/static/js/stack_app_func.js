@@ -82,25 +82,27 @@ function updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight
 }
 
 function plotCurrentTeam(currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip) {
+    console.log(currentTeam)
     dataExtracted = extractCurrentTeamData(currentTeam)
-                xLinearScale = xScale(
-                    dataExtracted.map(row => row[1]), 
-                    chartWidth
-                    )
-                yLinearScale = yScale(
-                    dataExtracted.map( row => row[2]),
-                     chartHeight
-                    )
-                xAxis = renderXAxis(xLinearScale, xAxis)
-                yAxis = renderYAxis(yLinearScale, yAxis)
-                circlesGroup = renderCircles(
-                    xLinearScale,
-                    yLinearScale, 
-                    yCurrentSelection,
-                    dataExtracted,
-                    dataCurrentSelection, 
-                    tooltip
-                )
+    xLinearScale = xScale(
+        dataExtracted.map(row => row[1]), 
+        chartWidth
+        )
+        yLinearScale = yScale(
+            dataExtracted.map( row => row[2]),
+                chartHeight
+            )
+        xAxis = renderXAxis(xLinearScale, xAxis)
+        yAxis = renderYAxis(yLinearScale, yAxis)
+        console.log(dataExtracted)
+        circlesGroup = renderCircles(
+            xLinearScale,
+            yLinearScale, 
+            yCurrentSelection,
+            dataExtracted,
+            dataCurrentSelection, 
+            tooltip
+        )
 }
 
 function updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip) {
@@ -108,7 +110,7 @@ function updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, 
         if (counts['flexCount'] < 1) {
             currentTeam.flexs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
-            var price = d3.select(this).attr('salary_4f4')
+            var price = d3.select(this).attr('price')
             currentTeam.flexs.projs.push(proj)
             currentTeam.flexs.prices.push(price)
             var list = d3.select('#flexList')
@@ -187,7 +189,6 @@ function renderYAxis (newYScale, yAxis) {
 function extractCurrentTeamData (currentTeam) {
     dataExtracted = []
                 Object.keys(currentTeam).forEach(key => {
-                    console.log(key)
                 if (key =='teamName') {
                     return undefined
                 }
@@ -265,7 +266,6 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         lines.enter()
             .append('line')
             .attr('class', 'error')
-            // .merge(lines)
             .attr('x1', function(d) { return xLinearScale(parseFloat(d['salary_4f4'])); })
             .attr('x2', function(d) { return xLinearScale(parseFloat(d['salary_4f4'])); })
             .attr('y1', function(d) { return yLinearScale(parseFloat(d['C_Ceil'])); })
@@ -313,8 +313,7 @@ function getTeamData(playerData, team, key) {
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
-    if (key =='salary_4f4') {
-        console.log(playerObjects)
+    if (key == 'salary_4f4') {
         var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)
         return price

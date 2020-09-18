@@ -144,16 +144,16 @@ def get_raw_data(player_coll, cols):
     return data
 
 
-def stack_app_query(player_coll, current_week):
+def stack_app_query(player_coll, current_week, current_season):
     ## leave week 16 until `current_week` data is avail
     print(current_week)
     query_params = {
         "week": current_week,
+        "season": current_season,
         "C_Proj": {"$exists": True},
         "C_Fl": {"$exists": True},
         "C_Ceil": {"$exists": True},
-        "salary_4f4": {"$exists": True},
-        "afpa_4f4": {"$exists": True},
+        "salary_4f4": {"$exists": True}
     }
     data = list(
         player_coll.find(
