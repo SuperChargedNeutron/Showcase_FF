@@ -108,7 +108,7 @@ function updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, 
         if (counts['flexCount'] < 1) {
             currentTeam.flexs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
-            var price = d3.select(this).attr('price')
+            var price = d3.select(this).attr('salary_4f4')
             currentTeam.flexs.projs.push(proj)
             currentTeam.flexs.prices.push(price)
             var list = d3.select('#flexList')
@@ -135,7 +135,7 @@ function assignOptions(playerNames, position) {
             }})
         .classed(`${position}Opt`, true)
         .attr('proj', function (d) {return d.C_Proj})
-        .attr('price', function (d) {return d.price})
+        .attr('price', function (d) {return d.salary_4f4})
         .text(function(d) { 
             if (position == 'flexPosition') {
                 return d; 
@@ -241,7 +241,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         circleGroup.selectAll("circle")
             .data(data).enter()
             .append('circle')
-            .attr('cx', d => xLinearScale(parseFloat(d['price'])))
+            .attr('cx', d => xLinearScale(parseFloat(d['salary_4f4'])))
             .attr('cy', d => yLinearScale(parseFloat(d['C_Proj'])))
             .attr('r', 5)
             .style('fill', (d, i) => teamCircleColor(d['teamName']))
@@ -266,8 +266,8 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
             .append('line')
             .attr('class', 'error')
             // .merge(lines)
-            .attr('x1', function(d) { return xLinearScale(parseFloat(d['price'])); })
-            .attr('x2', function(d) { return xLinearScale(parseFloat(d['price'])); })
+            .attr('x1', function(d) { return xLinearScale(parseFloat(d['salary_4f4'])); })
+            .attr('x2', function(d) { return xLinearScale(parseFloat(d['salary_4f4'])); })
             .attr('y1', function(d) { return yLinearScale(parseFloat(d['C_Ceil'])); })
             .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Fl'])); });
         return circleGroup
@@ -313,7 +313,7 @@ function getTeamData(playerData, team, key) {
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
-    if (key =='price') {
+    if (key =='salary_4f4') {
         console.log(playerObjects)
         var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)

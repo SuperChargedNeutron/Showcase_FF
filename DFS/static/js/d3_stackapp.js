@@ -33,7 +33,7 @@ d3.json('/stack_app_data').then(function(data){
 
 var teamLists = teams.map(elem => {
     var nameList = Object.values(elem).flat(1);
-    price = getTeamData(playerData, nameList, 'price'),
+    price = getTeamData(playerData, nameList, 'salary_4f4'),
     projection =  getTeamData(playerData, nameList, 'C_Proj'),
     teamName = nameList.shift();
     nameList.unshift(Math.round(price / projection*100)/100)
@@ -230,7 +230,7 @@ ylabelsGroup.append('text')
                         return teamPlayers                        
                 }).flat(1)
                 xLinearScale = xScale(
-                    allTeamPlayers.map(obj => obj['price']), 
+                    allTeamPlayers.map(obj => obj['salary_4f4']), 
                     chartWidth
                     )
                 yLinearScale = yScale(
@@ -294,7 +294,7 @@ ylabelsGroup.append('text')
         if (counts['qbCount'] < 1) {
             currentTeam.QBs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
-            var price = d3.select(this).attr('price')
+            var price = d3.select(this).attr('salary_4f4')
             currentTeam.QBs.projs.push(proj)
             currentTeam.QBs.prices.push(price)
             var list = d3.select('#qbList')
@@ -314,7 +314,7 @@ ylabelsGroup.append('text')
         if (counts['rbCount'] < 2) {
             currentTeam.RBs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
-            var price = d3.select(this).attr('price')
+            var price = d3.select(this).attr('salary_4f4')
             currentTeam.RBs.projs.push(proj)
             currentTeam.RBs.prices.push(price)
             var list = d3.select('#rbList')
@@ -336,7 +336,7 @@ ylabelsGroup.append('text')
         if (counts['wrCount'] < 3) {
             currentTeam.WRs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
-            var price = d3.select(this).attr('price')
+            var price = d3.select(this).attr('salary_4f4')
             currentTeam.WRs.projs.push(proj)
             currentTeam.WRs.prices.push(price)
             var list = d3.select('#wrList')
@@ -356,7 +356,7 @@ ylabelsGroup.append('text')
         if (counts['teCount'] < 1) {
             currentTeam.TEs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
-            var price = d3.select(this).attr('price')
+            var price = d3.select(this).attr('salary_4f4')
             currentTeam.TEs.projs.push(proj)
             currentTeam.TEs.prices.push(price)
             var list = d3.select('#teList')
@@ -376,7 +376,7 @@ ylabelsGroup.append('text')
         if (counts['dstCount'] < 1) {
             currentTeam.DSTs.players.push(this.value)
             var proj = d3.select(this).attr('proj')
-            var price = d3.select(this).attr('price')
+            var price = d3.select(this).attr('salary_4f4')
             currentTeam.DSTs.projs.push(proj)
             currentTeam.DSTs.prices.push(price)
             var list = d3.select('#dstList')
