@@ -144,12 +144,12 @@ def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
     )
 
 
-@app.route("/stack_app")
+@app.route("/stack_app", methods=['GET', 'POST'])
 def stack_app():
     return render_template("stack_app.html")
 
 
-@app.route("/stack_app_data")
+@app.route("/stack_app_data", methods=['GET', 'POST'])
 def stack_app_data():
     names = stack_app_query(player_coll, session["current_week"])
     teams = [x for x in TeamBuilder.find({}, {"_id": False})]

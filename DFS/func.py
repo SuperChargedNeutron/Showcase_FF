@@ -152,8 +152,8 @@ def stack_app_query(player_coll, current_week):
         "C_Proj": {"$exists": True},
         "C_Fl": {"$exists": True},
         "C_Ceil": {"$exists": True},
-        "price": {"$exists": True},
-        "afpa": {"$exists": True},
+        "salary_4f4": {"$exists": True},
+        "afpa_4f4": {"$exists": True},
     }
     data = list(
         player_coll.find(
@@ -162,9 +162,9 @@ def stack_app_query(player_coll, current_week):
                 "_id": False,
                 "player": True,
                 "position": True,
-                "price": True,
+                "salary_4f4": True,
                 "C_Proj": True,
-                "afpa": True,
+                "afpa_4f4": True,
                 "C_Fl": True,
                 "C_Ceil": True,
             },
