@@ -107,7 +107,7 @@ var td2 = trow.append('a')
         .classed('transform', `translate(${chartWidth}, 0)`)
         .call(leftAxis)
 
-    circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        circleColors = ['#9B5DE5', '#f15bb5', '#fee440','#c1839f', '#00bbf9', '#00f5d4', '#ff5a5f', '#087e8b']
 
     var teamCircleColor = d3.scaleOrdinal()
         .domain(teamsData.map(row => {return row[0]}))

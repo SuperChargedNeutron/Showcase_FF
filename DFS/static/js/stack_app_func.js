@@ -206,7 +206,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
     circleGroup.selectAll('line.error').remove().exit();
     if (dataCurrentSelection == 'teamStacked') {
 
-        circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        circleColors = ['#9B5DE5', '#f15bb5', '#fee440','#c1839f', '#00bbf9', '#00f5d4', '#ff5a5f', '#087e8b']
         var teamCircleColor = d3.scaleOrdinal()
             .domain(data.map(row => {return row[0]}))
             .range(circleColors);
@@ -234,7 +234,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         
     return circleGroup
     } else if ( dataCurrentSelection == 'teamPlayers') {
-        circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        circleColors = ['#9B5DE5', '#f15bb5', '#fee440','#c1839f', '#00bbf9', '#00f5d4', '#ff5a5f', '#087e8b']
         var teamCircleColor = d3.scaleOrdinal()
             .domain(data.map(row => {return row['teamName']}))
             .range(circleColors);

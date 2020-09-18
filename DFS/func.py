@@ -143,6 +143,7 @@ def get_raw_data(player_coll, cols):
     data = player_coll.find(query_params, data_return)
     return data
 
+circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
 
 def stack_app_query(player_coll, current_week, current_season):
     ## leave week 16 until `current_week` data is avail
