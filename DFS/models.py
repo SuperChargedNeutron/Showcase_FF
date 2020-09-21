@@ -14,7 +14,7 @@ seasons = [str(x) for x in player_coll.find({}).distinct("season")]
 if None in seasons:
     seasons.pop(seasons.index(None))
 positions = ["QB", "RB", "WR", "TE", "DEF"]
-weeks = [str(i) for i in range(1, 17)]
+weeks = [str(i) for i in range(1, 17)]   
 
 class GetTimeForm(FlaskForm):
     week = SelectField(

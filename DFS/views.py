@@ -245,7 +245,17 @@ def calculator_submit(label, meta, weights, columns):
 
 @app.route('/scrape_center')
 def scrape_center():
-    return render_template('scrape_center.html')
+    os.chdir(os.path.join(os.environ['USERPROFILE'], 'Desktop', 'DFS_data'))
+    files = [x.name[0:-4] for x in os.scandir(os.getcwd())]
+
+    return render_template('scrape_center.html', files = files)
+
+@app.route('/fupload/<file>')
+def fupload(file):
+    import pandas as pd
+    os.chdir(os.path.join(os.environ['USERPROFILE'], 'Desktop', 'DFS_data'))
+    df = pd.read_csv(file+'.csv')
+    return jsonify(df)
 
 @app.route("/delete/<collection>/<name>")
 def delete_team_points(collection, name):

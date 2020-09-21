@@ -24,9 +24,33 @@
         </button>
       </div>
 
+      
+<div class="input-group">
+  <select class="custom-select" id="fileSelect">
+    {% for file in files %}
+      <option class='file' value='{{file}}'> {{ file }}</option>
+    {% endfor %}
+  </select>
+  <div class="input-group-append">
+    <button id='fileButton'  class="btn btn-outline-secondary" type="button">Button</button>
+  </div>
+
+</div>
     </main>
 <!-- end main -->
 </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript"> 
+        d3.selectAll('.file').on('click', function() {
+          file = this.text
+      })
+      d3.select('#fileButton').on('click', function() {
+        window.location.assign(`/fupload/${file}`)            
+      })
+</script> 
 {% endblock %}
