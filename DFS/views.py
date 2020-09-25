@@ -8,12 +8,17 @@ from .func import (
     get_current_time,
     get_bookie_divs,
     scrape_bookie_divs,
-    conditional_insert
+    conditional_insert,
+    upload_file_clean,
+    column_clean,
+    rename_file, 
+    scrape_4f4
 )
 from .database import (
     db,
     player_coll,
     vegas_coll,
+    team_coll,
     TeamBuilder,
     CalcCollection,
 )
@@ -42,15 +47,17 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 def root():
     return redirect("/get_time")
 
-@app.route("/get_time", methods=['GET', 'POST'])
+
+@app.route("/get_time", methods=["GET", "POST"])
 def get_time():
     form = GetTimeForm(request.form)
     if form.validate():
-        session['current_week'] = int(form.week.data)
-        session['current_season'] = int(form.season.data)
+        session["current_week"] = int(form.week.data)
+        session["current_season"] = int(form.season.data)
 
-        return redirect('/VEGAS_Dash')
-    return render_template('gettime.html', form=form)
+        return redirect("/VEGAS_Dash")
+    return render_template("gettime.html", form=form)
+
 
 @app.route("/VEGAS_Dash")
 def vegas_dash():
@@ -58,22 +65,27 @@ def vegas_dash():
     week_games = list(
         vegas_coll.find(
             {"week": session["current_week"], "season": session["current_season"]},
-            {"_id": False}
+            {"_id": False},
         )
     )
+    
+    ##add counter if scrape bookie fails twice
+    #  then redirect to scrape center
+    ## with length of week_gmaes
     headers = week_games[0].keys()
-
     return render_template("vegas_dash.html", data=week_games, headers=headers)
+
 
 @app.route("/scrape_bookie")
 def scrape_bookie():
     divs = get_bookie_divs()
     games = scrape_bookie_divs(divs)
-    
+
     for g in games:
         conditional_insert(vegas_coll, g)
 
-    return redirect('/VEGAS_Dash')
+    return redirect("/VEGAS_Dash")
+
 
 @app.route("/<pos>_Dash")
 def position_dash(pos):
@@ -84,7 +96,11 @@ def position_dash(pos):
 def position_data(pos):
     data = list(
         player_coll.find(
-            {"season": session["current_season"], "week": session["current_week"], "position": pos},
+            {
+                "season": session["current_season"],
+                "week": session["current_week"],
+                "position": pos,
+            },
             {"_id": False},
         )
     )
@@ -116,11 +132,21 @@ def position_data_thresh(pos, threshold):
 @app.route("/TOP_GUNS/<qb_thresh>/<rb_thresh>/<wr_thresh>/<te_thresh>/<def_thresh>")
 def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
 
-    qbs = top_guns_query("QB", qb_thresh, session["current_week"], session["current_season"])
-    rbs = top_guns_query("RB", rb_thresh, session["current_week"], session["current_season"])
-    wrs = top_guns_query("WR", wr_thresh, session["current_week"], session["current_season"])
-    tes = top_guns_query("TE", te_thresh, session["current_week"], session["current_season"])
-    defs = top_guns_query("DEF", def_thresh, session["current_week"], session["current_season"])
+    qbs = top_guns_query(
+        "QB", qb_thresh, session["current_week"], session["current_season"]
+    )
+    rbs = top_guns_query(
+        "RB", rb_thresh, session["current_week"], session["current_season"]
+    )
+    wrs = top_guns_query(
+        "WR", wr_thresh, session["current_week"], session["current_season"]
+    )
+    tes = top_guns_query(
+        "TE", te_thresh, session["current_week"], session["current_season"]
+    )
+    defs = top_guns_query(
+        "DEF", def_thresh, session["current_week"], session["current_season"]
+    )
 
     qb_headers = list(qbs[0].keys())
     rb_headers = list(rbs[0].keys())
@@ -128,7 +154,6 @@ def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
     te_headers = list(tes[0].keys())
     def_headers = list(defs[0].keys())
 
-    # return jsonify(qbs)
     return render_template(
         "topguns.html",
         qbs=qbs,
@@ -144,14 +169,16 @@ def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
     )
 
 
-@app.route("/stack_app", methods=['GET', 'POST'])
+@app.route("/stack_app", methods=["GET", "POST"])
 def stack_app():
     return render_template("stack_app.html")
 
 
-@app.route("/stack_app_data", methods=['GET', 'POST'])
+@app.route("/stack_app_data", methods=["GET", "POST"])
 def stack_app_data():
-    names = stack_app_query(player_coll, session["current_week"], session['current_season'])
+    names = stack_app_query(
+        player_coll, session["current_week"], session["current_season"]
+    )
     teams = [x for x in TeamBuilder.find({}, {"_id": False})]
     data = {"names": names, "teams": teams}
     return jsonify(data)
@@ -243,19 +270,153 @@ def calculator_submit(label, meta, weights, columns):
 
     return redirect(f"/{point_meta['pos']}_Dash")
 
-@app.route('/scrape_center')
+
+@app.route("/scrape_center")
 def scrape_center():
-    os.chdir(os.path.join(os.environ['USERPROFILE'], 'Desktop', 'DFS_data'))
-    files = [x.name[0:-4] for x in os.scandir(os.getcwd())]
+    os.chdir(os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data"))
+    files = [x.name for x in os.scandir(os.getcwd())]
 
-    return render_template('scrape_center.html', files = files)
+    return render_template("scrape_center.html", files=files)
 
-@app.route('/fupload/<file>')
+
+@app.route("/scrape/<file_name>")
+def scrape_it(file_name):
+    dl_path = os.path.join(
+        os.path.join(os.environ["USERPROFILE"]), "Desktop", "DFS_data"
+    )
+    if not os.path.exists(dl_path):
+        os.makedirs(dl_path)
+    os.chdir(dl_path)
+    if file_name == "4f4_projection":
+        url = "https://www.4for4.com/full-impact/cheatsheet/QB/154605/ff_nflstats"
+        dl_button = (
+            '//*[@id="block-system-main"]/div/div/div/div/div/div/div[2]/div/div[2]/a'
+        )
+        file_name = rename_file(file_name, session['current_week'], session['current_season'])
+    elif file_name == "4f4_fc_data":
+        url = "https://www.4for4.com/floor-ceiling-projections/draftkings"
+        dl_button = '//*[@id="block-system-main"]/div/div/div/div/div/div[4]/div/div/div/div[2]/div/a'
+        file_name = rename_file(file_name, session['current_week'], session['current_season'])
+    elif file_name == '4f4_leverage':
+        url = 'https://www.4for4.com/gpp-leverage-scores'
+        dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
+        file_name = rename_file(file_name, session['current_week'], session['current_season'])
+    elif file_name == '4f4_rushing_redzone':
+        url = 'https://www.4for4.com/red-zone-stats?tab=1&sub-tab=0'
+        dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
+        file_name = rename_file(file_name, session['current_week'], session['current_season'])
+    elif file_name == '4f4_passing_redzone':
+        url = 'https://www.4for4.com/red-zone-stats?tab=2&sub-tab=0'
+        dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
+        file_name = rename_file(file_name, session['current_week'], session['current_season'])
+    elif file_name == '4f4_receiving_redzone':
+        url = 'https://www.4for4.com/red-zone-stats?tab=0&sub-tab=0'
+        dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
+        file_name = rename_file(file_name, session['current_week'], session['current_season'])
+    elif file_name == "urmom":
+        return "no scraping yet"
+    
+    if file_name[0:3] == '4f4':
+        scrape_4f4(url, dl_path, dl_button)
+    else:
+        pass
+
+    recent_file = max(list(os.scandir(os.getcwd())), key=os.path.getctime).name
+    os.rename(recent_file, os.path.join(dl_path, f"{file_name}.csv"))
+
+    return redirect(f'/fupload/{file_name}.csv')
+
+
+@app.route("/fupload/<file>")
 def fupload(file):
+    dl_path = os.path.join(
+        os.path.join(os.environ["USERPROFILE"]), "Desktop", "DFS_data"
+    )
+    os.chdir(dl_path)
+
     import pandas as pd
-    os.chdir(os.path.join(os.environ['USERPROFILE'], 'Desktop', 'DFS_data'))
-    df = pd.read_csv(file+'.csv')
-    return jsonify(df)
+
+    if "golden" in file.lower():
+
+        df = pd.read_excel(file) if file[-4:] == "xlsx" else pd.read_csv(file)
+        data = df.iloc[7:, 10:19].reset_index(drop=True)
+        data.columns = [column_clean(x.lower()) for x in df.iloc[6, 10:19]]
+        data["week"] = (
+            session["current_week"] + 1 if session["current_week"] < 17 else 1
+        )
+        data["season"] = (
+            session["current_season"]
+            if session["current_week"] < 17
+            else session["current_season"] + 1
+        )
+        golden = data[
+            [
+                "position",
+                "player",
+                "salary",
+                "team",
+                "avgpointspergame",
+                "season",
+                "week",
+            ]
+        ]
+        clean_df = upload_file_clean(golden)
+
+    elif file == f"4f4_projection_W{session['current_week']}_{session['current_season']}.csv":
+        df = pd.read_excel(file).fillna('nan') if file[-4:] == "xlsx" else pd.read_csv(file).fillna('nan')
+        clean_df = upload_file_clean(df, '4f4')
+        clean_df = clean_df.drop(columns=['pid_4f4'])
+        clean_df = clean_df[clean_df['position'] != 'K']
+
+    elif file == f"4f4_fc_data_W{session['current_week']}_{session['current_season']}.csv":
+        df = pd.read_csv(file).fillna('nan')
+        clean_df = upload_file_clean(df, '4f4')
+        clean_df = clean_df.drop(columns=['salary_4f4'])
+        clean_df['proj_4f4'] = round(clean_df['floor_4f4'] + clean_df['value1_4f4'], 2)
+
+    elif file == f"4f4_passing_redzone_W{session['current_week']}_{session['current_season']}.csv":
+        df = pd.read_csv(file).fillna('nan')
+        clean_df = upload_file_clean(df, 'RZ_pass')
+        clean_df = clean_df.drop(columns=['team'])
+        clean_df['cmp% 10_RZ_pass'] = clean_df['cmp% 10_RZ_pass'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+        clean_df['cmp% 20_RZ_pass'] = clean_df['cmp% 20_RZ_pass'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+   
+    elif file == f"4f4_rushing_redzone_W{session['current_week']}_{session['current_season']}.csv":
+        df = pd.read_csv(file).fillna('nan')
+        clean_df = upload_file_clean(df, 'RZ_rush')
+        clean_df = clean_df.drop(columns=['team'])
+        clean_df["%rush 20_RZ_rush"] = clean_df["%rush 20_RZ_rush"].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+        clean_df["%rush 10_RZ_rush"] = clean_df["%rush 10_RZ_rush"].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+        clean_df["%rush 5_RZ_rush"] = clean_df["%rush 5_RZ_rush"].apply(lambda x: 0 if x == " " else float(x.replace('%', ''))) 
+        
+
+    elif file == f"4f4_receiving_redzone_W{session['current_week']}_{session['current_season']}.csv":
+        df = pd.read_csv(file).fillna('nan')
+        clean_df = upload_file_clean(df, 'RZ_rec')
+        clean_df = clean_df.drop(columns=['team'])
+        clean_df['ctch% 20_RZ_rec'] = clean_df['ctch% 20_RZ_rec'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+        clean_df['%tgt 20_RZ_rec'] = clean_df['%tgt 20_RZ_rec'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+        clean_df['ctch% 10_RZ_rec'] = clean_df['ctch% 10_RZ_rec'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+        clean_df['%tgt 10_RZ_rec'] = clean_df['%tgt 10_RZ_rec'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+
+    elif file == f"ETR_proj_W{session['current_week']}_{session['current_season']}.csv":
+        df = pd.read_csv(file).fillna('nan')
+        clean_df = upload_file_clean(df, 'ETR')
+        clean_df = clean_df.drop(columns=['dk salary_ETR', 'dkslateid_ETR']) 
+        clean_df['dk ownership_ETR'] = clean_df['dk ownership_ETR'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+
+
+    for i in range(len(clean_df)):
+        row = clean_df.iloc[i, :].to_dict()
+        if row[list(row.keys())[0]] != 'nan':
+            conditional_insert(player_coll, row)
+
+    player_coll.delete_many({'avgpointspergame':{'$exists':False}})
+
+    return jsonify(file)
+    # return redirect("/scrape_center")
+
+
 
 @app.route("/delete/<collection>/<name>")
 def delete_team_points(collection, name):

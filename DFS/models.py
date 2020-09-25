@@ -11,19 +11,19 @@ from wtforms import (
 from wtforms.validators import InputRequired, DataRequired
 
 seasons = [str(x) for x in player_coll.find({}).distinct("season")]
+
 if None in seasons:
     seasons.pop(seasons.index(None))
 positions = ["QB", "RB", "WR", "TE", "DEF"]
-weeks = [str(i) for i in range(1, 17)]   
+
+weeks = [str(i) for i in range(1, 17)]
+
 
 class GetTimeForm(FlaskForm):
-    week = SelectField(
-        "Week: ", [InputRequired()], choices=list(zip(weeks, weeks))
-    )
-    season = SelectField(
-        "Season: ", choices=list(zip(seasons, seasons))
-    )
+    week = SelectField("Week: ", [InputRequired()], choices=list(zip(weeks, weeks)))
+    season = SelectField("Season: ", choices=list(zip(seasons, seasons)))
     submit = SubmitField()
+
 
 class CalculatorForm(FlaskForm):
     point_label = StringField("Point Label", [InputRequired()])
