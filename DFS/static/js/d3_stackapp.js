@@ -33,7 +33,7 @@ d3.json('/stack_app_data').then(function(data){
 
 var teamLists = teams.map(elem => {
     var nameList = Object.values(elem).flat(1);
-    price = getTeamData(playerData, nameList, 'salary_4f4'),
+    price = getTeamData(playerData, nameList, 'salary'),
     projection =  getTeamData(playerData, nameList, 'C_Proj'),
     teamName = nameList.shift();
     nameList.unshift(Math.round(price / projection*100)/100)
@@ -155,12 +155,12 @@ var td2 = trow.append('a')
         .attr("transform", `translate( ${(chartHeight / 2) }, ${0 - margin.left})`)
         .attr('transform', 'rotate(-90)')
 
-ylabelsGroup.append('text')
-        .attr('x', - (chartHeight / 2) )
-        .attr('y', - margin.left + 20)
-        .attr('value', 'aFPA')
-        .classed('active', false)
-        .text('aFPA')
+// ylabelsGroup.append('text')
+//         .attr('x', - (chartHeight / 2) )
+//         .attr('y', - margin.left + 20)
+//         .attr('value', 'aFPA')
+//         .classed('active', false)
+//         .text('aFPA')
 
 ylabelsGroup.append('text')
         .attr('x', - (chartHeight / 2) - 80)
@@ -230,11 +230,11 @@ ylabelsGroup.append('text')
                         return teamPlayers                        
                 }).flat(1)
                 xLinearScale = xScale(
-                    allTeamPlayers.map(obj => obj['salary_4f4']), 
+                    allTeamPlayers.map(obj => obj['salary']), 
                     chartWidth
                     )
                 yLinearScale = yScale(
-                    [allTeamPlayers.map(obj => obj['C_Fl']), 
+                    [allTeamPlayers.map(obj => obj['C_Floor']), 
                         allTeamPlayers.map(obj => obj['C_Proj']),
                         allTeamPlayers.map(obj => obj['C_Ceil'])].flat(1),
                      chartHeight

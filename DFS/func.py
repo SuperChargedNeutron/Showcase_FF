@@ -1,5 +1,5 @@
 import pymongo
-from .database import player_coll, team_coll
+from .database import player_coll, team_coll, vegas_coll
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import numpy as np
 from selenium import webdriver
@@ -9,43 +9,65 @@ import os
 from selenium import webdriver
 from datetime import datetime
 from webdriver_manager.firefox import GeckoDriverManager
+from random import randint
+from time import sleep
 
 def rename_file(file, week, season):
+
     return f"{file}_W{week}_{season}"
+    
+def rename_scrape_csv(file_name, week, season, scrape, dl_path):
+    recent_file = max(list(os.scandir(os.getcwd())), key=os.path.getctime).name
 
-def login_4f4(browser):
-    browser.get("https://4for4.com")
-    browser.implicitly_wait(15)
-    browser.find_element_by_xpath(
-        "/html/body/div[2]/div/div[1]/div/div/div[4]/div/div[1]/div/div/div/a"
-    ).click()
-    browser.implicitly_wait(15)
-    user_name = browser.find_element_by_id("edit-name")
-    password = browser.find_element_by_id("edit-pass")
-    user_name.send_keys("josephmesser@gmail.com")
-    password.send_keys("Awejmo33$")
-    browser.find_element_by_id("edit-submit--6").click()
+    if scrape == True and recent_file[-7:] != f"W{week}_{season}":
+        os.rename(recent_file, os.path.join(dl_path, f"{file_name}.csv"))
 
-
-def scrape_4f4(url, download_path, dl_button):
-
+def login(url, login_button, submit_login, login_user, login_pass, download_path):
     profile = webdriver.FirefoxProfile()
-    profile.set_preference("browser.download.folderList", 2)  # custom location
+    profile.set_preference("browser.download.folderList", 2)
     profile.set_preference("browser.download.manager.showWhenStarting", False)
+    profile.set_preference("browser.helperApps.alwaysAsk.force", False)
     profile.set_preference("browser.download.useDownloadDir", True)
+    profile.set_preference("browser.helperApps.neverAsk.openFile", True)
     profile.set_preference("browser.download.dir", download_path)
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv")
-    browser = webdriver.Firefox(profile, executable_path=GeckoDriverManager().install())
-    login_4f4(browser)
-    browser.implicitly_wait(15)
+    browser = webdriver.Firefox(firefox_profile=profile, executable_path=GeckoDriverManager().install())
     browser.get(url)
-    browser.implicitly_wait(30)
+    sleep(3)
+    browser.find_element_by_xpath(login_button).click()
+    sleep(3)
+    user_name = browser.find_element_by_id(login_user)
+    password = browser.find_element_by_id(login_pass)
+    for x in "josephmesser@gmail.com":
+        user_name.send_keys(x)
+        sleep(np.random.rand())
+    for x in "Awejmo33$":
+        password.send_keys(x)
+        sleep(np.random.rand())
+    
+    browser.find_element_by_id(submit_login).click()
+    sleep(3)
+    return browser
+
+def scrape_csv(browser, url, dl_button):
+
+    browser.get(url)
+    browser.implicitly_wait(5)
+    browser.get(url)
     try:
-        browser.find_element_by_xpath(dl_button).click()
+        browser.find_element_by_css_selector('.close').click()
     except:
         pass
+
+    try:
+        browser.find_element_by_xpath(dl_button).click()
+        scrape = True
+    except:
+        scrape = False
+
     browser.close()
 
+    return scrape
 
 def column_clean(column, source=""):
     if column == "name" or column == "full_name" or column == 'player':
@@ -271,9 +293,9 @@ def stack_app_query(player_coll, current_week, current_season):
         "week": current_week,
         "season": current_season,
         "C_Proj": {"$exists": True},
-        "C_Fl": {"$exists": True},
+        "C_Floor": {"$exists": True},
         "C_Ceil": {"$exists": True},
-        "salary_4f4": {"$exists": True},
+        "salary": {"$exists": True},
     }
     data = list(
         player_coll.find(
@@ -282,10 +304,10 @@ def stack_app_query(player_coll, current_week, current_season):
                 "_id": False,
                 "player": True,
                 "position": True,
-                "salary_4f4": True,
+                "salary": True,
                 "C_Proj": True,
                 "afpa_4f4": True,
-                "C_Fl": True,
+                "C_Floor": True,
                 "C_Ceil": True,
             },
         )
@@ -304,21 +326,25 @@ def average_row(row, avgee):
     acc = 0
     count = 0
     for key in row.keys():
-
-        if (
-            avgee in key.lower()
-            and key.lower() != "proj_own"
-            and "1k" not in key.lower()
-            and "val" not in key.lower()
-            and "dollar" not in key.lower()
-        ):
-            count += 1 if row[key] != "nan" else 0
-            acc += row[key] if row[key] != "nan" else 0
+        if avgee =='proj':
+            if key in ['proj_4f4', 'ffpts_4f4', 'dk projection_ETR']:
+                count += 1 if row[key] != 'nan' else 0
+                acc += row[key] if row[key] != 'nan' else 0
+        elif avgee == 'floor':
+            if key in ['floor_4f4']:
+                count += 1 if row[key] != 'nan' else 0
+                acc += row[key] if row[key] != 'nan' else 0
+        elif avgee == 'ceil':
+            if key in ['ceiling_4f4']:
+                count += 1 if row[key] != 'nan' else 0
+                acc += row[key] if row[key] != 'nan' else 0
     if count != 0:
         avg = acc / count
         player_coll.update_one(
-            {"_id": row["_id"]}, {"$set": {f"C_{avgee.capitalize()}": round(avg, 2)}}
+            {'_id':row['_id']}, 
+            {'$set':{f'C_{avgee.capitalize()}': round(avg,2)}}
         )
+        
 
 
 def is_favorite(doc):

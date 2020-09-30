@@ -82,7 +82,6 @@ function updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight
 }
 
 function plotCurrentTeam(currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip) {
-    console.log(currentTeam)
     dataExtracted = extractCurrentTeamData(currentTeam)
     xLinearScale = xScale(
         dataExtracted.map(row => row[1]), 
@@ -94,7 +93,6 @@ function plotCurrentTeam(currentTeam, chartWidth, chartHeight, xAxis, yAxis, dat
             )
         xAxis = renderXAxis(xLinearScale, xAxis)
         yAxis = renderYAxis(yLinearScale, yAxis)
-        console.log(dataExtracted)
         circlesGroup = renderCircles(
             xLinearScale,
             yLinearScale, 
@@ -137,7 +135,7 @@ function assignOptions(playerNames, position) {
             }})
         .classed(`${position}Opt`, true)
         .attr('proj', function (d) {return d.C_Proj})
-        .attr('price', function (d) {return d.salary_4f4})
+        .attr('price', function (d) {return d.salary})
         .text(function(d) { 
             if (position == 'flexPosition') {
                 return d; 
@@ -242,7 +240,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         circleGroup.selectAll("circle")
             .data(data).enter()
             .append('circle')
-            .attr('cx', d => xLinearScale(parseFloat(d['salary_4f4'])))
+            .attr('cx', d => xLinearScale(parseFloat(d['salary'])))
             .attr('cy', d => yLinearScale(parseFloat(d['C_Proj'])))
             .attr('r', 5)
             .style('fill', (d, i) => teamCircleColor(d['teamName']))
@@ -266,10 +264,10 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         lines.enter()
             .append('line')
             .attr('class', 'error')
-            .attr('x1', function(d) { return xLinearScale(parseFloat(d['salary_4f4'])); })
-            .attr('x2', function(d) { return xLinearScale(parseFloat(d['salary_4f4'])); })
+            .attr('x1', function(d) { return xLinearScale(parseFloat(d['salary'])); })
+            .attr('x2', function(d) { return xLinearScale(parseFloat(d['salary'])); })
             .attr('y1', function(d) { return yLinearScale(parseFloat(d['C_Ceil'])); })
-            .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Fl'])); });
+            .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Floor'])); });
         return circleGroup
     } else if ( dataCurrentSelection == 'teamBuild') {
         circleGroup.selectAll("circle")
@@ -313,7 +311,7 @@ function getTeamData(playerData, team, key) {
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
-    if (key == 'salary_4f4') {
+    if (key == 'salary') {
         var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)
         return price

@@ -11,6 +11,7 @@
   button.scrape {
     margin: 5px 10px 20px 20px;
   }
+
   
 </style>
 {% include 'navbar.html' %}
@@ -46,25 +47,19 @@
       <div class='row'>
         <p> 4for4 WR L4 <br> Fantasy Points</p>
         <button type="button" class="btn btn-info scrape">
-            <a>href='' scrape </a>
+            <a href='/scrape/4f4_wr_fp_L4'> scrape </a>
         </button>
       </div>
       <div class='row'>
         <p> 4for4 RB L3 <br> Fantasy Points </p>
         <button type="button" class="btn btn-info scrape">
-            <a> scrape </a>
+            <a href='/scrape/4f4_rb_fp_L3'> scrape </a>
         </button>
       </div>
       <div class='row'>
-        <p> 4for4 RB L1 <br> Fantasy Points </p>
-        <button type="button" class="btn btn-info scrape">
-            <a> scrape </a>
-        </button>
-      </div> 
-      <div class='row'>
         <p> 4for4 RB L3 Target</p>
         <button type="button" class="btn btn-info scrape">
-            <a> scrape </a>
+            <a href='/scrape/4f4_rb_targ_L3'> scrape </a>
         </button>
       </div> 
     </div>
@@ -74,7 +69,7 @@
       <div class='row'>
         <p> 4for4 RedZone Passing  </p>
         <button type="button" class="btn btn-info scrape">
-            <a  href='/scrape/4f4_passing_redzone'> scrape </a>
+            <a href='/scrape/4f4_passing_redzone'> scrape </a>
         </button>
       </div>
       <div class='row'>
@@ -114,7 +109,15 @@
         </button>
       </div> 
     </div>
+    
   </div>
+  <div class='row'>
+      <p> Average Data: </p>
+      <button type="button" class="btn btn-warning scrape">
+          <a href='/concensus_data'> Go </a>
+      </button>
+    </div> 
+
 <h4 class='text-left'> File Upload: </h4>
 <div class="input-group">
   <select class="custom-select" id="fileSelect">

@@ -1,4 +1,4 @@
-function getData(url){
+function getData(url, defaultCols){
     var colSelect = d3.select('#colSelect')
     var tableHeader = d3.select('#myTable').append('thead').append('tr')
     // var tableFooter = d3.select('#myTable').append('tfoot').append('tf').append('tr')
@@ -77,40 +77,18 @@ function getData(url){
         } );
         // initial toggle
         $(function() {
-            initColumns = ['player',
-            'team', 
-            'opponent',
-            'avgpointspergame',
-            'salary_4f4', 
-            'value_SS', 
-            'afpa_4f4',
-            'ss projection_SS',
-            'C_Proj',
-            'C_Ceil',	
-            'C_Flr', 
-            'dk_50_percentile_SS',
-            'dk_75_percentile_SS',
-            'dk_85_percentile_SS',
-            'dk_95_percentile_SS',
-            'dk_99_percentile_SS',
-            'dk min_ETR',
-            'dk max_ETR',
-            'projected own%_4f4',
-            'gpp odds_4f4',
-            'dk lev_4f4',
-            'wopr_ay',
-            'FAV'
-            //this is SS projection 
-           ]
-            // '4f4 RZ L3',
-            // 'Air Tar L3',
-            // Avgs,
-            // JALG]
             d3.selectAll('.toggle-vis')
                 .each(function(d) {
-                    if (!initColumns.includes(d)) {
+                    if (!defaultCols.includes(d)) {
                         var column = table.column($(this).attr('data-column') );
                         column.visible( ! column.visible() );
+                    }
+            })
+            d3.selectAll('.toggle-vis')
+                .each(function(d) {
+                    if (d.startsWith('w')) {
+                        var column = table.column($(this).attr('data-column') );
+                        column.visible( true );
                     }
             })
 
@@ -136,6 +114,18 @@ function getData(url){
 var pos = d3.select('.h1').attr('id')
 var thresh = d3.select('#thresh').text()
 
+if (pos == 'QB') {
+    cols = qb_cols
+} else if (pos == 'RB') {
+    cols = rb_cols
+} else if (pos == 'WR') {
+    cols = wr_cols
+} else if (pos = 'TE') {
+    cols = te_cols
+} else if (pos = 'DST') {
+    cols = def_cols
+};
+
 if (thresh != '') {
     url = `/${pos}_data/${thresh}`
 }
@@ -145,4 +135,4 @@ else if (thresh == '') {
 }
 
 console.log(url)
-getData(url)
+getData(url, cols)
