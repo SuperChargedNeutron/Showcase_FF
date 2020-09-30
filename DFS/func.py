@@ -38,10 +38,10 @@ def login(url, login_button, submit_login, login_user, login_pass, download_path
     sleep(3)
     user_name = browser.find_element_by_id(login_user)
     password = browser.find_element_by_id(login_pass)
-    for x in "josephmesser@gmail.com":
+    for x in os.environ['joe_mail']:
         user_name.send_keys(x)
         sleep(np.random.rand())
-    for x in "Awejmo33$":
+    for x in os.environ['joe_pass']:
         password.send_keys(x)
         sleep(np.random.rand())
     
