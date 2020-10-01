@@ -277,7 +277,7 @@ def calculator_submit(label, meta, weights, columns):
 
 @app.route("/scrape_center")
 def scrape_center():
-    dl_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data")
+    dl_path = os.path.join('c', 'Users', 'josep', "Desktop", "DFS_data")
     if not os.path.exists(dl_path):
         os.makedirs(dl_path)
     os.chdir(dl_path)
@@ -291,7 +291,7 @@ def scrape_it(file_name):
     week = session['current_week']
     season = session['current_season']
     dl_path = os.path.join(
-        os.path.join(os.environ["USERPROFILE"]), "Desktop", "DFS_data"
+        os.path.join('c', 'Users', 'josep', "Desktop", "DFS_data"
     )
     if not os.path.exists(dl_path):
         os.makedirs(dl_path)
@@ -398,7 +398,7 @@ def fupload(file):
     week = session['current_week']
     season = session['current_season']
     dl_path = os.path.join(
-        os.path.join(os.environ["USERPROFILE"]), "Desktop", "DFS_data"
+        os.path.join('c', 'Users', 'josep', "Desktop", "DFS_data"
     )
     os.chdir(dl_path)
 
