@@ -266,7 +266,7 @@ def fupload(file):
             clean_df = upload_file_clean(df, 'targ')
             week_cols = [col for col in clean_df.columns if col.startswith('w')]
             clean_df[week_cols] = clean_df[week_cols].applymap(lambda x: float(x) if x != '-' else x)
-            clean_df['array_4f4'] = clean_df['array_4f4'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+            clean_df['array_targ'] = clean_df['array_targ'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
             
 
         clean_df['week'] = week
