@@ -1,4 +1,4 @@
-from .database import player_coll
+from database import player_coll
 import datetime
 from flask_wtf import FlaskForm
 from wtforms import (
