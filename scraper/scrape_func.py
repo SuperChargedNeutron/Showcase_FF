@@ -1,12 +1,58 @@
 import os 
 import pymongo
-from database import player_coll
+from database import player_coll, team_coll, vegas_coll
 from selenium import webdriver
 from datetime import datetime
 from webdriver_manager.firefox import GeckoDriverManager
 from random import randint
 from time import sleep
 import numpy as np
+
+def average_row(row, avgee):
+
+    ### takes in a player/document and scans
+    ### for 'proj' in columns, then avg all
+    ##E the collected columns based on the averagee
+    ### avgee SHOULD be 'proj' or 'ceil' or 'flr'
+
+    acc = 0
+    count = 0
+    for key in row.keys():
+        if avgee =='proj':
+            if key in ['proj_4f4', 'ffpts_4f4', 'dk projection_ETR']:
+                count += 1 if row[key] != 'nan' else 0
+                acc += row[key] if row[key] != 'nan' else 0
+        elif avgee == 'floor':
+            if key in ['floor_4f4']:
+                count += 1 if row[key] != 'nan' else 0
+                acc += row[key] if row[key] != 'nan' else 0
+        elif avgee == 'ceil':
+            if key in ['ceiling_4f4']:
+                count += 1 if row[key] != 'nan' else 0
+                acc += row[key] if row[key] != 'nan' else 0
+    if count != 0:
+        avg = acc / count
+        player_coll.update_one(
+            {'_id':row['_id']}, 
+            {'$set':{f'C_{avgee.capitalize()}': round(avg,2)}}
+        )
+
+def is_favorite(doc):
+    ## this function takes in a player
+    ## team, and week and determines
+    ## whether that team is a favorite or
+    ## not according to vegas dash
+    if doc["team"] == "OAK":
+        doc["team"] = "LV"
+    if doc["team"] == "LA":
+        doc["team"] = "LAC"
+    if doc["team"] == "JAC":
+        doc["team"] = "JAX"
+    player_team = list(team_coll.find({"Acronym": doc["team"]}, {"_id": False}))[0]
+    if len(list(vegas_coll.find({"FAV": player_team["Team"]}))) > 0:
+        player_coll.update_one({"_id": doc["_id"]}, {"$set": {"FAV": True}})
+    elif len(list(vegas_coll.find({"FAV": player_team["Team"]}))) == 0:
+        player_coll.update_one({"_id": doc["_id"]}, {"$set": {"FAV": False}})
 
 def column_clean(column, source=""):
     if column == "name" or column == "full_name" or column == 'player':

@@ -8,28 +8,16 @@ from scrape_func import (
     login,
     scrape_csv,
     upload_file_clean,
-    column_clean
+    column_clean,
+    average_row,
+    is_favorite
 )
+from models import FileSubmitForm, GetTimeForm
 from database import db, player_coll
 import datetime
-from flask_wtf import FlaskForm
-from wtforms import (
-    Form,
-    SelectField,
-    SubmitField,
-)
 from flask_bootstrap import Bootstrap
 from flask_cors import CORS
-from wtforms.validators import InputRequired
-
-player_coll = db["Player_Data"]
-seasons = [str(x) for x in player_coll.find({}).distinct("season")]
-weeks = [str(i) for i in range(1, 17)]
-class GetTimeForm(FlaskForm):
-    week = SelectField("Week: ", [InputRequired()], choices=list(zip(weeks, weeks)))
-    season = SelectField("Season: ", choices=list(zip(seasons, seasons)))
-    submit = SubmitField()
-
+import pandas as pd
 
 app = Flask(__name__, static_url_path="/static")
 app.config["JSON_SORT_KEYS"] = False
@@ -53,15 +41,19 @@ def get_time():
         return redirect("/scrape_center")
     return render_template("gettime.html", form=form)
 
-@app.route("/scrape_center")
+@app.route("/scrape_center", methods=["GET", "POST"])
 def scrape_center():
     dl_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data")
     if not os.path.exists(dl_path):
         os.makedirs(dl_path)
     os.chdir(dl_path)
     files = [x.name for x in os.scandir(os.getcwd())]
+    form = FileSubmitForm(choices=files)
 
-    return render_template("scrape_center.html", files=files)
+    if form.validate():
+        return redirect(f'/fupload/{form.file_name.data}')
+
+    return render_template("scrape_center.html", form=form)
 
 @app.route("/scrape/<file_name>")
 def scrape_it(file_name):
@@ -182,8 +174,6 @@ def fupload(file):
     )
     os.chdir(dl_path)
 
-    import pandas as pd
-
     try:
         if "golden" in file.lower():
 
@@ -216,7 +206,15 @@ def fupload(file):
             clean_df = upload_file_clean(df, '4f4')
             clean_df = clean_df.drop(columns=['salary_4f4'])
             clean_df['proj_4f4'] = round(clean_df['floor_4f4'] + clean_df['value1_4f4'], 2)
-
+        
+        elif file == f"4f4_leverage_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna('nan')
+            clean_df = upload_file_clean(df, '4f4')
+            clean_df = clean_df.drop(columns=['dk sal $_4f4'])
+            clean_df['projected own%_4f4'] = clean_df['projected own%_4f4'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+            clean_df['cash odds_4f4'] = clean_df['cash odds_4f4'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+            clean_df['gpp odds_4f4'] = clean_df['gpp odds_4f4'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+            clean_df['implied own%_4f4'] = clean_df['implied own%_4f4'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
 
         elif file == f"4f4_passing_redzone_W{week}_{season}.csv":
             df = pd.read_csv(file).fillna('nan')
@@ -278,8 +276,20 @@ def fupload(file):
                 conditional_insert(player_coll, row)
 
         player_coll.delete_many({'avgpointspergame':{'$exists':False}})
-    
+        
     except:
         return render_template('404.html', file=file)
 
     return redirect("/scrape_center")
+
+
+@app.route('/concensus_data')
+def c_data():
+    players = list(player_coll.find({'week':session['current_week'], 'season':session['current_season']}))
+    for x in players:
+        average_row(x, 'proj')
+        average_row(x, 'ceil')
+        average_row(x, 'floor')
+        is_favorite(x)
+
+    return redirect('/scrape_center')

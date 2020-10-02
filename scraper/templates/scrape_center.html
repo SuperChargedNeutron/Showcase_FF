@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% import "bootstrap/wtf.html" as wtf %}
 {% block content %}
 <style>
   div.column {
@@ -120,14 +120,15 @@
 
 <h4 class='text-left'> File Upload: </h4>
 <div class="input-group">
-  <select class="custom-select" id="fileSelect">
-    {% for file in files %}
-      <option class='file' value='{{file}}'> {{ file }}</option>
-    {% endfor %}
-  </select>
-  <div class="input-group-append">
-    <button id='fileButton'  class="btn btn-outline-secondary" type="button">Button</button>
-  </div>
+  <form method='POST' action='/scrape_center'>
+      {{ form.hidden_tag() }}
+
+      <div class='form-row'>
+        {{ wtf.form_field(form.file_name) }}
+        <button class='btn btn-lg btn-primary' type='submit'>{{ wtf.form_field(form.submit)}}</button>
+      </div>
+      </div>
+  </form>>
 </div>
 </div>
     </main>
@@ -137,7 +138,7 @@
 
 {% endblock %}
 
-{% block scripts %}
+<!-- {% block scripts %}
 {{ super() }}
 <script type="text/javascript"> 
         d3.selectAll('.file').on('click', function() {
@@ -147,4 +148,4 @@
         window.location.assign(`/fupload/${file}`)            
       })
 </script> 
-{% endblock %}
+{% endblock %} -->
