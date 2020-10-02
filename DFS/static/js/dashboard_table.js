@@ -88,7 +88,7 @@ function getData(url, defaultCols){
                 .each(function(d) {
                     if (d.startsWith('w')) {
                         var column = table.column($(this).attr('data-column') );
-                        column.visible( true );
+                        column.visible(true);
                     }
             })
 

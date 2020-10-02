@@ -79,7 +79,7 @@ def column_clean(column, source=""):
     elif column == "pos" or column == "dk position" or column == 'position':
         return "position"
     elif column == "value.1":
-        return f"value1_{source}"
+        return f"value1_{source}" 
     elif column != "week" and column != "season":
         if source != "":
             return f"{column}_{source}"
