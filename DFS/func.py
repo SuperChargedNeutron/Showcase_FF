@@ -366,7 +366,7 @@ def is_favorite(doc):
 
 
 def get_bookie_divs():
-    browser = webdriver.Firefox()
+    browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
     browser.get("https://mybookie.ag/sportsbook/nfl/")
     html = browser.page_source
     browser.close()
