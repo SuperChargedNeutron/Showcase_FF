@@ -1,11 +1,10 @@
 from flask import render_template, redirect, request, url_for, jsonify, session
-from .func import (
+from func import (
     get_raw_data,
     stack_app_query,
     pull_scaled_data,
     weigh_data,
     top_guns_query,
-    get_current_time,
     get_bookie_divs,
     scrape_bookie_divs,
     conditional_insert,
@@ -15,20 +14,11 @@ from .func import (
     scrape_csv,
     average_row,
     is_favorite,
-    rename_scrape_csv,
     login
 )
-from .database import (
-    db,
-    player_coll,
-    vegas_coll,
-    team_coll,
-    TeamBuilder,
-    CalcCollection,
-)
-from .db_cols import (
+from db_cols import (
     ss_data_cols,
-    _4f4_ceil_cols,
+    _4f4_celi_cols,
     _4f4_proj_cols,
     _4f4_rb_fp_cols,
     _4f4_rb_tar_cols,
@@ -37,10 +27,10 @@ from .db_cols import (
     airy_te_cols,
     airy_wr_cols,
 )
-from .models import CalculatorForm, GetTimeForm
+from models import CalculatorForm, GetTimeForm
 import json
 from urllib.parse import quote, unquote
-from . import app
+from __init__ import app
 import os
 
 app.config["JSON_SORT_KEYS"] = False
@@ -61,7 +51,6 @@ def get_time():
 
         return redirect("/VEGAS_Dash")
     return render_template("gettime.html", form=form)
-
 
 @app.route("/VEGAS_Dash")
 def vegas_dash():
@@ -240,7 +229,7 @@ def calculator_submit(label, meta, weights, columns):
     columns = []
     weights = []
     if len(point_weights) == len(point_columns):
-        for i in range(len(point_weights)):
+        for i in range(len(point_weights)):``
             point_dict = {
                 "weight": point_weights[i][f"weight{i+1}"],
                 "col": point_columns[i][f"column{i+1}"],
@@ -384,8 +373,10 @@ def scrape_it(file_name):
         )
     scrape = scrape_csv(browser, url, dl_button)
 
-    if scrape == True:
-        rename_scrape_csv(file_name, week, season, scrape, dl_path)
+    recent_file = max(list(os.scandir(os.getcwd())), key=os.path.getctime).name
+
+    if scrape == True and recent_file[-7:] != f"W{week}_{season}":
+        os.rename(recent_file, os.path.join(dl_path, f"{file_name}.csv"))
 
         return redirect(f'/fupload/{file_name}.csv')
 
@@ -489,7 +480,7 @@ def fupload(file):
         clean_df = upload_file_clean(df, 'targ')
         week_cols = [col for col in clean_df.columns if col.startswith('w')]
         clean_df[week_cols] = clean_df[week_cols].applymap(lambda x: float(x) if x != '-' else x)
-        clean_df['array_targ'] = clean_df['array_targ'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
+        clean_df['array_4f4'] = clean_df['array_4f4'].apply(lambda x:  0 if x == " " else float(x.replace('%', ''))) 
         
 
     clean_df['week'] = week
@@ -555,23 +546,14 @@ def fupload(file):
 #         dl_path
 #         )
 #     scrape_1 = scrape_csv(browser, proj_scrape[0], proj_scrape[1])
-#     rename_scracpe_csv(f"4f4_projection_W{week}_{season}.csv", week, season)
 #     scrape_2 = scrape_csv(browser, fl_ce_scrape[0], fl_ce_scrape[1])
-#     rename_scracpe_csv(f"4f4_fc_data_W{week}_{season}.csv", week, season)
 #     scrape_3 = scrape_csv(browser, leverage_scrape_url, rz_lev_dl_button)
-#     rename_scracpe_csv(f"4f4_passing_redzone_W{week}_{season}.csv", week, season)
 #     scrape_4 = scrape_csv(browser, rush_rz_url, rz_lev_dl_button)
-#     rename_scracpe_csv(f"4f4_projection_W{week}_{season}.csv", week, season)
 #     scrape_5 = scrape_csv(browser, pass_rz_url, rz_lev_dl_button)
-#     rename_scracpe_csv(f"4f4_projection_W{week}_{season}.csv", week, season)
 #     scrape_6 = scrape_csv(browser, rec_rz_url, rz_lev_dl_button)
-#     rename_scracpe_csv(f"4f4_projection_W{week}_{season}.csv", week, season)
 #     scrape_7 = scrape_csv(browser, wr_fp_L4_url, fp_targ_dl_button)
-#     rename_scracpe_csv(f"4f4_projection_W{week}_{season}.csv", week, season)
 #     scrape_8 = scrape_csv(browser, rb_fp_L3_url, fp_targ_dl_button)
-#     rename_scracpe_csv(f"4f4_projection_W{week}_{season}.csv", week, season)
 #     scrape_8 = scrape_csv(browser, rb_tar_L3_url, fp_targ_dl_button)
-#     rename_scracpe_csv(f"4f4_projection_W{week}_{season}.csv", week, season)
 
 
 @app.route('/concensus_data')

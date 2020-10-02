@@ -1,13 +1,11 @@
 import pymongo
-from .database import player_coll, team_coll, vegas_coll
+from database import player_coll, team_coll, vegas_coll
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import numpy as np
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from datetime import datetime
 import os
-from selenium import webdriver
-from datetime import datetime
 from webdriver_manager.firefox import GeckoDriverManager
 from random import randint
 from time import sleep
@@ -38,10 +36,10 @@ def login(url, login_button, submit_login, login_user, login_pass, download_path
     sleep(3)
     user_name = browser.find_element_by_id(login_user)
     password = browser.find_element_by_id(login_pass)
-    for x in "josephmesser@gmail.com":
+    for x in os.environ['joe_mail']:
         user_name.send_keys(x)
         sleep(np.random.rand())
-    for x in "Awejmo33$":
+    for x in os.environ['joe_pass']:
         password.send_keys(x)
         sleep(np.random.rand())
     
@@ -179,25 +177,6 @@ def conditional_insert(collection, row):
         collection.insert_one(row)
 
 
-def get_current_time(vegas_coll):
-    current_season = int(
-        list(
-            vegas_coll.find({}, {"_id": False, "Season": True})
-            .sort("Season", -1)
-            .limit(1)
-        )[0]["Season"]
-    )
-
-    current_week = int(
-        list(
-            vegas_coll.find({"Season": current_season}, {"_id": False, "Week": True})
-            .sort("Week", -1)
-            .limit(1)
-        )[0]["Week"]
-    )
-    return current_week, current_season
-
-
 def top_guns_query(pos, thresh, current_week, current_season):
     return list(
         player_coll.find(
@@ -232,6 +211,8 @@ def pull_scaled_data(columns, meta):
     query = list(player_coll.find(query_params, query_cols))
     players = [x["player"] for x in query]
     to_be_scaled = np.array([[x[key] for key in columns] for x in query])
+
+    print(to_be_scaled)
 
     minmax_scaler = MinMaxScaler()
     standard_scaler = StandardScaler()
@@ -366,7 +347,7 @@ def is_favorite(doc):
 
 
 def get_bookie_divs():
-    browser = webdriver.Firefox()
+    browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
     browser.get("https://mybookie.ag/sportsbook/nfl/")
     html = browser.page_source
     browser.close()
@@ -428,6 +409,7 @@ def scrape_bookie_divs(divs):
                     "Market Spread": 0 if spread == "PK" else abs(float(spread)),
                 }
             )
+            print(buttons)
             if buttons[0][0] == "-":
                 fave_team = vegas_row["Home"]
                 dog_team = vegas_row["Road"]
