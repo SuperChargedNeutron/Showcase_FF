@@ -151,8 +151,6 @@ def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
         defs=defs,
         def_headers=def_headers,
     )
-
-
 @app.route("/stack_app", methods=["GET", "POST"])
 def stack_app():
     return render_template("stack_app.html")
