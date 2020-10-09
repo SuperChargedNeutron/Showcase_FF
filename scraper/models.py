@@ -1,4 +1,4 @@
-import os 
+import os
 import datetime
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -23,11 +23,15 @@ if not os.path.exists(dl_path):
 os.chdir(dl_path)
 files = [x.name for x in os.scandir(os.getcwd())]
 
+
 class GetTimeForm(FlaskForm):
     week = SelectField("Week: ", [InputRequired()], choices=list(zip(weeks, weeks)))
     season = SelectField("Season: ", choices=list(zip(seasons, seasons)))
     submit = SubmitField()
 
+
 class FileSubmitForm(FlaskForm):
-    file_name = SelectField('File Name : ',  [InputRequired()], choices=list(zip(files, files)))
+    file_name = SelectField(
+        "File Name : ", [InputRequired()], choices=list(zip(files, files))
+    )
     submit = SubmitField()

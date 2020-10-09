@@ -1,5 +1,5 @@
 import pymongo
-from database import player_coll, team_coll, vegas_coll
+from .database import player_coll, team_coll, vegas_coll
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import numpy as np
 from selenium import webdriver
@@ -10,15 +10,18 @@ from webdriver_manager.firefox import GeckoDriverManager
 from random import randint
 from time import sleep
 
+
 def rename_file(file, week, season):
 
     return f"{file}_W{week}_{season}"
-    
+
+
 def rename_scrape_csv(file_name, week, season, scrape, dl_path):
     recent_file = max(list(os.scandir(os.getcwd())), key=os.path.getctime).name
 
     if scrape == True and recent_file[-7:] != f"W{week}_{season}":
         os.rename(recent_file, os.path.join(dl_path, f"{file_name}.csv"))
+
 
 def login(url, login_button, submit_login, login_user, login_pass, download_path):
     profile = webdriver.FirefoxProfile()
@@ -29,23 +32,26 @@ def login(url, login_button, submit_login, login_user, login_pass, download_path
     profile.set_preference("browser.helperApps.neverAsk.openFile", True)
     profile.set_preference("browser.download.dir", download_path)
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv")
-    browser = webdriver.Firefox(firefox_profile=profile, executable_path=GeckoDriverManager().install())
+    browser = webdriver.Firefox(
+        firefox_profile=profile, executable_path=GeckoDriverManager().install()
+    )
     browser.get(url)
     sleep(3)
     browser.find_element_by_xpath(login_button).click()
     sleep(3)
     user_name = browser.find_element_by_id(login_user)
     password = browser.find_element_by_id(login_pass)
-    for x in os.environ['joe_mail']:
+    for x in os.environ["joe_mail"]:
         user_name.send_keys(x)
         sleep(np.random.rand())
-    for x in os.environ['joe_pass']:
+    for x in os.environ["joe_pass"]:
         password.send_keys(x)
         sleep(np.random.rand())
-    
+
     browser.find_element_by_id(submit_login).click()
     sleep(3)
     return browser
+
 
 def scrape_csv(browser, url, dl_button):
 
@@ -53,7 +59,7 @@ def scrape_csv(browser, url, dl_button):
     browser.implicitly_wait(5)
     browser.get(url)
     try:
-        browser.find_element_by_css_selector('.close').click()
+        browser.find_element_by_css_selector(".close").click()
     except:
         pass
 
@@ -67,14 +73,15 @@ def scrape_csv(browser, url, dl_button):
 
     return scrape
 
+
 def column_clean(column, source=""):
-    if column == "name" or column == "full_name" or column == 'player':
+    if column == "name" or column == "full_name" or column == "player":
         return "player"
-    elif column == "opp" or column == 'opponent':
+    elif column == "opp" or column == "opponent":
         return "opponent"
-    elif column == "tm" or column == "teamabbrev" or column == 'team':
+    elif column == "tm" or column == "teamabbrev" or column == "team":
         return "team"
-    elif column == "pos" or column == "dk position" or column == 'position':
+    elif column == "pos" or column == "dk position" or column == "position":
         return "position"
     elif column == "value.1":
         return f"value1_{source}"
@@ -92,7 +99,7 @@ def Filter(string):
     return [st for st in string if not any(sub in st for sub in substr)]
 
 
-def upload_file_clean(df, suffix=''):
+def upload_file_clean(df, suffix=""):
     df.columns = [column_clean(x.lower(), source=suffix) for x in df.columns]
     name_index = list(df.columns).index("player")
     pos_index = list(df.columns).index("position") if "position" in df.columns else None
@@ -126,10 +133,17 @@ def upload_file_clean(df, suffix=''):
         dst_index = df.index[df["position"] == "DST"]
         df.loc[dst_index, "position"] = "DEF"
         df.iloc[:, pos_index] = df.iloc[:, pos_index].apply(lambda x: x.split("/")[0])
-        for i in df.index[df['position'] =='DEF']:
-            df.iloc[i, name_index] = list(team_coll.find({'Acronym': df.iloc[i, list(df.columns).index('team')]}, {'_id':False, 'Team':True}).limit(1))[0]['Team']
+        for i in df.index[df["position"] == "DEF"]:
+            df.iloc[i, name_index] = list(
+                team_coll.find(
+                    {"Acronym": df.iloc[i, list(df.columns).index("team")]},
+                    {"_id": False, "Team": True},
+                ).limit(1)
+            )[0]["Team"]
     if opp_index != None:
-        df.iloc[:, opp_index] = df.iloc[:, opp_index].apply(lambda x: x.replace("@", ""))
+        df.iloc[:, opp_index] = df.iloc[:, opp_index].apply(
+            lambda x: x.replace("@", "")
+        )
 
     return df
 
@@ -252,24 +266,7 @@ def get_raw_data(player_coll, cols):
     data = player_coll.find(query_params, data_return)
     return data
 
-
-circleColors = [
-    "#B31217",
-    "#B35F12",
-    "#B8A211",
-    "#12B816",
-    "#1450B5",
-    "#1FA5B8",
-    "#ADB87D",
-    "#B87DB7",
-    "#AABDB1",
-    "#99A7BD",
-]
-
-
 def stack_app_query(player_coll, current_week, current_season):
-    ## leave week 16 until `current_week` data is avail
-    print(current_week)
     query_params = {
         "week": current_week,
         "season": current_season,
@@ -302,30 +299,28 @@ def average_row(row, avgee):
     ### takes in a player/document and scans
     ### for 'proj' in columns, then avg all
     ##E the collected columns based on the averagee
-    ### avgee SHOULD be 'proj' or 'ceil' or 'flr'
+    ### avgee SHOULD be 'proj' or 'ceil' or 'floor'
 
     acc = 0
     count = 0
     for key in row.keys():
-        if avgee =='proj':
-            if key in ['proj_4f4', 'ffpts_4f4', 'dk projection_ETR']:
-                count += 1 if row[key] != 'nan' else 0
-                acc += row[key] if row[key] != 'nan' else 0
-        elif avgee == 'floor':
-            if key in ['floor_4f4']:
-                count += 1 if row[key] != 'nan' else 0
-                acc += row[key] if row[key] != 'nan' else 0
-        elif avgee == 'ceil':
-            if key in ['ceiling_4f4']:
-                count += 1 if row[key] != 'nan' else 0
-                acc += row[key] if row[key] != 'nan' else 0
+        if avgee == "proj":
+            if key in ["proj_4f4", "ffpts_4f4", "dk projection_ETR"]:
+                count += 1 if row[key] != "nan" else 0
+                acc += row[key] if row[key] != "nan" else 0
+        elif avgee == "floor":
+            if key in ["floor_4f4"]:
+                count += 1 if row[key] != "nan" else 0
+                acc += row[key] if row[key] != "nan" else 0
+        elif avgee == "ceil":
+            if key in ["ceiling_4f4"]:
+                count += 1 if row[key] != "nan" else 0
+                acc += row[key] if row[key] != "nan" else 0
     if count != 0:
         avg = acc / count
         player_coll.update_one(
-            {'_id':row['_id']}, 
-            {'$set':{f'C_{avgee.capitalize()}': round(avg,2)}}
+            {"_id": row["_id"]}, {"$set": {f"C_{avgee.capitalize()}": round(avg, 2)}}
         )
-        
 
 
 def is_favorite(doc):

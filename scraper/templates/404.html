@@ -50,8 +50,14 @@
  
  {% include 'navbar.html' %}
  
-  <h1>Page Not Found</h1>
-  <p>Sorry, but {{file}} could not be properly uploaded</p>
+  <h1>{{ head }}</h1>
+  <h2> {{ code }}</h2>
+  <p>{{ message }}</p>
+  {% if boo %}
+  <button class= 'btn btn-success'>
+    <a href='/fupload_4f4'>Upload Files</a>
+  </button>
+  {% endif %}
 
 
 {% endblock %}
