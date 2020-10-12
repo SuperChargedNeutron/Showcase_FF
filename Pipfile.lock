@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "19d7f128b17d1228b85cf406670905fc950f1aa991661b061eb55761d4a0ddc4"
+            "sha256": "41e07d28397bc3098bcfb44c2eea4b47717f111dd85375b4f76932a4fe112bf9"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -36,17 +36,6 @@
             "index": "pypi",
             "version": "==0.0.1"
         },
-        "cefpython3": {
-            "hashes": [
-                "sha256:3ff46d8a1aadc1498e60eb451c4ec943aa0f66574617556cc977ed918abab76d",
-                "sha256:8e3b5491b6bffa000af56339db00d478912dc73bdb3714ed9cd3352ca6d1fbc4",
-                "sha256:9b8018c3b5aee260c755e0e0691be04f60ed10389e7eeea44f40ba9a3b0b410e",
-                "sha256:b0a23d5a04605e817c1b9f2135c6702f015e748f55b9ad47f7314232b31e12e2",
-                "sha256:b643f94d4fcf88bcea49a205ea9ff3f206b1422d5e0ce9fa5b193971c5a0e52b"
-            ],
-            "index": "pypi",
-            "version": "==66.0"
-        },
         "certifi": {
             "hashes": [
                 "sha256:5930595817496dd21bb8dc35dad090f1c2cd0adfaf21204bf6732ca5d8ee34d3",
@@ -79,11 +68,11 @@
         },
         "configparser": {
             "hashes": [
-                "sha256:2ca44140ee259b5e3d8aaf47c79c36a7ab0d5e94d70bd4105c03ede7a20ea5a1",
-                "sha256:cffc044844040c7ce04e9acd1838b5f2e5fa3170182f6fda4d2ea8b0099dbadd"
+                "sha256:005c3b102c96f4be9b8f40dafbd4997db003d07d1caa19f37808be8031475f2a",
+                "sha256:08e8a59ef1817ac4ed810bb8e17d049566dd6e024e7566f6285c756db2bb4ff8"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==5.0.0"
+            "version": "==5.0.1"
         },
         "crayons": {
             "hashes": [
@@ -393,7 +382,7 @@
                 "sha256:f0cd76232072b15bba4459cbf9475d81348065ac120e20c301d2593621dd0a76",
                 "sha256:faa3c2a90aadce92bfb28570830b498954243eb5c6907d41e9dcbd936ec9ca52"
             ],
-            "index": "pypi",
+            "markers": "sys_platform == 'win32'",
             "version": "==2.5.1"
         },
         "pytz": {

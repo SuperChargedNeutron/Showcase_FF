@@ -12,8 +12,9 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.firefox import GeckoDriverManager
 
-#Local Imports
+# Local Imports
 from database import player_coll, team_coll, vegas_coll
+
 
 def scrape_airyards(dl_path, week, season):
     profile = webdriver.FirefoxProfile()
@@ -29,16 +30,18 @@ def scrape_airyards(dl_path, week, season):
     year_input_xpath = '//*[@id="year-selectized"]'
     week_input_xpath = '//*[@id="weeks-selectized"]'
     dl_button_xpath = '//*[@id="download"]'
-    rb_check_xpath = '/html/body/div[1]/div[2]/div[1]/div/div/div[2]/label/input'
-    wr_check_xpath = '/html/body/div[1]/div[2]/div[1]/div/div/div[3]/label/input'
-    te_check_xpath = '/html/body/div[1]/div[2]/div[1]/div/div/div[4]/label/input'
+    rb_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[2]/label/input"
+    wr_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[3]/label/input"
+    te_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[4]/label/input"
 
     try:
         ## ---- initialize the browser and go to data URL ---- ##
-        browser = webdriver.Firefox(firefox_profile=profile, executable_path=GeckoDriverManager().install())
-        browser.get('https://apps.airyards.com/tables')
+        browser = webdriver.Firefox(
+            firefox_profile=profile, executable_path=GeckoDriverManager().install()
+        )
+        browser.get("https://apps.airyards.com/tables")
         sleep(10)
-        
+
         year_input = browser.find_element_by_xpath(year_input_xpath)
         year_input.send_keys(Keys.BACKSPACE)
         year_input.send_keys(season)
@@ -51,7 +54,7 @@ def scrape_airyards(dl_path, week, season):
         wr_check = browser.find_element_by_xpath(wr_check_xpath)
         te_check = browser.find_element_by_xpath(te_check_xpath)
 
-                    ## ---- Navigate the Webpage ---- ##
+        ## ---- Navigate the Webpage ---- ##
 
         ## ---- clear current weeks and set correct weeks ---- ##
         week_input.click()
@@ -65,15 +68,17 @@ def scrape_airyards(dl_path, week, season):
         rb_check.click()
         wr_check.click()
         te_check.click()
-        
+
         ## ---- download the file --- ###
         dl_button.click()
 
         scrape = True
     except:
         scrape = False
-    
+
     return scrape
+
+
 def login(url, login_button, submit_login, login_user, login_pass, download_path):
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.download.folderList", 2)
@@ -102,6 +107,7 @@ def login(url, login_button, submit_login, login_user, login_pass, download_path
     browser.find_element_by_id(submit_login).click()
     sleep(3)
     return browser
+
 
 def average_row(row, avgee):
 
@@ -171,36 +177,48 @@ def column_clean(column, source=""):
             return column
     else:
         return column
-    
+
+
 def scrape_def_data(dl_path):
     base_url = "https://4for4.com"
     login_button = (
-    "/html/body/div[2]/div/div[1]/div/div/div[4]/div/div[1]/div/div/div/a"
+        "/html/body/div[2]/div/div[1]/div/div/div[4]/div/div[1]/div/div/div/a"
     )
     login_user_id = "edit-name"
     login_pass_id = "edit-pass"
     submit_login = "edit-submit--6"
 
     browser = login(
-    base_url, login_button, submit_login, login_user_id, login_pass_id, dl_path
+        base_url, login_button, submit_login, login_user_id, login_pass_id, dl_path
     )
 
-    browser.get('https://www.4for4.com/full-impact/cheatsheet/DEF/154605/ff_nflstats')
+    browser.get("https://www.4for4.com/full-impact/cheatsheet/DEF/154605/ff_nflstats")
 
     soup = BeautifulSoup(browser.page_source, "html.parser")
     browser.close()
 
-    tr_tags = soup.find_all('tr')
-    cols = ['player', 'opponent', 'm/u', 'game outcome', 'ff ppts', 'pts allowed', 'yds allowed', 'sacks', 'forced turnovers']
+    tr_tags = soup.find_all("tr")
+    cols = [
+        "player",
+        "opponent",
+        "m/u",
+        "game outcome",
+        "ff ppts",
+        "pts allowed",
+        "yds allowed",
+        "sacks",
+        "forced turnovers",
+    ]
     trs = []
     for tr in tr_tags[1:]:
         tds = []
-        for td in tr.find_all('td')[1:]:
+        for td in tr.find_all("td")[1:]:
             tds.append(td.text)
         trs.append(tds)
-    
+
     return cols, trs
-    
+
+
 def rename_file(file, week, season):
 
     return f"{file}_W{week}_{season}.csv"
@@ -217,19 +235,12 @@ def rename_scrape_csv(file_name, week, season, scrape, dl_path):
         os.rename(
             recent_file, os.path.join(dl_path, f"{file_name}_W{week}_{season}.csv")
         )
-        
+
         renamed = True
     else:
         renamed = False
 
-    return {
-        'file': file_name,
-        'scraped' : scrape,
-        'renamed' : renamed
-    }
-
-
-
+    return {"file": file_name, "scraped": scrape, "renamed": renamed}
 
 
 def scrape_csv(browser, url, dl_button):

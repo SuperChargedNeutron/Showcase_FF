@@ -4,6 +4,7 @@ from flask_bootstrap import Bootstrap
 from flask_cors import CORS
 
 
+# Initiates the Flask object there not a lot going here.
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, static_url_path="/static", instance_relative_config=True)
@@ -28,4 +29,7 @@ def create_app(test_config=None):
 
 app = create_app()
 
+# this is circualr import 
+# approved by flask and should generally
+# not be used 
 from . import views

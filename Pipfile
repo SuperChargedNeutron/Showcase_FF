@@ -23,5 +23,4 @@ xlrd = "*"
 webdriver-manager = "*"
 pywebview = "*"
 pyinstaller = "*"
-pythonnet = "*"
-cefpython3 = "*"
+

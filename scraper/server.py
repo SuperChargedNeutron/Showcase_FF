@@ -22,7 +22,7 @@ from scrape_func import (
     average_row,
     is_favorite,
     scrape_airyards,
-    scrape_def_data
+    scrape_def_data,
 )
 
 ##  App object initialization
@@ -103,7 +103,7 @@ def scrape_it(file_name):
     elif file_name == "ETR_projection":
         url = f"https://establishtherun.com/draftkings-projections/"
         dl_button = "/html/body/div[1]/div[3]/div/div[1]/div/div/article/div[2]/div[2]/table/thead/tr[1]/th/div/button"
-        
+
     elif file_name == "4f4_wr_fp_L4":
         if week >= 4:
             url = f"https://www.4for4.com/tools/stat-app/ff_points/{season}/{week - 4}/{week}/ALL/WR"
@@ -141,7 +141,7 @@ def scrape_it(file_name):
         dl_button = (
             "/html/body/div[4]/div/div[3]/div/div[1]/div/div/div/div[4]/div[1]/a"
         )
-        
+
     if file_name[0:3] == "4f4" and url != None:
 
         base_url = "https://4for4.com"
@@ -174,10 +174,15 @@ def scrape_it(file_name):
         return redirect(f"/fupload/{file_name}.csv")
 
     else:
-        message = f"{file_name} didn't scrape or most recent file was already formatted."
-        return render_template('404.html', head='Scrape Report', code = 404, message=message, boo=False)
+        message = (
+            f"{file_name} didn't scrape or most recent file was already formatted."
+        )
+        return render_template(
+            "404.html", head="Scrape Report", code=404, message=message, boo=False
+        )
 
-@app.route('/scraper/airyards')
+
+@app.route("/scraper/airyards")
 def airyards():
     dl_path = os.path.join(
         os.path.join(os.environ["USERPROFILE"]), "Desktop", "DFS_data"
@@ -186,18 +191,23 @@ def airyards():
         os.makedirs(dl_path)
     os.chdir(dl_path)
 
-    scrape = scrape_airyards(dl_path, session['current_week'], session['current_season'])
-    
+    scrape = scrape_airyards(
+        dl_path, session["current_week"], session["current_season"]
+    )
+
     if scrape == True:
 
         return redirect(f"/fupload/airyards.csv")
     else:
-        message = 'something went wrong scraping airyards'
-        return render_template('404.html', head='Scrape Report', code=404, message=message, boo=False)
+        message = "something went wrong scraping airyards"
+        return render_template(
+            "404.html", head="Scrape Report", code=404, message=message, boo=False
+        )
+
 
 @app.route("/scrape_4f4")
 def scrape_4f4():
-    
+
     week = session["current_week"]
     season = session["current_season"]
     dl_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data")
@@ -243,22 +253,22 @@ def scrape_4f4():
             f"https://www.4for4.com/tools/stat-app/ff_points/{season}/1/{week}/ALL/RB"
         )
         rb_tar_L3_url = (
-             f"https://www.4for4.com/tools/stat-app/target/{season}/1/{week}/ALL/RB"
+            f"https://www.4for4.com/tools/stat-app/target/{season}/1/{week}/ALL/RB"
         )
     try:
         browser = login(
             base_url, login_button, submit_login, login_user_id, login_pass_id, dl_path
         )
-        
+
         scrape_1 = scrape_csv(browser, proj_scrape[0], proj_scrape[1])
         nam1 = rename_scrape_csv("4f4_projection", week, season, scrape_1, dl_path)
-        
+
         scrape_2 = scrape_csv(browser, fl_ce_scrape[0], fl_ce_scrape[1])
         nam2 = rename_scrape_csv("4f4_fc_data", week, season, scrape_2, dl_path)
-        
+
         scrape_3 = scrape_csv(browser, leverage_scrape_url, rz_lev_dl_button)
         nam3 = rename_scrape_csv("4f4_leverage", week, season, scrape_3, dl_path)
-    
+
         scrape_4 = scrape_csv(browser, rush_rz_url, rz_lev_dl_button)
         nam4 = rename_scrape_csv("4f4_rushing_redzone", week, season, scrape_4, dl_path)
 
@@ -270,23 +280,30 @@ def scrape_4f4():
 
         scrape_7 = scrape_csv(browser, rb_fp_L3_url, fp_targ_dl_button)
         nam7 = rename_scrape_csv("4f4_rb_fp_L3", week, season, scrape_7, dl_path)
-        
+
         scrape_8 = scrape_csv(browser, rec_rz_url, rz_lev_dl_button)
-        nam8 = rename_scrape_csv("4f4_receiving_redzone", week, season, scrape_8, dl_path)
-        
+        nam8 = rename_scrape_csv(
+            "4f4_receiving_redzone", week, season, scrape_8, dl_path
+        )
+
         scrape_9 = scrape_csv(browser, rb_tar_L3_url, fp_targ_dl_button)
         nam9 = rename_scrape_csv("4f4_rb_targ_L3", week, season, scrape_9, dl_path)
 
         browser.close()
 
         report = [nam1, nam2, nam3, nam4, nam5, nam6, nam7, nam8, nam9]
-        message = f'Here is the scraping report: \n {report}' 
+        message = f"Here is the scraping report: \n {report}"
 
-        return render_template('404.html', head='Scrape Report', code=200, message=message, boo=True)
-    
+        return render_template(
+            "404.html", head="Scrape Report", code=200, message=message, boo=True
+        )
+
     except:
-        message = 'Something went wrong, please try again.'
-        return render_template('404.html', head='Scrape Report', code=404, message=message, boo=False)
+        message = "Something went wrong, please try again."
+        return render_template(
+            "404.html", head="Scrape Report", code=404, message=message, boo=False
+        )
+
 
 @app.route("/fupload/<file>")
 def fupload(file):
@@ -317,7 +334,6 @@ def fupload(file):
             ]
         ]
         clean_df = upload_file_clean(golden)
-        
 
     elif file == f"4f4_projection_W{week}_{season}.csv":
         df = (
@@ -333,9 +349,7 @@ def fupload(file):
         df = pd.read_csv(file).fillna("nan")
         clean_df = upload_file_clean(df, "4f4")
         clean_df = clean_df.drop(columns=["salary_4f4"])
-        clean_df["proj_4f4"] = round(
-            clean_df["floor_4f4"] + clean_df["value1_4f4"], 2
-        )
+        clean_df["proj_4f4"] = round(clean_df["floor_4f4"] + clean_df["value1_4f4"], 2)
 
     elif file == f"4f4_leverage_W{week}_{season}.csv":
         df = pd.read_csv(file).fillna("nan")
@@ -430,11 +444,11 @@ def fupload(file):
         clean_df["array_targ"] = clean_df["array_targ"].apply(
             lambda x: 0 if x == " " else float(x.replace("%", ""))
         )
-    elif file == f'airyards.csv':
+    elif file == f"airyards.csv":
         df = pd.read_csv(file).fillna("nan")
         clean_df = upload_file_clean(df, "ay")
-        clean_df = clean_df.drop(columns=['unnamed: 0_ay'])
-    
+        clean_df = clean_df.drop(columns=["unnamed: 0_ay"])
+
     elif file == "def_scrape":
         cols, data = scrape_def_data(dl_path)
         df = pd.DataFrame(data, columns=cols)
@@ -467,10 +481,7 @@ def fupload_all():
     dl_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data")
     os.chdir(dl_path)
 
-    uploaded_files = {
-        'uploaded': [],
-        'failed' : []
-        }
+    uploaded_files = {"uploaded": [], "failed": []}
 
     for file in glob.glob("4f4*.csv"):
         try:
@@ -585,16 +596,14 @@ def fupload_all():
                 row = clean_df.iloc[i, :].to_dict()
                 if row[list(row.keys())[0]] != "nan":
                     conditional_insert(player_coll, row)
-                    
-            uploaded_files['uploaded'].append(file)
-        except:
-            uploaded_files['failed'].append(file)
 
-        
+            uploaded_files["uploaded"].append(file)
+        except:
+            uploaded_files["failed"].append(file)
 
     player_coll.delete_many({"avgpointspergame": {"$exists": False}})
 
-    head = '4for4 Upload Report'
+    head = "4for4 Upload Report"
     code = 200
     message = f"Here is the report: \n {uploaded_files}"
 
