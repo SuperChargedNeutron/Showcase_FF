@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block content %}
+<style>
+  div.column {
+    margin: 0px 60px 0px 60px;
+    column-count: 2;
+    overflow: visible;
+    column-width: auto;
+  }
+  p {
+    margin: 10px 0px 20px 10px;
+  }
+
+  button.scrape {
+    margin: 5px 10px 20px 20px;
+  }
+
+</style>
+{% include 'navbar.html' %}
+<div class="container-fluid">
+  <div class="row">
+    <!-- start main-->
+    <main role="main" class="col-md-12 col-lg-12">
+      <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Scrape Center</h1>
+      </div>
+      <div class='container text-center'>
+
+          <div class='column'>
+            <div class='row'>
+              <p> 4for4 Projection Data</p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_projection'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 Flr/Ceil Data</p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_fc_data'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 Leverage Scores </p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_leverage'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 WR L4 <br> Fantasy Points</p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_wr_fp_L4'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 RB L3 <br> Fantasy Points </p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_rb_fp_L3'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 RB L3 Target</p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_rb_targ_L3'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 DEF Data</p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/fupload/def_scrape'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 WR L4 <br> Fantasy Points</p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_wr_fp_L4'> scrape </a>
+              </button>
+            </div>
+
+            <div class='row'>
+              <p> 4for4 RB L3 <br> Fantasy Points </p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_rb_fp_L3'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 RB L3 Target</p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_rb_targ_L3'> scrape </a>
+              </button>
+            </div>
+       
+            <div class='row'>
+              <p> 4for4 RedZone <br> Passing </p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_passing_redzone'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 RedZone <br> Rushing </p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_rushing_redzone'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> 4for4 RedZone <br> Receiving </p>
+              <button type="button" class="btn btn-info scrape">
+                <a href='/scrape/4f4_receiving_redzone'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> ETR Projection</p>
+              <button type="button" class="btn btn-success scrape">
+                <a href='/scrape/ETR_projection'> scrape </a>
+              </button>
+            </div>
+            <div class='row'>
+              <p> AirYards </p>
+              <button type="button" class="btn btn-secondary scrape">
+                <a href='/scraper/airyards'> scrape </a>
+              </button>
+            </div>
+
+          </div>
+   </div>
+        <div class='column'>
+          <div class='row'>
+            <p> Scrape 4f4: </p>
+            <button type="button" class="btn btn-danger scrape">
+              <a href='/scrape_4f4'> Go </a>
+            </button>
+          </div>
+          <div class='row'>
+            <p> Average Data: </p>
+            <button type="button" class="btn btn-warning scrape">
+              <a href='/concensus_data'> Go </a>
+            </button>
+          </div>
+        </div>
+        <div class='container text-center'>
+            <h4 class='text-left'> File Upload: </h4>
+            <div class="input-group">
+              <form method='POST' action='/scrape_center'>
+                {{ form.hidden_tag() }}
+
+                <div class='form-row'>
+                  {{ wtf.form_field(form.file_name) }}
+                </div>
+                <div class='form=row'>
+                  <button class='btn btn-primary' type='submit'>{{ wtf.form_field(form.submit)}}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+      </div>
+  </div>
+  </main>
+  <!-- end main -->
+</div>
+</div>
+
+{% endblock %}

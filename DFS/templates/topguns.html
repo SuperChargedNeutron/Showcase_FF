@@ -1,118 +1,133 @@
+<!-- Inherits Base Skeleton From base.html -->
 {% extends "base.html" %}
 
+
 {% block head %}
+<!-- Includes base.html body code -->
 {{ super() }}
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
 {% endblock %}
 
+<!-- Inserts in content block in base.html -->
 {% block content %}
-    {% include 'navbar.html' %}
 
-    <div class="container">
-        <div class="row">
-          <div class="col-sm">
-            <h1>QB</h1>
-  <table class='topguntable'>
-    <thead >
-        {% for h in qb_headers %}
-            <th>{{h}}</th>
-        {% endfor %}
-            </thead>
+<!-- copies navber -->
+{% include 'navbar.html' %}
+
+<!-- Outer Container for ALL tables -->
+<div class="container">
+
+
+  <div class="row">
+    <div class="col-sm">
+      <!-- QB Table -->
+      <h1>QB</h1>
+      <table class='topguntable'>
+        <thead>
+          {% for h in qb_headers %}
+          <th>{{h}}</th>
+          {% endfor %}
+        </thead>
         <tbody>
-            {% for d in qbs %}
-            <tr>
-                {% for key in d.keys() %}
-                    <td> {{ d[key] }}</td>
-                 {% endfor %}
-            </tr>
+          {% for d in qbs %}
+          <tr>
+            {% for key in d.keys() %}
+            <td> {{ d[key] }}</td>
             {% endfor %}
-          </tbody>
-        </table>
-        <h1>RB</h1>
-        <table class='topguntable'>
-          <thead >
-              {% for h in rb_headers %}
-                  <th>{{h}}</th>
-              {% endfor %}
-                  </thead>
-              <tbody>
-                  {% for d in rbs %}
-                  <tr>
-                      {% for key in d.keys() %}
-                          <td> {{ d[key] }}</td>
-                       {% endfor %}
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-        </div>
-        <div class="col-sm">
-          <h1>WR</h1>
-          <table class='topguntable'>
-            <thead>
-                {% for h in wr_headers %}
-                    <th>{{h}}</th>
-                {% endfor %}
-                    </thead>
-                <tbody>
-                    {% for d in wrs %}
-                    <tr>
-                        {% for key in d.keys() %}
-                            <td> {{ d[key] }}</td>
-                         {% endfor %}
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-        </div>
-        <div class="col-sm">
-          <h1>TE</h1>
-          <table class='topguntable'>
-            <thead>
-                {% for h in te_headers %}
-                    <th>{{h}}</th>
-                {% endfor %}
-            </thead>
-                <tbody>
-                    {% for d in tes %}
-                    <tr>
-                        {% for key in d.keys() %}
-                            <td> {{ d[key] }}</td>
-                         {% endfor %}
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-                <h1>DEF</h1>
-                <table class='topguntable'>
-                  <thead>
-                      {% for h in def_headers %}
-                          <th>{{h}}</th>
-                      {% endfor %}
-                          </thead>
-                      <tbody>
-                          {% for d in defs %}
-                          <tr>
-                              {% for key in d.keys() %}
-                                  <td> {{ d[key] }}</td>
-                               {% endfor %}
-                          </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
-        </div>
-      </div>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <!-- RB Table -->
+      <h1>RB</h1>
+      <table class='topguntable'>
+        <thead>
+          {% for h in rb_headers %}
+          <th>{{h}}</th>
+          {% endfor %}
+        </thead>
+        <tbody>
+          {% for d in rbs %}
+          <tr>
+            {% for key in d.keys() %}
+            <td> {{ d[key] }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+    <div class="col-sm">
+      <!-- WR Table -->
+      <h1>WR</h1>
+      <table class='topguntable'>
+        <thead>
+          {% for h in wr_headers %}
+          <th>{{h}}</th>
+          {% endfor %}
+        </thead>
+        <tbody>
+          {% for d in wrs %}
+          <tr>
+            {% for key in d.keys() %}
+            <td> {{ d[key] }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col-sm">
+      <!-- TE Table -->
+      <h1>TE</h1>
+      <table class='topguntable'>
+        <thead>
+          {% for h in te_headers %}
+          <th>{{h}}</th>
+          {% endfor %}
+        </thead>
+        <tbody>
+          {% for d in tes %}
+          <tr>
+            {% for key in d.keys() %}
+            <td> {{ d[key] }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h1>DEF</h1>
+      <!-- DEF Table -->
+      <table class='topguntable'>
+        <thead>
+          {% for h in def_headers %}
+          <th>{{h}}</th>
+          {% endfor %}
+        </thead>
+        <tbody>
+          {% for d in defs %}
+          <tr>
+            {% for key in d.keys() %}
+            <td> {{ d[key] }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 
 {% endblock %}
 
 {% block scripts %}
-  {{ super() }}
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='js/DataTables/datatables.min.css') }}"/>
- 
-  <script type="text/javascript" src="{{ url_for('static', filename='js/DataTables/datatables.min.js') }}"></script>
-  
-  <script src="{{ url_for('static', filename='js/topguns.js') }}"></script>
-  <!-- <script src="{{ url_for('static', filename='js/dash_chart.js') }}"></script> -->
+{{ super() }}
+<!-- DataTables File Imports -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='js/DataTables/datatables.min.css') }}" />
+<script type="text/javascript" src="{{ url_for('static', filename='js/DataTables/datatables.min.js') }}"></script>
+
+<!-- Local Imports -->
+<script src="{{ url_for('static', filename='js/topguns.js') }}"></script>
+
 {% endblock %}

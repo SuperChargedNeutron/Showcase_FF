@@ -21,3 +21,6 @@ bs4 = "*"
 pandas = "*"
 xlrd = "*"
 webdriver-manager = "*"
+pywebview = "*"
+pyinstaller = "*"
+
