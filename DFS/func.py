@@ -170,7 +170,16 @@ def get_bookie_divs():
     Opens up a selenium browser and parses 
     the page source with beautiful soup
     """
-    browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference("browser.download.folderList", 2)
+    profile.set_preference("browser.download.manager.showWhenStarting", False)
+    profile.set_preference("browser.helperApps.alwaysAsk.force", False)
+    profile.set_preference("browser.download.useDownloadDir", True)
+    profile.set_preference("browser.helperApps.neverAsk.openFile", True)
+    profile.set_preference("browser.download.dir", dl_path)
+    profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv")
+
+    browser = webdriver.Firefox(firefox_profile=profile, executable_path=GeckoDriverManager().install())
     browser.get("https://mybookie.ag/sportsbook/nfl/")
     html = browser.page_source
     browser.close()
