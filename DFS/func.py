@@ -163,7 +163,7 @@ def stack_app_query(player_coll, current_week, current_season):
 
     return data
 
-def get_bookie_divs():
+def get_bookie_divs(dl_path):
     """ 
     Returns game divs found in mybookie.au
 

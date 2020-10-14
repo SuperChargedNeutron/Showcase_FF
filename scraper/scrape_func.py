@@ -31,7 +31,7 @@ def scrape_airyards(dl_path, week, season):
     week_input_xpath = '//*[@id="weeks-selectized"]'
     dl_button_xpath = '//*[@id="download"]'
     rb_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[2]/label/input"
-    wr_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[3]/label/input"
+    # wr_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[3]/label/input"
     te_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[4]/label/input"
 
     try:
@@ -39,7 +39,7 @@ def scrape_airyards(dl_path, week, season):
         browser = webdriver.Firefox(
             firefox_profile=profile, executable_path=GeckoDriverManager().install()
         )
-        browser.get("https://apps.airyards.com/tables")
+        browser.get("https://apps.airyards.com/airyards-2020")
         sleep(10)
 
         year_input = browser.find_element_by_xpath(year_input_xpath)
@@ -51,7 +51,7 @@ def scrape_airyards(dl_path, week, season):
         week_input = browser.find_element_by_xpath(week_input_xpath)
         dl_button = browser.find_element_by_xpath(dl_button_xpath)
         rb_check = browser.find_element_by_xpath(rb_check_xpath)
-        wr_check = browser.find_element_by_xpath(wr_check_xpath)
+        # wr_check = browser.find_element_by_xpath(wr_check_xpath)
         te_check = browser.find_element_by_xpath(te_check_xpath)
 
         ## ---- Navigate the Webpage ---- ##
@@ -66,11 +66,12 @@ def scrape_airyards(dl_path, week, season):
 
         ## ---- set the position metric --- ##
         rb_check.click()
-        wr_check.click()
         te_check.click()
 
         ## ---- download the file --- ###
         dl_button.click()
+
+        browser.close()
 
         scrape = True
     except:

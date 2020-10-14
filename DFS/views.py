@@ -71,7 +71,8 @@ def vegas_dash():
 @app.route("/scrape_bookie")
 def scrape_bookie():
     # gets game divs from HTML
-    divs = get_bookie_divs()
+    dl_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data")
+    divs = get_bookie_divs(dl_path)
 
     # extracts data from HTML divs
     games = scrape_bookie_divs(divs)
