@@ -311,7 +311,9 @@ function getTeamData(playerData, team, key) {
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
+
     if (key == 'salary') {
+        console.log(playerObjects)
         var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)
         return price
