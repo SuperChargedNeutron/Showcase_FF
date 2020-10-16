@@ -47,10 +47,11 @@ def conditional_insert(collection, row):
     player_row = list(collection.find(query_params, {"_id": False}))
     #replaces data
     if len(player_row) != 0:
+        #checks every data point in the dictions
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
                 pass
-            elif key not in player_row[0] and row[key] != None:
+            elif (key not in player_row[0] or row[key] != player_row[0][key]) and row[key] != None:
                 if isinstance(row[key], (np.int32, np.int64)):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:
@@ -169,7 +170,7 @@ def stack_app_query(player_coll, current_week, current_season):
 
     return data
 
-def get_bookie_divs(dl_path):
+def get_bookie_divs():
     """ 
     Returns game divs found in mybookie.au
 
@@ -182,7 +183,6 @@ def get_bookie_divs(dl_path):
     profile.set_preference("browser.helperApps.alwaysAsk.force", False)
     profile.set_preference("browser.download.useDownloadDir", True)
     profile.set_preference("browser.helperApps.neverAsk.openFile", True)
-    profile.set_preference("browser.download.dir", dl_path)
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv")
 
     browser = webdriver.Firefox(firefox_profile=profile, executable_path=GeckoDriverManager().install())

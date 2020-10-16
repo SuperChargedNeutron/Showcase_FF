@@ -329,23 +329,28 @@ def search_index_keys(columns):
         index_cols.append("Road")
     return index_cols
 
-
 def conditional_insert(collection, row):
+    # search dict for indexer keys
     index_cols = search_index_keys(list(row.keys()))
+
+    # set params for player search query
     query_params = {
         ic: row[ic] if not isinstance(row[ic], (np.int64, np.int32)) else int(row[ic])
         for ic in index_cols
     }
+    # player search to either replace data or initialize a document
     player_row = list(collection.find(query_params, {"_id": False}))
-    if len(player_row) > 0:
+    #replaces data
+    if len(player_row) != 0:
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
                 pass
-            elif key not in player_row[0] or row[key] != None:
+            elif (key not in player_row[0] or row[key] == player_row[0][key]) and row[key] != None:
                 if isinstance(row[key], (np.int32, np.int64)):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:
                     collection.update_one(query_params, {"$set": {key: row[key]}})
+    # starts new document
     elif len(player_row) == 0:
         for x in row:
             if isinstance(row[x], (np.int32, np.int64)):
