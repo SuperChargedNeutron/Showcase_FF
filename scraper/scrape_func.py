@@ -337,11 +337,11 @@ def conditional_insert(collection, row):
         for ic in index_cols
     }
     player_row = list(collection.find(query_params, {"_id": False}))
-    if len(player_row) != 0:
+    if len(player_row) > 0:
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
                 pass
-            elif key not in player_row[0] and row[key] != None:
+            elif key not in player_row[0] or row[key] != None:
                 if isinstance(row[key], (np.int32, np.int64)):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:

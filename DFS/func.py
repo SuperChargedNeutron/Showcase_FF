@@ -35,12 +35,17 @@ def search_index_keys(columns):
 
 
 def conditional_insert(collection, row):
+    # search dict for indexer keys
     index_cols = search_index_keys(list(row.keys()))
+
+    # set params for player search query
     query_params = {
         ic: row[ic] if not isinstance(row[ic], (np.int64, np.int32)) else int(row[ic])
         for ic in index_cols
     }
+    # player search to either replace data or initialize a document
     player_row = list(collection.find(query_params, {"_id": False}))
+    #replaces data
     if len(player_row) != 0:
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
@@ -50,6 +55,7 @@ def conditional_insert(collection, row):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:
                     collection.update_one(query_params, {"$set": {key: row[key]}})
+    # starts new document
     elif len(player_row) == 0:
         for x in row:
             if isinstance(row[x], (np.int32, np.int64)):
@@ -184,7 +190,9 @@ def get_bookie_divs(dl_path):
     html = browser.page_source
     browser.close()
     soup = BeautifulSoup(html, "html.parser")
-    return soup.find_all("div", {"class": "game-line py-3"})[0:16]
+    div_list = soup.find_all("div", {"class": "game-line py-3"})
+    return_divs = div_list[0:16] if len(div_list) >= 15 else div_list
+    return return_divs
 
 
 def scrape_bookie_divs(divs):

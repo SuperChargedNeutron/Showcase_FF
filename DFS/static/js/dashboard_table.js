@@ -120,9 +120,9 @@ if (pos == 'QB') {
     cols = rb_cols
 } else if (pos == 'WR') {
     cols = wr_cols
-} else if (pos = 'TE') {
+} else if (pos == 'TE') {
     cols = te_cols
-} else if (pos = 'DST') {
+} else if (pos == 'DEF') {
     cols = def_cols
 };
 
@@ -134,5 +134,6 @@ else if (thresh == '') {
     url = `/${pos}_data`
 }
 
-console.log(url)
+console.log(pos)
+
 getData(url, cols)
