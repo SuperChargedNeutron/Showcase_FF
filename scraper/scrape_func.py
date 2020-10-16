@@ -115,14 +115,14 @@ def average_row(row, avgee):
     ### takes in a player document from mongoDB (includes _id) and scans
     ### for 'proj' in columns, then avg all
     ##E the collected columns based on the averagee
-    ### avgee SHOULD be 'proj' or 'ceil' or 'flr'
+    ### avgee SHOULD be 'proj' or 'ceil' or 'floor'
 
     acc = 0
     count = 0
     for key in row.keys():
         if avgee == "proj":
             ## add a projection metric to be averaged in the list below
-            if key in ["proj_4f4", "ffpts_4f4", "dk projection_ETR"]:
+            if key in ["proj_4f4", "dk projection_ETR"]:
                 count += 1 if row[key] != "nan" else 0
                 acc += row[key] if row[key] != "nan" else 0
         elif avgee == "floor":
