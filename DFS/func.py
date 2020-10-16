@@ -8,9 +8,10 @@ from time import sleep
 import pymongo
 import numpy as np
 from bs4 import BeautifulSoup
-from selenium import webdriver
+import requests
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from webdriver_manager.firefox import GeckoDriverManager
+# from selenium import webdriver
+# from webdriver_manager.firefox import GeckoDriverManager
 
 # Local Imports 
 from .database import player_coll, team_coll, vegas_coll
@@ -178,10 +179,10 @@ def get_bookie_divs():
     the page source with beautiful soup
     """
 
-    browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
-    browser.get("https://mybookie.ag/sportsbook/nfl/")
-    html = browser.page_source
-    browser.close()
+    # browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    reponse = requests.get("https://mybookie.ag/sportsbook/nfl/")
+    html = reponse.text
+    # browser.close()
     soup = BeautifulSoup(html, "html.parser")
     div_list = soup.find_all("div", {"class": "game-line py-3"})
     return_divs = div_list[0:16] if len(div_list) >= 15 else div_list
