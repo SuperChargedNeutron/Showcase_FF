@@ -313,23 +313,15 @@ function getTeamData(playerData, team, key) {
       });
 
     if (key == 'salary') {
-        if (playerObjects.length > 0) {
-            var price = playerObjects.map(row => row[key])
+        var price = playerObjects.map(row => row[key])
                         .reduce((acc, val) => acc + val)
         return price
-        }
-        
     } else if (key == 'C_Proj') {
-        console.log(playerObjects)
-        if (playerObjects.length > 0) {
-            var projection = playerObjects.map(row => row[key])
+        var projection = playerObjects.map(row => row[key])
                                 .reduce((acc, val) => acc + val)
         return projection
-        }
-        
     } else if (key == 'players') {
-        if (playerObjects.length > 0) {
-            let mappedObjects = playerObjects.map(obj =>{
+        let mappedObjects = playerObjects.map(obj =>{
             var outDict = {'teamName' : teamName}
             Object.entries(obj).forEach((key, val) => {
                 outDict[key[0]] = key[1]
@@ -337,7 +329,5 @@ function getTeamData(playerData, team, key) {
             return outDict})
 
         return mappedObjects
-        }
-        
     };
 }   
