@@ -326,10 +326,13 @@ def fupload(file):
     if "golden" in file.lower():
 
         df = pd.read_excel(file) if file[-4:] == "xlsx" else pd.read_csv(file)
-        data = df.iloc[7:, 14:23].reset_index(drop=True)
-        data.columns = [column_clean(x.lower()) for x in df.iloc[6, 14:23]]
+        # data = df.iloc[7:, 14:23].reset_index(drop=True)
+        # data.columns = [column_clean(x.lower()) for x in df.iloc[6, 14:23]]
+        data = df.iloc[7:, 10:19].reset_index(drop=True)
+        data.columns = [column_clean(x.lower()) for x in df.iloc[6, 10:19]]
         data["week"] = week
         data["season"] = season
+        
         golden = data[
             [
                 "position",
@@ -342,6 +345,8 @@ def fupload(file):
             ]
         ]
         clean_df = upload_file_clean(golden)
+        clean_df['salary'] = pd.to_numeric(clean_df['salary'])
+
 
     elif file == f"4f4_projection_W{week}_{season}.csv":
         df = (
