@@ -1,6 +1,6 @@
 import os
-from pymongo import MongoClient
 import pymongo
+from pymongo import MongoClient
 
 # gets connections from environement and connects to database
 MONGO_URI = os.environ.get("MONGODB_URI")

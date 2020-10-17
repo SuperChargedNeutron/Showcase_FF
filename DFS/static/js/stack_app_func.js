@@ -83,24 +83,24 @@ function updateRemoveButtonFunction(counts, currentTeam, chartWidth, chartHeight
 
 function plotCurrentTeam(currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip) {
     dataExtracted = extractCurrentTeamData(currentTeam)
-                xLinearScale = xScale(
-                    dataExtracted.map(row => row[1]), 
-                    chartWidth
-                    )
-                yLinearScale = yScale(
-                    dataExtracted.map( row => row[2]),
-                     chartHeight
-                    )
-                xAxis = renderXAxis(xLinearScale, xAxis)
-                yAxis = renderYAxis(yLinearScale, yAxis)
-                circlesGroup = renderCircles(
-                    xLinearScale,
-                    yLinearScale, 
-                    yCurrentSelection,
-                    dataExtracted,
-                    dataCurrentSelection, 
-                    tooltip
-                )
+    xLinearScale = xScale(
+        dataExtracted.map(row => row[1]), 
+        chartWidth
+        )
+        yLinearScale = yScale(
+            dataExtracted.map( row => row[2]),
+                chartHeight
+            )
+        xAxis = renderXAxis(xLinearScale, xAxis)
+        yAxis = renderYAxis(yLinearScale, yAxis)
+        circlesGroup = renderCircles(
+            xLinearScale,
+            yLinearScale, 
+            yCurrentSelection,
+            dataExtracted,
+            dataCurrentSelection, 
+            tooltip
+        )
 }
 
 function updateFlexOptions(counts, currentTeam, chartWidth, chartHeight, xAxis, yAxis, dataCurrentSelection, yCurrentSelection, tooltip) {
@@ -135,7 +135,7 @@ function assignOptions(playerNames, position) {
             }})
         .classed(`${position}Opt`, true)
         .attr('proj', function (d) {return d.C_Proj})
-        .attr('price', function (d) {return d.dk_price})
+        .attr('price', function (d) {return d.salary})
         .text(function(d) { 
             if (position == 'flexPosition') {
                 return d; 
@@ -187,7 +187,6 @@ function renderYAxis (newYScale, yAxis) {
 function extractCurrentTeamData (currentTeam) {
     dataExtracted = []
                 Object.keys(currentTeam).forEach(key => {
-                    console.log(key)
                 if (key =='teamName') {
                     return undefined
                 }
@@ -205,7 +204,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
     circleGroup.selectAll('line.error').remove().exit();
     if (dataCurrentSelection == 'teamStacked') {
 
-        circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        circleColors = ['#9B5DE5', '#f15bb5', '#fee440','#c1839f', '#00bbf9', '#00f5d4', '#ff5a5f', '#087e8b']
         var teamCircleColor = d3.scaleOrdinal()
             .domain(data.map(row => {return row[0]}))
             .range(circleColors);
@@ -233,7 +232,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         
     return circleGroup
     } else if ( dataCurrentSelection == 'teamPlayers') {
-        circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        circleColors = ['#9B5DE5', '#f15bb5', '#fee440','#c1839f', '#00bbf9', '#00f5d4', '#ff5a5f', '#087e8b']
         var teamCircleColor = d3.scaleOrdinal()
             .domain(data.map(row => {return row['teamName']}))
             .range(circleColors);
@@ -241,7 +240,7 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         circleGroup.selectAll("circle")
             .data(data).enter()
             .append('circle')
-            .attr('cx', d => xLinearScale(parseFloat(d['dk_price'])))
+            .attr('cx', d => xLinearScale(parseFloat(d['salary'])))
             .attr('cy', d => yLinearScale(parseFloat(d['C_Proj'])))
             .attr('r', 5)
             .style('fill', (d, i) => teamCircleColor(d['teamName']))
@@ -265,11 +264,10 @@ function renderCircles(xLinearScale, yLinearScale, yCurrentSelection, data, data
         lines.enter()
             .append('line')
             .attr('class', 'error')
-            // .merge(lines)
-            .attr('x1', function(d) { return xLinearScale(parseFloat(d['dk_price'])); })
-            .attr('x2', function(d) { return xLinearScale(parseFloat(d['dk_price'])); })
+            .attr('x1', function(d) { return xLinearScale(parseFloat(d['salary'])); })
+            .attr('x2', function(d) { return xLinearScale(parseFloat(d['salary'])); })
             .attr('y1', function(d) { return yLinearScale(parseFloat(d['C_Ceil'])); })
-            .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Flr'])); });
+            .attr('y2', function(d) { return yLinearScale(parseFloat(d['C_Floor'])); });
         return circleGroup
     } else if ( dataCurrentSelection == 'teamBuild') {
         circleGroup.selectAll("circle")
@@ -313,13 +311,13 @@ function getTeamData(playerData, team, key) {
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
-    if (key =='dk_price') {
-        console.log(playerObjects)
-        var price = playerObjects.map(row => row[key])
+
+    if (key == 'salary') {
+        var price = playerObjects.map(row => parseFloat(row[key]))
                         .reduce((acc, val) => acc + val)
         return price
     } else if (key == 'C_Proj') {
-        var projection = playerObjects.map(row => row[key])
+        var projection = playerObjects.map(row => parseFloat(row[key]))
                                 .reduce((acc, val) => acc + val)
         return projection
     } else if (key == 'players') {

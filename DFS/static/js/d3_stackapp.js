@@ -33,7 +33,7 @@ d3.json('/stack_app_data').then(function(data){
 
 var teamLists = teams.map(elem => {
     var nameList = Object.values(elem).flat(1);
-    price = getTeamData(playerData, nameList, 'dk_price'),
+    price = getTeamData(playerData, nameList, 'salary'),
     projection =  getTeamData(playerData, nameList, 'C_Proj'),
     teamName = nameList.shift();
     nameList.unshift(Math.round(price / projection*100)/100)
@@ -44,14 +44,6 @@ var teamLists = teams.map(elem => {
 });
 
 
-//////////////  /////////////////////
-//  TRY DOING TEAM DATA MATH IN PYTHON TO SIMPLY QUERY THE TEAMS
-// AND BUILD A QUICK CHART BEFORE THE DOM IS DONE
-// THEN POSSIBLY TURN IT INTO A DATATABLES OBJECT
-// AND I COULD ADD DELETE BUTTONS LIKE IN MY PANTREE APP
-////////////////////////////// 
-
-// teamLists2 = teamLists.forEach(row =>  {newRow = row.push('button'); return v})
 var teamsData = teamLists.map(row => [row[0], row[2], row[1]])
 teamNames4buttons = teamsData.map(row=> {return row[0]})
 var table = d3.select('#tableBody')
@@ -115,7 +107,7 @@ var td2 = trow.append('a')
         .classed('transform', `translate(${chartWidth}, 0)`)
         .call(leftAxis)
 
-    circleColors = ['#B31217', '#B35F12', '#B8A211', '#12B816', '#1450B5', '#1FA5B8', '#ADB87D', '#B87DB7', '#AABDB1', '#99A7BD']
+        circleColors = ['#9B5DE5', '#f15bb5', '#fee440','#c1839f', '#00bbf9', '#00f5d4', '#ff5a5f', '#087e8b']
 
     var teamCircleColor = d3.scaleOrdinal()
         .domain(teamsData.map(row => {return row[0]}))
@@ -163,12 +155,12 @@ var td2 = trow.append('a')
         .attr("transform", `translate( ${(chartHeight / 2) }, ${0 - margin.left})`)
         .attr('transform', 'rotate(-90)')
 
-ylabelsGroup.append('text')
-        .attr('x', - (chartHeight / 2) )
-        .attr('y', - margin.left + 20)
-        .attr('value', 'aFPA')
-        .classed('active', false)
-        .text('aFPA')
+// ylabelsGroup.append('text')
+//         .attr('x', - (chartHeight / 2) )
+//         .attr('y', - margin.left + 20)
+//         .attr('value', 'aFPA')
+//         .classed('active', false)
+//         .text('aFPA')
 
 ylabelsGroup.append('text')
         .attr('x', - (chartHeight / 2) - 80)
@@ -238,11 +230,11 @@ ylabelsGroup.append('text')
                         return teamPlayers                        
                 }).flat(1)
                 xLinearScale = xScale(
-                    allTeamPlayers.map(obj => obj['dk_price']), 
+                    allTeamPlayers.map(obj => obj['salary']), 
                     chartWidth
                     )
                 yLinearScale = yScale(
-                    [allTeamPlayers.map(obj => obj['C_Flr']), 
+                    [allTeamPlayers.map(obj => obj['C_Floor']), 
                         allTeamPlayers.map(obj => obj['C_Proj']),
                         allTeamPlayers.map(obj => obj['C_Ceil'])].flat(1),
                      chartHeight

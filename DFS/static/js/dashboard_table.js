@@ -1,4 +1,4 @@
-function getData(url){
+function getData(url, defaultCols){
     var colSelect = d3.select('#colSelect')
     var tableHeader = d3.select('#myTable').append('thead').append('tr')
     // var tableFooter = d3.select('#myTable').append('tfoot').append('tf').append('tr')
@@ -77,34 +77,18 @@ function getData(url){
         } );
         // initial toggle
         $(function() {
-            initColumns = ['player',
-            'team', 
-            'opponent', 
-            'price',
-            'dk_price', 
-            'value', 
-            'afpa',
-            'projection',
-            'C_Proj',
-            'C_Ceil',	
-            'C_Flr', 
-            'dk_50_percentile',
-            'dk_75_percentile',
-            'dk_85_percentile',
-            'dk_95_percentile',
-            'dk_99_percentile',
-            'FAV'
-            //this is SS projection 
-           ]
-            // '4f4 RZ L3',
-            // 'Air Tar L3',
-            // Avgs,
-            // JALG]
             d3.selectAll('.toggle-vis')
                 .each(function(d) {
-                    if (!initColumns.includes(d)) {
+                    if (!defaultCols.includes(d)) {
                         var column = table.column($(this).attr('data-column') );
                         column.visible( ! column.visible() );
+                    }
+            })
+            d3.selectAll('.toggle-vis')
+                .each(function(d) {
+                    if (d.startsWith('w')) {
+                        var column = table.column($(this).attr('data-column') );
+                        column.visible(true);
                     }
             })
 
@@ -128,5 +112,28 @@ function getData(url){
 );
 }
 var pos = d3.select('.h1').attr('id')
-url = `${pos}_data`
-getData(url)
+var thresh = d3.select('#thresh').text()
+
+if (pos == 'QB') {
+    cols = qb_cols
+} else if (pos == 'RB') {
+    cols = rb_cols
+} else if (pos == 'WR') {
+    cols = wr_cols
+} else if (pos == 'TE') {
+    cols = te_cols
+} else if (pos == 'DEF') {
+    cols = def_cols
+};
+
+if (thresh != '') {
+    url = `/${pos}_data/${thresh}`
+}
+
+else if (thresh == '') {
+    url = `/${pos}_data`
+}
+
+console.log(pos)
+
+getData(url, cols)

@@ -1,112 +1,167 @@
+# Python Imports
+import os, json
+from urllib.parse import quote, unquote
+
+# Third Party Imports
 from flask import render_template, redirect, request, url_for, jsonify, session
+
+# Local Imports
+from . import app
+from .database import player_coll, vegas_coll, TeamBuilder
+from .models import CalculatorForm, GetTimeForm
 from .func import (
     get_raw_data,
     stack_app_query,
     pull_scaled_data,
     weigh_data,
+    top_guns_query,
+    get_bookie_divs,
+    scrape_bookie_divs,
+    conditional_insert
 )
-from .database import (
-    db,
-    player_coll,
-    vegas_coll,
-    TeamBuilder,
-    CalcCollection,
-)
-from .db_cols import (
-    ss_data_cols,
-    _4f4_ceil_cols,
-    _4f4_proj_cols,
-    _4f4_rb_fp_cols,
-    _4f4_rb_tar_cols,
-    _4f4_redZ_cols,
-    _4f4_wr_fp_cols,
-    airy_te_cols,
-    airy_wr_cols,
-)
-from .models import CalculatorForm
-import json
-from urllib.parse import quote, unquote
-from . import app
-import os
 
+
+# app configuration
 app.config["JSON_SORT_KEYS"] = False
-app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY"
+)  # necessary for get_time and calcutor forms
 
-
+# Root route
 @app.route("/")
 def root():
-    return redirect("/VEGAS_Dash")
+    return redirect("/get_time")
+
+
+# Get Time route, validates form when Submit is clicked
+# then redirects
+@app.route("/get_time", methods=["GET", "POST"])
+def get_time():
+    form = GetTimeForm(request.form)
+    if form.validate():
+        session["current_week"] = int(form.week.data)
+        session["current_season"] = int(form.season.data)
+
+        return redirect("/VEGAS_Dash")
+    return render_template("gettime.html", form=form)
 
 
 @app.route("/VEGAS_Dash")
 def vegas_dash():
-    current_week = list(
-        vegas_coll.find({}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
-    )[0]["Week"]
 
-    week_games = list(vegas_coll.find({"Week": current_week}, {"_id": False}))
-    headers = week_games[0].keys()
+    week_games = list(
+        vegas_coll.find(
+            {"week": session["current_week"], "season": session["current_season"]},
+            {"_id": False},
+        )
+    )
 
-    return render_template("vegas_dash.html", data=week_games, headers=headers)
+    ## this conditoinal check if there was any games returned for the current time
+    if len(week_games) > 0:
+        # this extracts colmns names for HTML
+        headers = week_games[0].keys()
+
+        return render_template("vegas_dash.html", data=week_games, headers=headers)
+
+    else:
+        return redirect("/scrape_bookie")
 
 
+# This route scrapes mybookie.au
+@app.route("/scrape_bookie")
+def scrape_bookie():
+    # gets game divs from HTML
+    divs = get_bookie_divs()
+
+    # extracts data from HTML divs
+    games = scrape_bookie_divs(divs)
+
+    # insert into database based on values
+    for g in games:
+        conditional_insert(vegas_coll, g)
+
+    return redirect("/VEGAS_Dash")
+
+
+# this route handles all positional dashboards
+# with ONE HTML template. Javascript gets data
+# #from route right below def postion data
 @app.route("/<pos>_Dash")
 def position_dash(pos):
     return render_template("dashboard_temp.html", position=pos)
 
 
+# queries the database based on position and current time
+# then send data out in a json file to be parsed in the
+# dashboard_table.js file
 @app.route("/<pos>_data")
 def position_data(pos):
-    data = list(player_coll.find({"week": 16, "position": pos}, {"_id": False}))
+    data = list(
+        player_coll.find(
+            {
+                "season": session["current_season"],
+                "week": session["current_week"],
+                "position": pos,
+            },
+            {"_id": False},
+        )
+    )
+    return jsonify(data)
+
+
+# Same idea as above this time we add a threshold to the query
+@app.route("/<pos>_Dash/<threshold>")
+def position_dash_thresh(pos, threshold):
+    return render_template("dashboard_temp.html", position=pos, thresh=threshold)
+
+
+@app.route("/<pos>_data/<threshold>")
+def position_data_thresh(pos, threshold):
+    data = list(
+        player_coll.find(
+            {
+                "season": session["current_season"],
+                "week": session["current_week"],
+                "position": pos,
+                "C_Proj": {
+                    "$gte": int(threshold)
+                },  ## this is where the threshhold is added to query
+            },
+            {"_id": False},
+        )
+    )
 
     return jsonify(data)
 
 
+## return only C_proj for players who meet the threshold.
+# high default threshold is hardcoded in the HTML href (link)
 @app.route("/TOP_GUNS/<qb_thresh>/<rb_thresh>/<wr_thresh>/<te_thresh>/<def_thresh>")
 def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
-    current_week = list(
-        vegas_coll.find({}, {"_id": False, "Week": True}).sort("Week", -1).limit(1)
-    )[0]["Week"]
 
-    ## leave week as 16 for now
-    qbs = list(
-        player_coll.find(
-            {"position": "QB", "week": 16, "C_Proj": {"$gte": int(qb_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
+    qbs = top_guns_query(
+        "QB", qb_thresh, session["current_week"], session["current_season"]
     )
-    rbs = list(
-        player_coll.find(
-            {"position": "RB", "week": 16, "C_Proj": {"$gte": int(rb_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
+    rbs = top_guns_query(
+        "RB", rb_thresh, session["current_week"], session["current_season"]
     )
-    wrs = list(
-        player_coll.find(
-            {"position": "WR", "week": 16, "C_Proj": {"$gte": int(wr_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
+    wrs = top_guns_query(
+        "WR", wr_thresh, session["current_week"], session["current_season"]
     )
-    tes = list(
-        player_coll.find(
-            {"position": "TE", "week": 16, "C_Proj": {"$gte": int(te_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
+    tes = top_guns_query(
+        "TE", te_thresh, session["current_week"], session["current_season"]
     )
-    defs = list(
-        player_coll.find(
-            {"position": "DEF", "week": 16, "C_Proj": {"$gte": int(def_thresh)}},
-            {"_id": False, "player": True, "C_Proj": True, "C_Ceil": True, "FAV": True},
-        )
+    defs = top_guns_query(
+        "DEF", def_thresh, session["current_week"], session["current_season"]
     )
 
+    # this extracts colmns names for HTML
     qb_headers = list(qbs[0].keys())
     rb_headers = list(rbs[0].keys())
     wr_headers = list(wrs[0].keys())
     te_headers = list(tes[0].keys())
     def_headers = list(defs[0].keys())
 
-    # return jsonify(qbs)
     return render_template(
         "topguns.html",
         qbs=qbs,
@@ -122,19 +177,28 @@ def top_guns(qb_thresh, rb_thresh, wr_thresh, te_thresh, def_thresh):
     )
 
 
-@app.route("/stack_app")
+# This route queries both players with only
+# C_proj, C_floor, and C_ceil data
+# and the stacked teams created in the app
+@app.route("/stack_app_data", methods=["GET", "POST"])
+def stack_app_data():
+    player_data = stack_app_query(
+        player_coll, session["current_week"], session["current_season"]
+    )
+    team_data = [x for x in TeamBuilder.find({}, {"_id": False})]
+    data = {"names": player_data, "teams": team_data}
+
+    return jsonify(data)
+
+
+@app.route("/stack_app", methods=["GET", "POST"])
 def stack_app():
     return render_template("stack_app.html")
 
 
-@app.route("/stack_app_data")
-def stack_app_data():
-    names = stack_app_query(player_coll)
-    teams = [x for x in TeamBuilder.find({}, {"_id": False})]
-    data = {"names": names, "teams": teams}
-    return jsonify(data)
-
-
+# This route receives team names from the
+# teams created in the stack app
+# and inputs the names to the team_coll collection
 @app.route("/<team_name>/<qb>/<rb1>/<rb2>/<wr1>/<wr2>/<wr3>/<te>/<dst>/<flex>")
 def save_new_team(team_name, qb, rb1, rb2, wr1, wr2, wr3, te, dst, flex):
     team = {
@@ -152,6 +216,8 @@ def save_new_team(team_name, qb, rb1, rb2, wr1, wr2, wr3, te, dst, flex):
     return redirect("/stack_app")
 
 
+# This route renders the form that collects
+# the metadata on custom points
 @app.route("/football_calculator_settings", methods=["GET", "POST"])
 def calculator_settings():
     form = CalculatorForm(request.form)
@@ -165,6 +231,9 @@ def calculator_settings():
     return render_template("calc_settings_jinja.html", form=form)
 
 
+# This route receives the point metadata from the calculator from
+# and renders the frontend to input point weightings and columns
+# necessary
 @app.route("/calculator/<string:label>/<int:amnt>/<position>/<season>/<week>")
 def football_calculator(label, amnt, position, season, week):
     return render_template(
@@ -177,32 +246,38 @@ def football_calculator(label, amnt, position, season, week):
     )
 
 
+# this route the take in metadata, weights and columns,
+# each in JSON format and parses then
 @app.route("/<string:label>/<meta>/<weights>/<columns>")
 def calculator_submit(label, meta, weights, columns):
-    point_label = unquote(label)
+    # parsess data from URL
     point_meta = json.loads(unquote(meta))
     point_weights = json.loads(unquote(weights))
     point_columns = json.loads(unquote(columns))
-    point_data = {"label": point_label}
+
+    # extracts necessary data and reformat to list of dictionaries
     columns = []
     weights = []
     if len(point_weights) == len(point_columns):
         for i in range(len(point_weights)):
-            point_dict = {
-                "weight": point_weights[i][f"weight{i+1}"],
-                "col": point_columns[i][f"column{i+1}"],
-            }
+            ###### I think the commented out code is useless #######
+            # point_dict = {
+            #     "weight": point_weights[i][f"weight{i+1}"],
+            #     "col": point_columns[i][f"column{i+1}"],
+            # }
             columns.append(point_columns[i][f"column{i+1}"])
             weights.append(float(point_weights[i][f"weight{i+1}"]))
-            point_data[f"point{i+1}"] = point_dict
 
-    CalcCollection.insert_one(point_data)
-
+    # pulls data from database and applies normalization to the data
+    # first variable returned is data scaled by maxmin and
+    # second is scaled by a sttandard scaler
     minmax_data, standard_data = pull_scaled_data(columns, point_meta)
 
+    # weigh and combine the data according the weights
     minmax_point = weigh_data(weights, minmax_data)
     standard_point = weigh_data(weights, standard_data)
 
+    # update the database document with two new points
     for p_minmax, p_standard in zip(minmax_point, standard_point):
         player_coll.update_many(
             {
@@ -222,51 +297,10 @@ def calculator_submit(label, meta, weights, columns):
     return redirect(f"/{point_meta['pos']}_Dash")
 
 
+# deletes teams off the teambuilder collection
 @app.route("/delete/<collection>/<name>")
 def delete_team_points(collection, name):
     if collection == "teams":
         query = {"name": name}
         TeamBuilder.delete_one(query)
-    elif collection == "points":
-        query = {"label": name}
-        CalcCollection.delete_one(query)
     return redirect("/stack_app")
-
-
-@app.route("/raw_data/<source>")
-def raw_data(source):
-    if source == "SS_Data":
-        name = "Saber Sim Raw"
-        cols = ss_data_cols
-    elif source == "4f4proj":
-        name = "4for4 Projection Data"
-        cols = _4f4_proj_cols
-    elif source == "4f4ceil":
-        name = "4for4 Ceiling Data"
-        cols = _4f4_ceil_cols
-    # elif source == '4f4_WR_cb':
-    #     name = "4for4 WR cb?"
-    #     cols = _4f4_wrcb_co
-    elif source == "4f4_redzone":
-        name = "4for4 Redzone Data"
-        cols = _4f4_redZ_cols
-    elif source == "4f4_WR_fp":
-        name = "4for4 WR Fantasy Points"
-        cols = _4f4_wr_fp_cols
-    elif source == "4f4_RB_fp":
-        name = "4for4 RB Fantasy Points"
-        cols = _4f4_rb_fp_cols
-    elif source == "4f4_RB_tar":
-        name = "4for4 RB Target Data"
-        cols = _4f4_rb_tar_cols
-    elif source == "airy_wr":
-        name = "AirY WR Data"
-        cols = airy_wr_cols
-    elif source == "airy_te":
-        name = "AirY TE Data"
-        cols = airy_te_cols
-
-    data = get_raw_data(player_coll, cols)
-    headers = data[0].keys()
-
-    return render_template("raw_data_temp.html", name=name, data=data, headers=headers)

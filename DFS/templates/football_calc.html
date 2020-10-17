@@ -1,8 +1,13 @@
+<!-- Extends base.html -->
 {% extends "base.html" %}
+<!-- Jinja Import for forms -->
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-    {% include 'navbar.html' %}
+<!-- copies navbar -->
+{% include 'navbar.html' %}
+
+<!-- Page Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="h2">Football Calculator</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
@@ -10,7 +15,9 @@
         </div>
       </div>
     </div>
-  <div class="container">
+
+   <!-- Metadata Display -->
+    <div class="container">
       <div class="well">
     <div class="panel panel-primary">
       <div class="panel-heading">
@@ -26,7 +33,10 @@
     </div>
   </div>
 </div>
+<!-- End Metadata display -->
 <div class='container' id='variables'>
+  
+<!-- Start Javascript for user input -->
   <ul id='variableInput'>
   </ul>
   <div id='forButton'>
