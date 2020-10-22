@@ -10,7 +10,6 @@ from . import app
 from .database import player_coll, vegas_coll, TeamBuilder
 from .models import CalculatorForm, GetTimeForm
 from .func import (
-    get_raw_data,
     stack_app_query,
     pull_scaled_data,
     weigh_data,

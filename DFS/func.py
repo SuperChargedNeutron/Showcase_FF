@@ -127,15 +127,6 @@ def weigh_data(weights, data):
         weighed_scaled_data.append(player_transform)
     return weighed_scaled_data
 
-
-def get_raw_data(player_coll, cols):
-    query_params = {col: {"$exists": True} for col in cols}
-    data_return = {col: True for col in cols}
-    data_return.update({"_id": False})
-    data = player_coll.find(query_params, data_return)
-    return data
-
-
 def stack_app_query(player_coll, current_week, current_season):
     query_params = {
         "week": current_week,
