@@ -31,7 +31,7 @@ def scrape_airyards(dl_path, week, season):
     week_input_xpath = '//*[@id="weeks-selectized"]'
     dl_button_xpath = '//*[@id="download"]'
     rb_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[2]/label/input"
-    wr_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[3]/label/input"
+    # wr_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[3]/label/input"
     te_check_xpath = "/html/body/div[1]/div[2]/div[1]/div/div/div[4]/label/input"
 
     try:
@@ -39,7 +39,7 @@ def scrape_airyards(dl_path, week, season):
         browser = webdriver.Firefox(
             firefox_profile=profile, executable_path=GeckoDriverManager().install()
         )
-        browser.get("https://apps.airyards.com/tables")
+        browser.get("https://apps.airyards.com/airyards-2020")
         sleep(10)
 
         year_input = browser.find_element_by_xpath(year_input_xpath)
@@ -51,7 +51,7 @@ def scrape_airyards(dl_path, week, season):
         week_input = browser.find_element_by_xpath(week_input_xpath)
         dl_button = browser.find_element_by_xpath(dl_button_xpath)
         rb_check = browser.find_element_by_xpath(rb_check_xpath)
-        wr_check = browser.find_element_by_xpath(wr_check_xpath)
+        # wr_check = browser.find_element_by_xpath(wr_check_xpath)
         te_check = browser.find_element_by_xpath(te_check_xpath)
 
         ## ---- Navigate the Webpage ---- ##
@@ -66,11 +66,12 @@ def scrape_airyards(dl_path, week, season):
 
         ## ---- set the position metric --- ##
         rb_check.click()
-        wr_check.click()
         te_check.click()
 
         ## ---- download the file --- ###
         dl_button.click()
+
+        browser.close()
 
         scrape = True
     except:
@@ -114,14 +115,14 @@ def average_row(row, avgee):
     ### takes in a player document from mongoDB (includes _id) and scans
     ### for 'proj' in columns, then avg all
     ##E the collected columns based on the averagee
-    ### avgee SHOULD be 'proj' or 'ceil' or 'flr'
+    ### avgee SHOULD be 'proj' or 'ceil' or 'floor'
 
     acc = 0
     count = 0
     for key in row.keys():
         if avgee == "proj":
             ## add a projection metric to be averaged in the list below
-            if key in ["proj_4f4", "ffpts_4f4", "dk projection_ETR"]:
+            if key in ["proj_4f4", "dk projection_ETR"]:
                 count += 1 if row[key] != "nan" else 0
                 acc += row[key] if row[key] != "nan" else 0
         elif avgee == "floor":
@@ -328,23 +329,28 @@ def search_index_keys(columns):
         index_cols.append("Road")
     return index_cols
 
-
 def conditional_insert(collection, row):
+    # search dict for indexer keys
     index_cols = search_index_keys(list(row.keys()))
+
+    # set params for player search query
     query_params = {
         ic: row[ic] if not isinstance(row[ic], (np.int64, np.int32)) else int(row[ic])
         for ic in index_cols
     }
+    # player search to either replace data or initialize a document
     player_row = list(collection.find(query_params, {"_id": False}))
+    #replaces data
     if len(player_row) != 0:
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
                 pass
-            elif key not in player_row[0] and row[key] != None:
+            elif (key not in player_row[0] or row[key] == player_row[0][key]) and row[key] != None:
                 if isinstance(row[key], (np.int32, np.int64)):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:
                     collection.update_one(query_params, {"$set": {key: row[key]}})
+    # starts new document
     elif len(player_row) == 0:
         for x in row:
             if isinstance(row[x], (np.int32, np.int64)):

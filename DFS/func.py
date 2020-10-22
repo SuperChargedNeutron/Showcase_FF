@@ -8,9 +8,10 @@ from time import sleep
 import pymongo
 import numpy as np
 from bs4 import BeautifulSoup
-from selenium import webdriver
+import requests
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from webdriver_manager.firefox import GeckoDriverManager
+# from selenium import webdriver
+# from webdriver_manager.firefox import GeckoDriverManager
 
 # Local Imports 
 from .database import player_coll, team_coll, vegas_coll
@@ -35,21 +36,28 @@ def search_index_keys(columns):
 
 
 def conditional_insert(collection, row):
+    # search dict for indexer keys
     index_cols = search_index_keys(list(row.keys()))
+
+    # set params for player search query
     query_params = {
         ic: row[ic] if not isinstance(row[ic], (np.int64, np.int32)) else int(row[ic])
         for ic in index_cols
     }
+    # player search to either replace data or initialize a document
     player_row = list(collection.find(query_params, {"_id": False}))
+    #replaces data
     if len(player_row) != 0:
+        #checks every data point in the dictions
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
                 pass
-            elif key not in player_row[0] and row[key] != None:
+            elif (key not in player_row[0] or row[key] != player_row[0][key]) and row[key] != None:
                 if isinstance(row[key], (np.int32, np.int64)):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:
                     collection.update_one(query_params, {"$set": {key: row[key]}})
+    # starts new document
     elif len(player_row) == 0:
         for x in row:
             if isinstance(row[x], (np.int32, np.int64)):
@@ -161,12 +169,15 @@ def get_bookie_divs():
     Opens up a selenium browser and parses 
     the page source with beautiful soup
     """
-    browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
-    browser.get("https://mybookie.ag/sportsbook/nfl/")
-    html = browser.page_source
-    browser.close()
+
+    # browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    reponse = requests.get("https://mybookie.ag/sportsbook/nfl/")
+    html = reponse.text
+    # browser.close()
     soup = BeautifulSoup(html, "html.parser")
-    return soup.find_all("div", {"class": "game-line py-3"})[0:16]
+    div_list = soup.find_all("div", {"class": "game-line py-3"})
+    return_divs = div_list[0:16] if len(div_list) >= 15 else div_list
+    return return_divs
 
 
 def scrape_bookie_divs(divs):

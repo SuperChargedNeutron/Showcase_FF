@@ -37,7 +37,7 @@ Bootstrap(app)
 def root():
     return redirect("/get_time")
 
-
+### uses forms to set week and season used by mongo queries ###
 @app.route("/get_time", methods=["GET", "POST"])
 def get_time():
     form = GetTimeForm(request.form)
@@ -48,7 +48,7 @@ def get_time():
         return redirect("/scrape_center")
     return render_template("gettime.html", form=form)
 
-
+### displays all scrape buttons and uses a form for file upload
 @app.route("/scrape_center", methods=["GET", "POST"])
 def scrape_center():
     dl_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data")
@@ -63,7 +63,8 @@ def scrape_center():
 
     return render_template("scrape_center.html", form=form)
 
-
+### sets download button and URL settings for 4f4 
+### based on the button clicked
 @app.route("/scrape/<file_name>")
 def scrape_it(file_name):
     week = session["current_week"]
@@ -74,28 +75,35 @@ def scrape_it(file_name):
     if not os.path.exists(dl_path):
         os.makedirs(dl_path)
     os.chdir(dl_path)
+
+    # setings for 4f4 projectio
     if file_name == "4f4_projection":
         url = "https://www.4for4.com/full-impact/cheatsheet/QB/154605/ff_nflstats"
         dl_button = (
             '//*[@id="block-system-main"]/div/div/div/div/div/div/div[2]/div/div[2]/a'
         )
 
+    # settings for floor and ceailing data
     elif file_name == "4f4_fc_data":
         url = "https://www.4for4.com/floor-ceiling-projections/draftkings"
         dl_button = '//*[@id="block-system-main"]/div/div/div/div/div/div[4]/div/div/div/div[2]/div/a'
 
+    # settings for leverage data
     elif file_name == "4f4_leverage":
         url = "https://www.4for4.com/gpp-leverage-scores"
         dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
 
+    # settings for rushing redzone data
     elif file_name == "4f4_rushing_redzone":
         url = "https://www.4for4.com/red-zone-stats?tab=1&sub-tab=0"
         dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
 
+    # settings for passing redzone data
     elif file_name == "4f4_passing_redzone":
         url = "https://www.4for4.com/red-zone-stats?tab=2&sub-tab=0"
         dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
 
+    # settings for receiving redzone data
     elif file_name == "4f4_receiving_redzone":
         url = "https://www.4for4.com/red-zone-stats?tab=0&sub-tab=0"
         dl_button = '//*[@id="field_sub_tab_body-wrapper"]/a'
@@ -197,7 +205,7 @@ def airyards():
 
     if scrape == True:
 
-        return redirect(f"/fupload/airyards.csv")
+        return redirect(url_for(fupload, 'airyards.csv'))
     else:
         message = "something went wrong scraping airyards"
         return render_template(
@@ -318,10 +326,13 @@ def fupload(file):
     if "golden" in file.lower():
 
         df = pd.read_excel(file) if file[-4:] == "xlsx" else pd.read_csv(file)
-        data = df.iloc[7:, 14:23].reset_index(drop=True)
-        data.columns = [column_clean(x.lower()) for x in df.iloc[6, 14:23]]
+        # data = df.iloc[7:, 14:23].reset_index(drop=True)
+        # data.columns = [column_clean(x.lower()) for x in df.iloc[6, 14:23]]
+        data = df.iloc[7:, 10:19].reset_index(drop=True)
+        data.columns = [column_clean(x.lower()) for x in df.iloc[6, 10:19]]
         data["week"] = week
         data["season"] = season
+        
         golden = data[
             [
                 "position",
@@ -334,6 +345,8 @@ def fupload(file):
             ]
         ]
         clean_df = upload_file_clean(golden)
+        clean_df['salary'] = pd.to_numeric(clean_df['salary'])
+
 
     elif file == f"4f4_projection_W{week}_{season}.csv":
         df = (
@@ -415,8 +428,10 @@ def fupload(file):
         clean_df = upload_file_clean(df, "ETR")
         clean_df = clean_df.drop(columns=["dk salary_ETR", "dkslateid_ETR"])
         clean_df["dk ownership_ETR"] = clean_df["dk ownership_ETR"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
+            lambda x: float(x.replace("%", "")) if '%' in x else 0
         )
+        clean_df["week"] = week
+        clean_df["season"] = season
 
     elif file == f"4f4_wr_fp_L4_W{week}_{season}.csv":
         df = pd.read_csv(file).fillna("nan")
@@ -425,6 +440,8 @@ def fupload(file):
         clean_df[week_cols] = clean_df[week_cols].applymap(
             lambda x: float(x) if x != "-" else x
         )
+        clean_df["week"] = week
+        clean_df["season"] = season
 
     elif file == f"4f4_rb_fp_L3_W{week}_{season}.csv":
         df = pd.read_csv(file).fillna("nan")
@@ -433,6 +450,8 @@ def fupload(file):
         clean_df[week_cols] = clean_df[week_cols].applymap(
             lambda x: float(x) if x != "-" else x
         )
+        clean_df["week"] = week
+        clean_df["season"] = season
 
     elif file == f"4f4_rb_targ_L3_W{week}_{season}.csv":
         df = pd.read_csv(file).fillna("nan")
@@ -444,27 +463,30 @@ def fupload(file):
         clean_df["array_targ"] = clean_df["array_targ"].apply(
             lambda x: 0 if x == " " else float(x.replace("%", ""))
         )
+        clean_df["week"] = week
+        clean_df["season"] = season
+
     elif file == f"airyards.csv":
         df = pd.read_csv(file).fillna("nan")
         clean_df = upload_file_clean(df, "ay")
         clean_df = clean_df.drop(columns=["unnamed: 0_ay"])
+        clean_df["week"] = week
+        clean_df["season"] = season
 
     elif file == "def_scrape":
         cols, data = scrape_def_data(dl_path)
         df = pd.DataFrame(data, columns=cols)
-        # clean_df = upload_file_clean(df, '4f4')
+        clean_df = upload_file_clean(df, '4f4')
+        clean_df["week"] = week
+        clean_df["season"] = season
+    
+    for i in range(len(clean_df)):
+        row = clean_df.iloc[i, :].to_dict()
 
-        return jsonify(df.T.to_dict())
+        if row[list(row.keys())[0]] != "nan":
+            conditional_insert(player_coll, row)
 
-    #     clean_df["week"] = week
-    #     clean_df["season"] = season
-
-    #     for i in range(len(clean_df)):
-    #         row = clean_df.iloc[i, :].to_dict()
-    #         if row[list(row.keys())[0]] != "nan":
-    #             conditional_insert(player_coll, row)
-
-    #     player_coll.delete_many({ 'position': {'$ne' : 'DEF'},"avgpointspergame": {"$exists": False}})
+    player_coll.delete_many({ 'position': {'$ne' : 'DEF'},"avgpointspergame": {"$exists": False}})
 
     # except:
     #     message = f"File {file} was not able to be uploaded, double check that the name corresponds to the right colums names."
