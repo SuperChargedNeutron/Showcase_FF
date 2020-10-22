@@ -12,7 +12,6 @@ import pandas as pd
 from models import FileSubmitForm, GetTimeForm
 from database import db, player_coll
 from scrape_func import (
-    rename_file,
     rename_scrape_csv,
     conditional_insert,
     login,

@@ -219,12 +219,6 @@ def scrape_def_data(dl_path):
 
     return cols, trs
 
-
-def rename_file(file, week, season):
-
-    return f"{file}_W{week}_{season}.csv"
-
-
 def rename_scrape_csv(file_name, week, season, scrape, dl_path):
     recent_file = max(list(os.scandir(os.getcwd())), key=os.path.getmtime).name
 
