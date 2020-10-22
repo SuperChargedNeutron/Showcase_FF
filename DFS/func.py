@@ -214,9 +214,9 @@ def scrape_bookie_divs(divs, current_week):
                 ## uses game date as fail safe
                         elif "week" not in words:
                             today = date.today()
-                            if py_date.date() - today < timedelta(days=8):
+                            if py_date.date() - today < timedelta(days=7):
                                 week = current_week 
-                            elif py_date.date() - today >= timedelta(days=8):
+                            elif py_date.date() - today >= timedelta(days=7):
                                 week = current_week + 1
 
                 ## gets the data points
