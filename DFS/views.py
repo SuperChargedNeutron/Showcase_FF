@@ -73,7 +73,7 @@ def scrape_bookie():
     divs = get_bookie_divs()
 
     # extracts data from HTML divs
-    games = scrape_bookie_divs(divs)
+    games = scrape_bookie_divs(divs, session['current_week'])
 
     # insert into database based on values
     for g in games:
