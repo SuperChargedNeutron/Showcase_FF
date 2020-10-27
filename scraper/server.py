@@ -204,7 +204,7 @@ def airyards():
 
     if scrape == True:
 
-        return redirect(url_for(fupload, 'airyards.csv'))
+        return redirect(url_for('fupload', file='airyards.csv'))
     else:
         message = "something went wrong scraping airyards"
         return render_template(
@@ -507,7 +507,7 @@ def fupload(file):
         return redirect("/scrape_center")
         
     except:
-        message = f"File {file} was not able to be uploaded, double check that the name corresponds to the right colums names."
+        message = f"File {file} was not able to be uploaded, double check that the name corresponds to the right colums names and that the file downloaded correctly."
         return render_template("404.html", head='UPLOAD ERROR', code=404, message=message, boo=False)
 
 

@@ -71,9 +71,19 @@ def scrape_airyards(dl_path, week, season):
         ## ---- download the file --- ###
         dl_button.click()
 
+        sleep(3)
+        
+        # while the file doesn't exist it waits 3 seconds and tries again
+        while os.path.isfile(os.path.join(dl_path, 'airyards.csv')) == False:
+            dl_button.click()
+            sleep(3)
+
         browser.close()
 
         scrape = True
+    
+
+    #if an error happens scrape flags after this function runs
     except:
         scrape = False
 
@@ -334,12 +344,13 @@ def conditional_insert(collection, row):
     }
     # player search to either replace data or initialize a document
     player_row = list(collection.find(query_params, {"_id": False}))
+
     #replaces data
     if len(player_row) != 0:
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
                 pass
-            elif (key not in player_row[0] or row[key] == player_row[0][key]) and row[key] != None:
+            elif (key not in player_row[0] or row[key] != player_row[0][key]) and row[key] != None:
                 if isinstance(row[key], (np.int32, np.int64)):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:
