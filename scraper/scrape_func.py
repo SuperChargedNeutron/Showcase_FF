@@ -132,7 +132,7 @@ def average_row(row, avgee):
     for key in row.keys():
         if avgee == "proj":
             ## add a projection metric to be averaged in the list below
-            if key in ["proj_4f4", "dk projection_ETR"]:
+            if key in ["ffpts_4f4", "dk projection_ETR"]:
                 count += 1 if row[key] != "nan" else 0
                 acc += row[key] if row[key] != "nan" else 0
         elif avgee == "floor":
