@@ -1,6 +1,6 @@
 # Python Imports
 import os
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from random import randint
 from time import sleep
 
@@ -46,6 +46,7 @@ def conditional_insert(collection, row):
     }
     # player search to either replace data or initialize a document
     player_row = list(collection.find(query_params, {"_id": False}))
+
     #replaces data
     if len(player_row) != 0:
         #checks every data point in the dictions
@@ -57,6 +58,7 @@ def conditional_insert(collection, row):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:
                     collection.update_one(query_params, {"$set": {key: row[key]}})
+
     # starts new document
     elif len(player_row) == 0:
         for x in row:
@@ -135,15 +137,6 @@ def weigh_data(weights, data):
         weighed_scaled_data.append(player_transform)
     return weighed_scaled_data
 
-
-def get_raw_data(player_coll, cols):
-    query_params = {col: {"$exists": True} for col in cols}
-    data_return = {col: True for col in cols}
-    data_return.update({"_id": False})
-    data = player_coll.find(query_params, data_return)
-    return data
-
-
 def stack_app_query(player_coll, current_week, current_season):
     query_params = {
         "week": current_week,
@@ -189,9 +182,8 @@ def get_bookie_divs():
     return return_divs
 
 
-def scrape_bookie_divs(divs):
+def scrape_bookie_divs(divs, current_week):
     game_data = []
-    week_list = []
 
     # loop though all divs from scrape_bookie()
     for maindiv in divs:
@@ -200,30 +192,36 @@ def scrape_bookie_divs(divs):
         # check if div has game metadata
         if maindiv.find("meta") != None:
             try:
+                ##gets meta tag with teams playing
                 teams = (
                     maindiv.find("meta", {"itemprop": "name"}).get("content").split(" v ")
                 )
+                ## gets date from another meta tag and converts to python object
+                raw_date = maindiv.find("meta", {"itemprop": "startDate"}).get("content")
+                py_date = datetime.strptime(raw_date, "%Y-%m-%d %H:%M+00:%S")
 
-                date = maindiv.find("meta", {"itemprop": "startDate"}).get("content")
 
-                py_date = datetime.strptime(date, "%Y-%m-%d %H:%M+00:%S")
+                ## sets the week for the game
                 if len(maindiv.find_all("p", {"class": "game-line__banner mb-2"})) > 0:
+                    ## gets div descriptive paragraphs
                     banners = maindiv.find_all("p", {"class": "game-line__banner mb-2"})
                     for ban in banners:
-                        
                         words = ban.text.lower().split()
         
                         if "week" in words:
                             week_ind = words.index("week")
                             week = int(words[week_ind + 1])
-                            week_list.append(week)
-                            break
-                        else:
-                            week = week_list[0] if len(week_list) > 0 else 0
+                ## uses game date as fail safe
+                        elif "week" not in words:
+                            today = date.today()
+                            if py_date.date() - today < timedelta(days=7):
+                                week = current_week 
+                            elif py_date.date() - today >= timedelta(days=7):
+                                week = current_week + 1
 
+                ## gets the data points
                 buttons = [x.text.strip() for x in maindiv.find_all("button")]
-
-                market_ou = buttons[2].split()[1]
+                market_ou = buttons[2].split()[1] if buttons[2] != '-' else buttons[2]
                 market_ou = int(market_ou[0:2]) + 0.5 if market_ou[-1] == "½" else market_ou
                 spread = buttons[0].split()[0]
                 
@@ -246,12 +244,15 @@ def scrape_bookie_divs(divs):
                         "week": int(week),
                         "season": py_date.year,
                         "Game Date": f"{py_date.month}-{py_date.day}",
-                        "Market_O/U": float(market_ou),
-                        "Market Spread": 0 if spread == "PK" else abs(float(spread)),
+                        "Market_O/U": float(market_ou) if market_ou != '-' else '-',
+                        "Market Spread": 0 if spread == "PK" or spread == '-' else abs(float(spread)),
                     }
                 )
-
-                if buttons[0][0] == "-":
+                
+                if spread == 'PK':
+                    fave_team = '-'
+                    dog_team = '-'
+                elif buttons[0][0] == "-":
                     fave_team = vegas_row["Home"]
                     dog_team = vegas_row["Road"]
                 elif buttons[3][0] == "-":
@@ -260,7 +261,13 @@ def scrape_bookie_divs(divs):
                 vegas_row.update(
                     {
                         "FAV": fave_team,
-                        "DOG": dog_team,
+                        "DOG": dog_team
+                    }
+                )
+                
+                if spread != '-' and market_ou != '-':
+                    vegas_row.update(
+                    {
                         "Market_Imp_fav": (int(market_ou) / 2)
                         if spread == "PK"
                         else (int(market_ou) / 2) + (abs(int(spread)) / 2),
@@ -274,4 +281,4 @@ def scrape_bookie_divs(divs):
             except:
                 pass
 
-    return sorted(game_data, key=lambda k: k["Market_O/U"], reverse=True)
+    return game_data

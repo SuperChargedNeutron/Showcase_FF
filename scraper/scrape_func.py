@@ -71,9 +71,19 @@ def scrape_airyards(dl_path, week, season):
         ## ---- download the file --- ###
         dl_button.click()
 
+        sleep(3)
+        
+        # while the file doesn't exist it waits 3 seconds and tries again
+        while os.path.isfile(os.path.join(dl_path, 'airyards.csv')) == False:
+            dl_button.click()
+            sleep(3)
+
         browser.close()
 
         scrape = True
+    
+
+    #if an error happens scrape flags after this function runs
     except:
         scrape = False
 
@@ -122,7 +132,7 @@ def average_row(row, avgee):
     for key in row.keys():
         if avgee == "proj":
             ## add a projection metric to be averaged in the list below
-            if key in ["proj_4f4", "dk projection_ETR"]:
+            if key in ["ffpts_4f4", "dk projection_ETR"]:
                 count += 1 if row[key] != "nan" else 0
                 acc += row[key] if row[key] != "nan" else 0
         elif avgee == "floor":
@@ -218,12 +228,6 @@ def scrape_def_data(dl_path):
         trs.append(tds)
 
     return cols, trs
-
-
-def rename_file(file, week, season):
-
-    return f"{file}_W{week}_{season}.csv"
-
 
 def rename_scrape_csv(file_name, week, season, scrape, dl_path):
     recent_file = max(list(os.scandir(os.getcwd())), key=os.path.getmtime).name
@@ -340,12 +344,13 @@ def conditional_insert(collection, row):
     }
     # player search to either replace data or initialize a document
     player_row = list(collection.find(query_params, {"_id": False}))
+
     #replaces data
     if len(player_row) != 0:
         for key in row:
             if key in player_row[0] and row[key] == player_row[0][key]:
                 pass
-            elif (key not in player_row[0] or row[key] == player_row[0][key]) and row[key] != None:
+            elif (key not in player_row[0] or row[key] != player_row[0][key]) and row[key] != None:
                 if isinstance(row[key], (np.int32, np.int64)):
                     collection.update_one(query_params, {"$set": {key: int(row[key])}})
                 else:

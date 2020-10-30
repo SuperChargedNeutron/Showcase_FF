@@ -12,7 +12,6 @@ import pandas as pd
 from models import FileSubmitForm, GetTimeForm
 from database import db, player_coll
 from scrape_func import (
-    rename_file,
     rename_scrape_csv,
     conditional_insert,
     login,
@@ -205,7 +204,7 @@ def airyards():
 
     if scrape == True:
 
-        return redirect(url_for(fupload, 'airyards.csv'))
+        return redirect(url_for('fupload', file='airyards.csv'))
     else:
         message = "something went wrong scraping airyards"
         return render_template(
@@ -322,177 +321,194 @@ def fupload(file):
     )
     os.chdir(dl_path)
 
-    # try:
-    if "golden" in file.lower():
+    try:
+        if "golden" in file.lower():
 
-        df = pd.read_excel(file) if file[-4:] == "xlsx" else pd.read_csv(file)
-        # data = df.iloc[7:, 14:23].reset_index(drop=True)
-        # data.columns = [column_clean(x.lower()) for x in df.iloc[6, 14:23]]
-        data = df.iloc[7:, 10:19].reset_index(drop=True)
-        data.columns = [column_clean(x.lower()) for x in df.iloc[6, 10:19]]
-        data["week"] = week
-        data["season"] = season
+            df = pd.read_excel(file) if file[-4:] == "xlsx" else pd.read_csv(file)
+            try:
+                data = df.iloc[7:, 14:23].reset_index(drop=True)
+                data.columns = [column_clean(x.lower()) for x in df.iloc[6, 14:23]]
+                data["week"] = week
+                data["season"] = season
+                
+                golden = data[
+                    [
+                        "position",
+                        "player",
+                        "salary",
+                        "team",
+                        "avgpointspergame",
+                        "season",
+                        "week",
+                    ]
+                ]
+                clean_df = upload_file_clean(golden)
+                clean_df['salary'] = pd.to_numeric(clean_df['salary'])
+            except:
+                data = df.iloc[7:, 10:19].reset_index(drop=True)
+                data.columns = [column_clean(x.lower()) for x in df.iloc[6, 10:19]]
+                data["week"] = week
+                data["season"] = season
+                
+                golden = data[
+                    [
+                        "position",
+                        "player",
+                        "salary",
+                        "team",
+                        "avgpointspergame",
+                        "season",
+                        "week",
+                    ]
+                ]
+                clean_df = upload_file_clean(golden)
+                clean_df['salary'] = pd.to_numeric(clean_df['salary'])
+
+        elif file == f"4f4_projection_W{week}_{season}.csv":
+            df = (
+                pd.read_excel(file).fillna("nan")
+                if file[-4:] == "xlsx"
+                else pd.read_csv(file).fillna("nan")
+            )
+            clean_df = upload_file_clean(df, "4f4")
+            clean_df = clean_df.drop(columns=["pid_4f4"])
+            clean_df = clean_df[clean_df["position"] != "K"]
+
+        elif file == f"4f4_fc_data_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "4f4")
+            clean_df = clean_df.drop(columns=["salary_4f4"])
+            clean_df["proj_4f4"] = round(clean_df["floor_4f4"] + clean_df["value1_4f4"], 2)
+
+        elif file == f"4f4_leverage_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "4f4")
+            clean_df = clean_df.drop(columns=["dk sal $_4f4"])
+            clean_df["projected own%_4f4"] = clean_df["projected own%_4f4"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["cash odds_4f4"] = clean_df["cash odds_4f4"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["gpp odds_4f4"] = clean_df["gpp odds_4f4"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["implied own%_4f4"] = clean_df["implied own%_4f4"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+
+        elif file == f"4f4_passing_redzone_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "RZ_pass")
+            clean_df = clean_df.drop(columns=["team"])
+            clean_df["cmp% 10_RZ_pass"] = clean_df["cmp% 10_RZ_pass"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["cmp% 20_RZ_pass"] = clean_df["cmp% 20_RZ_pass"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+
+        elif file == f"4f4_rushing_redzone_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "RZ_rush")
+            clean_df = clean_df.drop(columns=["team"])
+            clean_df["%rush 20_RZ_rush"] = clean_df["%rush 20_RZ_rush"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["%rush 10_RZ_rush"] = clean_df["%rush 10_RZ_rush"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["%rush 5_RZ_rush"] = clean_df["%rush 5_RZ_rush"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+
+        elif file == f"4f4_receiving_redzone_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "RZ_rec")
+            clean_df = clean_df.drop(columns=["team"])
+            clean_df["ctch% 20_RZ_rec"] = clean_df["ctch% 20_RZ_rec"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["%tgt 20_RZ_rec"] = clean_df["%tgt 20_RZ_rec"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["ctch% 10_RZ_rec"] = clean_df["ctch% 10_RZ_rec"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["%tgt 10_RZ_rec"] = clean_df["%tgt 10_RZ_rec"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+
+        elif file == f"ETR_projection_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "ETR")
+            clean_df = clean_df.drop(columns=["dk salary_ETR", "dkslateid_ETR"])
+            clean_df["dk ownership_ETR"] = clean_df["dk ownership_ETR"].apply(
+                lambda x: float(x.replace("%", "")) if '%' in x else 0
+            )
+            clean_df["week"] = week
+            clean_df["season"] = season
+
+        elif file == f"4f4_wr_fp_L4_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "fp")
+            week_cols = [col for col in clean_df.columns if col.startswith("w")]
+            clean_df[week_cols] = clean_df[week_cols].applymap(
+                lambda x: float(x) if x != "-" else x
+            )
+            clean_df["week"] = week
+            clean_df["season"] = season
+
+        elif file == f"4f4_rb_fp_L3_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "fp")
+            week_cols = [col for col in clean_df.columns if col.startswith("w")]
+            clean_df[week_cols] = clean_df[week_cols].applymap(
+                lambda x: float(x) if x != "-" else x
+            )
+            clean_df["week"] = week
+            clean_df["season"] = season
+
+        elif file == f"4f4_rb_targ_L3_W{week}_{season}.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "targ")
+            week_cols = [col for col in clean_df.columns if col.startswith("w")]
+            clean_df[week_cols] = clean_df[week_cols].applymap(
+                lambda x: float(x) if x != "-" else x
+            )
+            clean_df["array_targ"] = clean_df["array_targ"].apply(
+                lambda x: 0 if x == " " else float(x.replace("%", ""))
+            )
+            clean_df["week"] = week
+            clean_df["season"] = season
+
+        elif file == f"airyards.csv":
+            df = pd.read_csv(file).fillna("nan")
+            clean_df = upload_file_clean(df, "ay")
+            clean_df = clean_df.drop(columns=["unnamed: 0_ay"])
+            clean_df["week"] = week
+            clean_df["season"] = season
+
+        elif file == "def_scrape":
+            cols, data = scrape_def_data(dl_path)
+            df = pd.DataFrame(data, columns=cols)
+            clean_df = upload_file_clean(df, '4f4')
+            clean_df["week"] = week
+            clean_df["season"] = season
         
-        golden = data[
-            [
-                "position",
-                "player",
-                "salary",
-                "team",
-                "avgpointspergame",
-                "season",
-                "week",
-            ]
-        ]
-        clean_df = upload_file_clean(golden)
-        clean_df['salary'] = pd.to_numeric(clean_df['salary'])
+        for i in range(len(clean_df)):
+            row = clean_df.iloc[i, :].to_dict()
 
+            if row[list(row.keys())[0]] != "nan":
+                conditional_insert(player_coll, row)
 
-    elif file == f"4f4_projection_W{week}_{season}.csv":
-        df = (
-            pd.read_excel(file).fillna("nan")
-            if file[-4:] == "xlsx"
-            else pd.read_csv(file).fillna("nan")
-        )
-        clean_df = upload_file_clean(df, "4f4")
-        clean_df = clean_df.drop(columns=["pid_4f4"])
-        clean_df = clean_df[clean_df["position"] != "K"]
+        player_coll.delete_many({ 'position': {'$ne' : 'DEF'},"avgpointspergame": {"$exists": False}})
 
-    elif file == f"4f4_fc_data_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "4f4")
-        clean_df = clean_df.drop(columns=["salary_4f4"])
-        clean_df["proj_4f4"] = round(clean_df["floor_4f4"] + clean_df["value1_4f4"], 2)
-
-    elif file == f"4f4_leverage_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "4f4")
-        clean_df = clean_df.drop(columns=["dk sal $_4f4"])
-        clean_df["projected own%_4f4"] = clean_df["projected own%_4f4"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["cash odds_4f4"] = clean_df["cash odds_4f4"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["gpp odds_4f4"] = clean_df["gpp odds_4f4"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["implied own%_4f4"] = clean_df["implied own%_4f4"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-
-    elif file == f"4f4_passing_redzone_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "RZ_pass")
-        clean_df = clean_df.drop(columns=["team"])
-        clean_df["cmp% 10_RZ_pass"] = clean_df["cmp% 10_RZ_pass"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["cmp% 20_RZ_pass"] = clean_df["cmp% 20_RZ_pass"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-
-    elif file == f"4f4_rushing_redzone_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "RZ_rush")
-        clean_df = clean_df.drop(columns=["team"])
-        clean_df["%rush 20_RZ_rush"] = clean_df["%rush 20_RZ_rush"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["%rush 10_RZ_rush"] = clean_df["%rush 10_RZ_rush"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["%rush 5_RZ_rush"] = clean_df["%rush 5_RZ_rush"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-
-    elif file == f"4f4_receiving_redzone_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "RZ_rec")
-        clean_df = clean_df.drop(columns=["team"])
-        clean_df["ctch% 20_RZ_rec"] = clean_df["ctch% 20_RZ_rec"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["%tgt 20_RZ_rec"] = clean_df["%tgt 20_RZ_rec"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["ctch% 10_RZ_rec"] = clean_df["ctch% 10_RZ_rec"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["%tgt 10_RZ_rec"] = clean_df["%tgt 10_RZ_rec"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-
-    elif file == f"ETR_projection_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "ETR")
-        clean_df = clean_df.drop(columns=["dk salary_ETR", "dkslateid_ETR"])
-        clean_df["dk ownership_ETR"] = clean_df["dk ownership_ETR"].apply(
-            lambda x: float(x.replace("%", "")) if '%' in x else 0
-        )
-        clean_df["week"] = week
-        clean_df["season"] = season
-
-    elif file == f"4f4_wr_fp_L4_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "fp")
-        week_cols = [col for col in clean_df.columns if col.startswith("w")]
-        clean_df[week_cols] = clean_df[week_cols].applymap(
-            lambda x: float(x) if x != "-" else x
-        )
-        clean_df["week"] = week
-        clean_df["season"] = season
-
-    elif file == f"4f4_rb_fp_L3_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "fp")
-        week_cols = [col for col in clean_df.columns if col.startswith("w")]
-        clean_df[week_cols] = clean_df[week_cols].applymap(
-            lambda x: float(x) if x != "-" else x
-        )
-        clean_df["week"] = week
-        clean_df["season"] = season
-
-    elif file == f"4f4_rb_targ_L3_W{week}_{season}.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "targ")
-        week_cols = [col for col in clean_df.columns if col.startswith("w")]
-        clean_df[week_cols] = clean_df[week_cols].applymap(
-            lambda x: float(x) if x != "-" else x
-        )
-        clean_df["array_targ"] = clean_df["array_targ"].apply(
-            lambda x: 0 if x == " " else float(x.replace("%", ""))
-        )
-        clean_df["week"] = week
-        clean_df["season"] = season
-
-    elif file == f"airyards.csv":
-        df = pd.read_csv(file).fillna("nan")
-        clean_df = upload_file_clean(df, "ay")
-        clean_df = clean_df.drop(columns=["unnamed: 0_ay"])
-        clean_df["week"] = week
-        clean_df["season"] = season
-
-    elif file == "def_scrape":
-        cols, data = scrape_def_data(dl_path)
-        df = pd.DataFrame(data, columns=cols)
-        clean_df = upload_file_clean(df, '4f4')
-        clean_df["week"] = week
-        clean_df["season"] = season
-    
-    for i in range(len(clean_df)):
-        row = clean_df.iloc[i, :].to_dict()
-
-        if row[list(row.keys())[0]] != "nan":
-            conditional_insert(player_coll, row)
-
-    player_coll.delete_many({ 'position': {'$ne' : 'DEF'},"avgpointspergame": {"$exists": False}})
-
-    # except:
-    #     message = f"File {file} was not able to be uploaded, double check that the name corresponds to the right colums names."
-    #     return render_template("404.html", head='UPLOAD ERROR', code=404, message=message, boo=False)
-
-    return redirect("/scrape_center")
+        return redirect("/scrape_center")
+        
+    except:
+        message = f"File {file} was not able to be uploaded, double check that the name corresponds to the right colums names and that the file downloaded correctly."
+        return render_template("404.html", head='UPLOAD ERROR', code=404, message=message, boo=False)
 
 
 @app.route("/fupload_4f4")

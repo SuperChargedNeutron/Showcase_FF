@@ -10,7 +10,6 @@ from . import app
 from .database import player_coll, vegas_coll, TeamBuilder
 from .models import CalculatorForm, GetTimeForm
 from .func import (
-    get_raw_data,
     stack_app_query,
     pull_scaled_data,
     weigh_data,
@@ -74,7 +73,7 @@ def scrape_bookie():
     divs = get_bookie_divs()
 
     # extracts data from HTML divs
-    games = scrape_bookie_divs(divs)
+    games = scrape_bookie_divs(divs, session['current_week'])
 
     # insert into database based on values
     for g in games:
