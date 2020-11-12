@@ -3,7 +3,7 @@ import os, json
 from urllib.parse import quote, unquote
 
 # Third Party Imports
-from flask import render_template, redirect, request, url_for, jsonify, session
+from flask import render_template, redirect, request, url_for, jsonify, session, json
 
 # Local Imports
 from . import app
@@ -19,6 +19,13 @@ from .func import (
     conditional_insert
 )
 
+def dict_clean(items):
+    result = {}
+    for key, value in items:
+        if value is None:
+            value = 'default'
+        result[key] = value 
+    return result
 
 # app configuration
 app.config["JSON_SORT_KEYS"] = False
@@ -105,8 +112,9 @@ def position_data(pos):
             {"_id": False},
         )
     )
-    return jsonify(data)
-
+    data_str = json.dumps(data).replace('NaN', '""')
+    data_out = json.loads(data_str)
+    return jsonify(data_out)
 
 # Same idea as above this time we add a threshold to the query
 @app.route("/<pos>_Dash/<threshold>")
@@ -130,7 +138,9 @@ def position_data_thresh(pos, threshold):
         )
     )
 
-    return jsonify(data)
+    data_str = json.dumps(data).replace('NaN', '""')
+    data_out = json.loads(data_str)
+    return jsonify(data_out)
 
 
 ## return only C_proj for players who meet the threshold.
