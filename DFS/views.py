@@ -264,6 +264,7 @@ def calculator_submit(label, meta, weights, columns):
     return redirect(f"/{point_meta['pos']}_Dash")
 
 
+<<<<<<< HEAD
 @app.route("/scrape_center")
 def scrape_center():
     dl_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "DFS_data")
@@ -495,6 +496,8 @@ def fupload(file):
 
     return redirect("/scrape_center")
 
+=======
+>>>>>>> 8e94423... fix
 # @app.route('/scrape_4f4')
 # def scrape_4f4():
 
