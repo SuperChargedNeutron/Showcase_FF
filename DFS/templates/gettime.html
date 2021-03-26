@@ -1,8 +1,11 @@
+<!-- Extends base.html -->
 {% extends "base.html" %}
+<!-- Jinja Import for forms -->
 {% import "bootstrap/wtf.html" as wtf %}
 
+<!-- Appends to base.html content block -->
 {% block content %}
-    <d  v class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="h2">Select Time Data</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
@@ -10,10 +13,10 @@
       </div>
     </div>
   <div class="container">
-        
+    
+  <!-- Initiates Time Form sent from python -->
   <form method='POST' action='/get_time'>
     {{ form.hidden_tag() }}
-
     <div class="form-row">
         {{ wtf.form_field(form.week)}}
     </div>

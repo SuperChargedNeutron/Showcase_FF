@@ -1,25 +1,39 @@
+<!-- Extends base.html -->
 {% extends "base.html" %}
+<!-- Jinja Import for forms -->
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-    {% include 'navbar.html' %}
-    <d  v class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+
+ <!-- copies navbar -->
+{% include 'navbar.html' %}
+
+<!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="h2">Football Calculator</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
         </div>
       </div>
     </div>
+    <div>
+      This is a basic feature extraction tool that normalizes a weighed 
+      set of data points. In this page set the metadata for the point.
+      Once you submit this form, you will be redirtected to a page where you can choose the 
+      points and set the weights for each point. 
+      EX: ((.3)*(avg_points))+((.7)*(pass_yards))
+    </div>
+    <!-- Start Form -->
   <div class="container">
-        
   <form class='' method='POST' action='/football_calculator_settings'>
     {{ form.hidden_tag() }}
-
+    <!-- Row for label and points considered -->
     <div class="form-row">
       {{ wtf.form_field(form.point_label)}}
       {{ wtf.form_field(form.amnt_pts)}}
     </div>
     <div class="form-row">
+      <!-- Poinr Metadata input -->
       {{ wtf.form_field(form.position)}}
       {{ wtf.form_field(form.season)}}
       {{ wtf.form_field(form.week)}}

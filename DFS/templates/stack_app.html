@@ -1,37 +1,44 @@
+<!-- Inherits Base Skeleton From base.html -->
 {% extends "base.html" %}
 
-
+<!-- Inserts in body clock in base.html -->
 {% block body %}
+
+<!-- copies navbar -->
 {% include 'navbar.html' %}
+
+<!-- Includes base.html body code -->
 {{ super() }}
 <style>
-   .btn-danger {
-        background-color: #FFF;
-        color: #ac2925;
-        border-color: #d2322d;
-        border-radius: 25px;
-    }
-    .btn-danger:hover,
-    .btn-danger:focus,
-    .btn-danger:active {
-        background-color: #d2322d;
-        color: #FFF;
-        border-color: #ac2925;
-    }
-.btn-circle {
-  width: 25px;
-  height: 25px;
-  line-height: 25px;
-  text-align: center;
-  padding: 0;
-  font-size: 0.8rem;
-  border-radius: 50%;
-}
+  .btn-danger {
+    background-color: #FFF;
+    color: #ac2925;
+    border-color: #d2322d;
+    border-radius: 25px;
+  }
 
-.btn-circle i {
-  position: relative;
-  top: -1px;
-}
+  .btn-danger:hover,
+  .btn-danger:focus,
+  .btn-danger:active {
+    background-color: #d2322d;
+    color: #FFF;
+    border-color: #ac2925;
+  }
+
+  .btn-circle {
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    padding: 0;
+    font-size: 0.8rem;
+    border-radius: 50%;
+  }
+
+  .btn-circle i {
+    position: relative;
+    top: -1px;
+  }
 
   line {
     stroke: black;
@@ -39,144 +46,156 @@
     fill: none;
     opacity: .5;
   }
-
 </style>
 {% endblock %}
 
 {% block content %}
 
-  <div class="container-fluid">
-    <div class="row">
+<div class="container-fluid align-items-center">
   <!-- start main  -->
-      <main role="main" class="col-md-12 col-lg-12 ">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h1 class="h2">Team Builder | Stack App</h1>
-          <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group mr-2">
-            </div>
-          </div>
-        </div>
-  <div class="spacer --small">
-    
+  <main role="main" class="col-md-12 col-lg-12 ">
+    <div
+      class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-right pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">Stack App | Team Builder</h1>
+    </div>
+    <div class="spacer --small">
       <div class="showcase__section">
-        <div class='container-fluid'>
-          <div class='row'>
-          <div id='stackApp'></div>
-          <div class="card  box-shadow col-5 " id='teamBuilder'>
-            <div class="card-header">
-              <h4 class="my-0 font-weight-normal">Team Builder</h4>
+        <div class='container-fluid align-items-center'>
+          <div class='row d-flex justify-content-center text-center'>
+            <p class=' col-4'> To use this tool, please click 'Builder' on
+              the top left corner of the graph. Proceed to stack your choice of players, watch you team get built with live stats, name your team then hit
+              submit and see how your team stack up against other fantasy teams! If you don't like the team anymore, click the trashcan icon in that team's row to delte the team off the db.
+              You can find the code for this graph <a href='https://github.com/techcheese/FantasyPlot'> here.</a></p>
+          </div>
+          <div class="row d-flex justify-content-center ">
+
+            <div class='column '>
+              <!-- Stack App Graph -->
+              <div id='stackApp'></div>
             </div>
-            <div class="card-body">
+            <div class='column'>
+              <!-- Start Team Builder -->
+              <div class="card  box-shadow col-12 " id='teamBuilder'>
+                <div class="card-header">
+                  <h4 class="my-0 font-weight-normal">Team Builder</h4>
+                </div>
+                <div class="card-body">
+                  <!-- Input Team Name -->
+                  <div class="input-group mb-3">
+                    <input id='nameSetter' type="text" class="form-control" placeholder="Team Name"
+                      aria-label="Recipient's username" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                      <button id='nameSetterButton' class="btn btn-outline-secondary" type="button">Set Name</button>
+                    </div>
+                  </div>
+                  <!-- Player Selections -->
+                  <div class='row'>
+                    <div class="card">
+                      <ul class="list-group list-group-flush">
+                        <li class="list-group-item">QB Selection:
+                          <div class="control-row">
+                            <select class='posSelect' id="qbSelection">
+                            </select>
+                          </div>
+                        </li>
+                        <li class="list-group-item">RB Selection:
+                          <div class="control-row">
+                            <select class='posSelect' id="rbSelection">
+                            </select>
+                          </div>
+                        </li>
+                        <li class="list-group-item">WR Selection:
+                          <div class="control-row">
+                            <select class='posSelect' id="wrSelection">
+                            </select>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="card">
+                      <ul class="list-group list-group-flush">
+                        <li class="list-group-item">TE Selection:
+                          <div class="control-row">
+                            <select class='posSelect' id="teSelection">
+                            </select>
+                          </div>
+                        </li>
+                        <li class="list-group-item">DST Selection:
+                          <div class="control-row">
+                            <select class='posSelect' id="dstSelection">
+                            </select>
+                          </div>
+                        </li>
+                        <li class="list-group-item">Flex Selection:
+                          <div class="control-row">
+                            <select class='dropdown posSelect' id="flexPositionSelection">
+                            </select>
+                            <select class='dropdown posSelect' id="flexPlayerSelection">
+                            </select>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class='control-row'>
+                    <button type="button" class="btn btn-primary" id='submitButton'>Submit</button>
+                  </div>
+                </div>
 
-
-              <div class="input-group mb-3">
-                <input id='nameSetter' type="text" class="form-control" placeholder="Team Name" aria-label="Recipient's username" aria-describedby="basic-addon2">
-                <div class="input-group-append">
-                  <button id='nameSetterButton' class="btn btn-outline-secondary" type="button">Set Name</button>
+                <!-- Display current stacked team -->
+                <div class='row' id='currentTeam'>
                 </div>
               </div>
-
-              <div class='row'>
-
-              <div class="card">
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item">QB Selection: 
-                    <div class="control-row">
-                     <select class='posSelect' id="qbSelection">
-                      </select>
-                      </div>
-                  </li>
-                  <li class="list-group-item">RB Selection: 
-                    <div class="control-row">
-                       <select class='posSelect' id="rbSelection">
-                      </select>
-                      </div>
-                  </li>
-                  <li class="list-group-item">WR Selection: 
-                    <div class="control-row">
-                      <select class='posSelect' id="wrSelection">
-                      </select>
-                      </div>
-                  </li>
-                </ul>
-              </div>
-            <div class="card">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">TE Selection: 
-                <div class="control-row">
-                  <select class='posSelect' id="teSelection">
-                  </select>
-                  </div>
-              </li>
-              <li class="list-group-item">DST Selection: 
-                <div class="control-row">
-                  <select class='posSelect' id="dstSelection">
-                  </select>
-                  </div>
-              </li>
-              <li class="list-group-item">Flex Selection: 
-                <div class="control-row">
-                  <select class='dropdown posSelect' id="flexPositionSelection">
-                  </select>
-                  <select class='dropdown posSelect' id="flexPlayerSelection">
-                  </select>
-                  </div>
-              </li>
-            </ul>
-          </div>
-          <div class='control-row'>
-            <button type="button" class="btn btn-primary" id='submitButton'>Submit</button>
-      </div>
             </div>
           </div>
-          <div class='row' id='currentTeam'>
-          </div>
-          </div>
-        </div>
-      </div>
-      </div>
 
-        <h2>Selected Teams</h2>
-        <div class="table-responsive">
-          <table id='teamTable' class="table table-striped">
-            <thead>
-              <tr>
-                <th>Team Name</th>
-                <th>Sum of <br> Projections</th>
-                <th>Total Price</th>
-                <th>$ per <br> Point</th>
-                <th>QB</th>
-                <th>RB_1</th>
-                <th>RB_2</th>
-                <th>WR_1</th>
-                <th>WR_2</th>
-                <th>WR_3</th>
-                <th>TE</th>
-                <th>DST</th>
-                <th>Flex</th>
-                <th>Delete <br> Team</th>
-              </tr>
-            </thead>
-            <tbody id='tableBody'>
-              
-            </tbody>
-          </table>
 
         </div>
+      </div>
     </div>
-  </div>
-  
- </main>
+    <!-- Start Current Team Table -->
+    <h2>Selected Teams</h2>
+    <div class="table-responsive">
+      <table id='teamTable' class="table table-striped">
+        <thead>
+          <tr>
+            <th>Team Name</th>
+            <th>Sum of <br> Projections</th>
+            <th>Total Price</th>
+            <th>$ per <br> Point</th>
+            <th>QB</th>
+            <th>RB_1</th>
+            <th>RB_2</th>
+            <th>WR_1</th>
+            <th>WR_2</th>
+            <th>WR_3</th>
+            <th>TE</th>
+            <th>DST</th>
+            <th>Flex</th>
+            <th>Delete <br> Team</th>
+          </tr>
+        </thead>
+        <tbody id='tableBody'>
+        </tbody>
+      </table>
+
+    </div>
 </div>
 </div>
-      <!-- end main -->
+
+</main>
+</div>
+<!-- end main -->
 {% endblock %}
 
 {% block scripts %}
-  {{ super() }}
-  <script src="{{ url_for('static', filename='js/d3-scale-chromatic/d3-scale-chromatic.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/d3/d3.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/d3-color/d3-color.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/stack_app_func.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/d3_stackapp.js') }}"></script>
+{{ super() }}
+<!-- D3 Imports -->
+<script src="{{ url_for('static', filename='js/d3-scale-chromatic/d3-scale-chromatic.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3/d3.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3-color/d3-color.min.js') }}"></script>
+
+<!-- Local Imports -->
+<script src="{{ url_for('static', filename='js/stack_app_func.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3_stackapp.js') }}"></script>
 {% endblock %}

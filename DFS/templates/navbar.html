@@ -1,4 +1,9 @@
+<!-- Navbar, stays static throughout the app -->
+<nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top flex-md-nowrap p-0 shadow">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"><strong>Joe's DFS</strong></a>
 
+<<<<<<< HEAD
   <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top flex-md-nowrap p-0 shadow">
     <div class="container-fluid">
             <a class="navbar-brand" href="#"><strong>Joe's DFS</strong></a>
@@ -53,4 +58,53 @@
             </ul>
         </div>
         </div>
+=======
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav ml-auto">
+
+        <!-- get time link -->
+        <li class="nav-item">
+          <a class="nav-link" href="/get_time">Set Time</a>
+        </li>
+
+        <!-- Vegas Dash -->
+        <li class="nav-item">
+          <a class="nav-link" href="/VEGAS_Dash">Vegas Dash</a>
+        </li>
+
+        <!-- TOP GUNS -->
+        <li class="nav-item">
+          <a class="nav-link" href="/TOP_GUNS/20/15/15/12/7">TOP GUNS</a>
+        </li>
+
+        <!-- Positional Dashboards -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">Position Dashboards</a>
+          <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/QB_Dash">QB</a>
+            <a class="dropdown-item" href="/WR_Dash">WR</a>
+            <a class="dropdown-item" href="/TE_Dash">TE</a>
+            <a class="dropdown-item" href="/RB_Dash">RB</a>
+            <a class="dropdown-item" href="/DEF_Dash">DST</a>
+          </div>
+        </li>
+
+        <!-- Stack App -->
+        <li class="nav-item">
+          <a class="nav-link" href="/stack_app">Stack App</a>
+        </li>
+
+        <!-- Calculator Settings -->
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('calculator_settings') }}">Calculator</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+>>>>>>> 319928895e40bf3808519c97d9b524aa6481009b
 </nav>

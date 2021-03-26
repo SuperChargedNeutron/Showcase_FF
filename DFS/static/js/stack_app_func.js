@@ -311,12 +311,13 @@ function getTeamData(playerData, team, key) {
     var playerObjects = playerObjects.filter(function (el) {
         return el != undefined;
       });
+
     if (key == 'salary') {
-        var price = playerObjects.map(row => row[key])
+        var price = playerObjects.map(row => parseFloat(row[key]))
                         .reduce((acc, val) => acc + val)
         return price
     } else if (key == 'C_Proj') {
-        var projection = playerObjects.map(row => row[key])
+        var projection = playerObjects.map(row => parseFloat(row[key]))
                                 .reduce((acc, val) => acc + val)
         return projection
     } else if (key == 'players') {
