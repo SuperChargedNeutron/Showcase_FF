@@ -7,11 +7,7 @@ from time import sleep
 # Third Party Imports
 import pymongo
 import numpy as np
-from bs4 import BeautifulSoup
-import requests
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-# from selenium import webdriver
-# from webdriver_manager.firefox import GeckoDriverManager
 
 # Local Imports 
 from .database import player_coll, team_coll, vegas_coll

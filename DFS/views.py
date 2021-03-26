@@ -33,7 +33,7 @@ def root():
 
 
 # Get Time route, validates form when Submit is clicked
-# then redirects
+# then redirects with appropiate season and year variables to query ny
 @app.route("/get_time", methods=["GET", "POST"])
 def get_time():
     form = GetTimeForm(request.form)

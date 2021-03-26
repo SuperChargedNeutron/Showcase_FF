@@ -22,7 +22,7 @@ if None in seasons:
 
 # hard code positions and week for certain options in the forms
 positions = ["QB", "RB", "WR", "TE", "DEF"]
-weeks = [str(i) for i in range(1, 17)]
+weeks = [str(i) for i in range(8, 10)]
 
 # Forms are used in this app for user input in certain places
 # easy to tell when the form 
