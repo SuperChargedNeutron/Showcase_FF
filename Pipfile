@@ -1,9 +1,7 @@
 [[source]]
-name = "pypi"
-url = "https://pypi.org/simple"
+url = "https://pypi.python.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
 flask = "*"
@@ -16,3 +14,7 @@ scikit-learn = "*"
 python-dotenv = "*"
 waitress = "*"
 
+[dev-packages]
+
+[requires]
+python_version = "3.8"
