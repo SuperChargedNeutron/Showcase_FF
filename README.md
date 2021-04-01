@@ -4,7 +4,7 @@ Fantasy Football Dashboard that scrapes data from multiple sites and organizes t
 The scraping functionality is not available since it requires username and password for the specific sites it is spraping.
 
 The demo is currently currently grabbing a subset of data and using it to show the front end capabilities.
-Here is a live demo of the app _______.
+Here is a live demo of the [app](https://temp-showcase.herokuapp.com).
 
 # Dependency Install
 
